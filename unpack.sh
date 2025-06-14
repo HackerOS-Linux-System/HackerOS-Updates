@@ -16,5 +16,6 @@ sudo rm -rf /usr/share/HackerOS/
 # Przenieś katalog do /usr/share/
 echo "Przenoszę nowy katalog HackerOS do /usr/share/..."
 sudo mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/
+chmod a+x /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh
 
 echo "Operacja zakończona sukcesem."
