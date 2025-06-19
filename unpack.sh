@@ -18,4 +18,10 @@ echo "Moving new HackerOS directory to /usr/share/..."
 sudo mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/
 chmod a+x /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Mode-Update.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Unpack.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Update.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Documentation.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-TV.sh /usr/share/HackerOS/Scripts/Bin/install-penetration-tools.sh /usr/share/HackerOS/Scripts/Bin/install-tools.sh /usr/share/HackerOS/Scripts/Bin/revert_to_plasma.sh /usr/share/HackerOS/Scripts/Bin/Switch_To_Other_Session.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh 
 
+echo "Updating HackerOS-TV"
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
+python3 -m venv venv
+source /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/venv/bin/activate
+pip3 install flask-wtf
+
 echo "The operation was completed successfully."
