@@ -102,7 +102,7 @@ count_updated_packages() {
     local log_snippet="$1"
     local count=0
     if [ -n "$log_snippet" ]; then
-        count=$(grep -c "upgraded" "$log_snippet" || echo 0)
+        count=$(grep -c "upgraded.*[0-9]\+ newly installed" "$log_snippet" || echo 0)
     fi
     echo "$count"
 }
@@ -249,7 +249,7 @@ update_proton() {
     fi
 
     log_message "${SKYBLUE}[2/5] Zainstalowana wersja: $INSTALLED_VERSION${NC}"
-    log_message "${SKYBLUE}[2/5] Najnowsza dostępjourney wersja: $LATEST_VERSION${NC}"
+    log_message "${SKYBLUE}[2/5] Najnowsza dostępna wersja: $LATEST_VERSION${NC}"
 
     # Check if latest version is already installed
     if [[ -d "$PROTON_DIR/$LATEST_VERSION" ]]; then
@@ -334,24 +334,29 @@ perform_updates() {
     log_message "${GOLD}┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━┫${NC}"
 
     # Update APT
-    if check_command apt-get; then
+    if check_command apt; then
         print_header "APT Package Updates"
-        sudo apt-get update -y 2>&1 | tee -a "$temp_log" &
+        sudo apt update -y 2>&1 | tee -a "$temp_log" &
         spinner $! "Updating APT package lists"
         if [ $? -ne 0 ]; then
             print_table_row "APT" "${RED}Failed${NC}" "N/A"
             log_message "${RED}❌ APT update failed. Check log for details.${NC}"
         else
-            sudo apt-get upgrade -y 2>&1 | tee -a "$temp_log" &
+            sudo apt upgrade -y 2>&1 | tee -a "$temp_log" &
             spinner $! "Installing APT package upgrades"
-            apt_count=$(count_updated_packages "$temp_log")
-            print_table_row "APT" "${EMERALD}Success${NC}" "$apt_count packages"
-            log_message "${EMERALD}✔ APT updates completed successfully.${NC}"
+            if [ $? -ne 0 ]; then
+                print_table_row "APT" "${RED}Failed${NC}" "N/A"
+                log_message "${RED}❌ APT upgrade failed. Check log for details.${NC}"
+            else
+                apt_count=$(count_updated_packages "$temp_log")
+                print_table_row "APT" "${EMERALD}Success${NC}" "$apt_count packages"
+                log_message "${EMERALD}✔ APT updates completed successfully.${NC}"
+            fi
+            sudo apt autoremove -y 2>&1 | tee -a "$temp_log" &
+            spinner $! "Removing unused APT packages"
+            sudo apt autoclean -y 2>&1 | tee -a "$temp_log" &
+            spinner $! "Cleaning APT package cache"
         fi
-        sudo apt-get autoremove -y 2>&1 | tee -a "$LOGFILE" &
-        spinner $! "Removing unused APT packages"
-        sudo apt-get autoclean -y 2>&1 | tee -a "$LOGFILE" &
-        spinner $! "Cleaning APT package cache"
     else
         print_table_row "APT" "${RED}Not Installed${NC}" "N/A"
         log_message "${RED}❌ APT not found. Skipping APT updates.${NC}"
@@ -377,9 +382,7 @@ perform_updates() {
             log_message "${EMERALD}✔ Snap updates completed successfully.${NC}"
         fi
     else
-        print
-
-_table_row "Snap" "${RED}Not Installed${NC}" "N/A"
+        print_table_row "Snap" "${RED}Not Installed${NC}" "N/A"
         log_message "${RED}❌ Snap not installed. Skipping Snap updates.${NC}"
     fi
 
