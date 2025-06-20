@@ -24,6 +24,11 @@ EMERALD='\033[1;38;5;48m'
 FUCHSIA='\033[1;38;5;198m'
 NC='\033[0m' # No Color
 
+# Proton-GE Configuration
+VERSION_FILE="$HOME/.hackeros/proton-version"
+PROTON_DIR="$HOME/.steam/root/compatibilitytools.d"
+TMP_DIR="/tmp/proton-ge-update"
+
 # Check if running in Alacritty
 if [ -z "$ALACRITTY_WINDOW_ID" ]; then
     if command -v alacritty >/dev/null 2>&1; then
@@ -44,7 +49,7 @@ log_message() {
 spinner() {
     local pid=$1
     local delay=0.08
-    local spinstr='⡿⣟⣯⣷⣾⣽⣻⢿' # Enhanced Unicode spinner for smoother animation
+    local spinstr='⡿⣟⣯⣷⣾⣽⣻⢿'
     local message="$2"
     local max_width=60
     local trunc_message="${message:0:$((max_width-4))}"
@@ -81,18 +86,117 @@ print_header() {
 
 # Function to authenticate sudo upfront
 authenticate_sudo() {
-    log_message "${YELLOW}Authenticating sudo credentials...${NC}"
+    log_message "${YELLOW}🔐 Authenticating sudo credentials...${NC}"
     sudo -v
     if [ $? -ne 0 ]; then
-        log_message "${RED}Sudo authentication failed. Exiting.${NC}"
+        log_message "${RED}❌ Sudo authentication failed. Exiting.${NC}"
         exit 1
     fi
+}
+
+# Function to update Proton-GE
+update_proton() {
+    print_header "Proton-GE Update"
+    local temp_log=$(mktemp)
+
+    # Create necessary directories
+    mkdir -p "$PROTON_DIR" "$(dirname "$VERSION_FILE")" "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Creating Proton-GE directories"
+
+    # Fetch latest Proton-GE version
+    log_message "${CYAN}[1/5] Sprawdzanie najnowszej wersji...${NC}"
+    LATEST_URL=$(curl -s https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest \
+        | grep "browser_download_url.*tar.gz" \
+        | cut -d '"' -f 4) 2>&1 | tee -a "$temp_log" &
+    spinner $! "Fetching latest Proton-GE release"
+    if [ $? -ne 0 ] || [[ -z "$LATEST_URL" ]]; then
+        log_message "${RED}❌ Błąd: Nie udało się uzyskać informacji o najnowszej wersji.${NC}"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 1
+    fi
+
+    FILENAME=$(basename "$LATEST_URL")
+    LATEST_VERSION="${FILENAME%.tar.gz}"
+
+    # Read installed version
+    if [[ -f "$VERSION_FILE" ]]; then
+        INSTALLED_VERSION=$(cat "$VERSION_FILE")
+    else
+        INSTALLED_VERSION="Brak"
+    fi
+
+    log_message "${CYAN}[2/5] Zainstalowana wersja: $INSTALLED_VERSION${NC}"
+    log_message "${CYAN}[2/5] Najnowsza dostępna wersja: $LATEST_VERSION${NC}"
+
+    # Check if latest version is already installed
+    if [[ -d "$PROTON_DIR/$LATEST_VERSION" ]]; then
+        log_message "${LIME}✅ Masz już najnowszą wersję Proton-GE ($LATEST_VERSION).${NC}"
+        echo "$LATEST_VERSION" > "$VERSION_FILE" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Updating Proton-GE version file"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 0
+    fi
+
+    # Prompt user for update confirmation
+    log_message "${YELLOW}➤ Czy chcesz zaktualizować do wersji $LATEST_VERSION? [t/n]: ${NC}"
+    read -t 30 -n 1 -r CONFIRM
+    echo
+    if [[ "$CONFIRM" != "t" && "$CONFIRM" != "T" ]]; then
+        log_message "${YELLOW}Anulowano aktualizację Proton-GE.${NC}"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 0
+    fi
+
+    # Remove previous version if exists
+    if [[ -n "$INSTALLED_VERSION" && "$INSTALLED_VERSION" != "Brak" && -d "$PROTON_DIR/$INSTALLED_VERSION" ]]; then
+        log_message "${CYAN}[3/5] Usuwanie poprzedniej wersji: $INSTALLED_VERSION${NC}"
+        rm -rf "$PROTON_DIR/$INSTALLED_VERSION" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Removing previous Proton-GE version"
+    fi
+
+    # Download new version
+    log_message "${CYAN}[4/5] Pobieranie $FILENAME...${NC}"
+    curl -L -o "$TMP_DIR/$FILENAME" "$LATEST_URL" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Downloading Proton-GE $LATEST_VERSION"
+    if [ $? -ne 0 ] || [[ ! -f "$TMP_DIR/$FILENAME" ]]; then
+        log_message "${RED}❌ Błąd: Pobieranie zakończone niepowodzeniem.${NC}"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 1
+    fi
+
+    # Install new version
+    log_message "${CYAN}[5/5] Instalowanie nowej wersji...${NC}"
+    tar -xf "$TMP_DIR/$FILENAME" -C "$PROTON_DIR" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Installing Proton-GE $LATEST_VERSION"
+    if [ $? -ne 0 ]; then
+        log_message "${RED}❌ Instalacja zakończona niepowodzeniem.${NC}"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 1
+    fi
+
+    # Update version file
+    echo "$LATEST_VERSION" > "$VERSION_FILE" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Updating Proton-GE version file"
+
+    log_message "${LIME}✅ Instalacja zakończona. Zainstalowano Proton-GE: $LATEST_VERSION${NC}"
+
+    # Cleanup
+    rm -rf "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Cleaning up temporary files"
+
+    cat "$temp_log" >> "$LOGFILE"
+    rm "$temp_log"
 }
 
 # Function to perform updates
 perform_updates() {
     print_header "System Update Process"
-    log_message "${CYAN}Starting system updates...${NC}"
+    log_message "${CYAN}🚀 Starting system updates...${NC}"
 
     # Update APT
     if check_command apt-get; then
@@ -100,22 +204,29 @@ perform_updates() {
         sudo apt-get update -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Updating package lists"
         if [ $? -ne 0 ]; then
-            log_message "${RED}APT update failed. Check log for details.${NC}"
+            log_message "${RED}❌ APT update failed. Check log for details.${NC}"
             return 1
         fi
         sudo apt-get upgrade -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Installing package upgrades"
         if [ $? -ne 0 ]; then
-            log_message "${RED}APT upgrade failed. Check log for details.${NC}"
+            log_message "${RED}❌ APT upgrade failed. Check log for details.${NC}"
             return 1
         fi
         sudo apt-get autoremove -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Removing unused packages"
         sudo apt-get autoclean -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Cleaning package cache"
-        log_message "${LIME}APT updates completed successfully.${NC}"
+        log_message "${LIME}✔ APT updates completed successfully.${NC}"
     else
-        log_message "${RED}APT not found. Skipping APT updates.${NC}"
+        log_message "${RED}❌ APT not found. Skipping APT updates.${NC}"
+    fi
+
+    # Update Proton-GE
+    if check_command curl; then
+        update_proton
+    else
+        log_message "${RED}❌ curl not installed. Skipping Proton-GE updates.${NC}"
     fi
 
     # Update Snap
@@ -124,12 +235,12 @@ perform_updates() {
         sudo snap refresh 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Refreshing Snap packages"
         if [ $? -ne 0 ]; then
-            log_message "${RED}Snap refresh failed. Check log for details.${NC}"
+            log_message "${RED}❌ Snap refresh failed. Check log for details.${NC}"
         else
-            log_message "${LIME}Snap updates completed successfully.${NC}"
+            log_message "${LIME}✔ Snap updates completed successfully.${NC}"
         fi
     else
-        log_message "${RED}Snap not installed. Skipping Snap updates.${NC}"
+        log_message "${RED}❌ Snap not installed. Skipping Snap updates.${NC}"
     fi
 
     # Update Flatpak
@@ -138,15 +249,15 @@ perform_updates() {
         flatpak update -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Updating Flatpak packages"
         if [ $? -ne 0 ]; then
-            log_message "${RED}Flatpak update failed. Check log for details.${NC}"
+            log_message "${RED}❌ Flatpak update failed. Check log for details.${NC}"
         else
-            log_message "${LIME}Flatpak updates completed successfully.${NC}"
+            log_message "${LIME}✔ Flatpak updates completed successfully.${NC}"
         fi
     else
-        log_message "${RED}Flatpak not installed. Skipping Flatpak updates.${NC}"
+        log_message "${RED}❌ Flatpak not installed. Skipping Flatpak updates.${NC}"
     fi
 
-    # Update firmware
+    # Update Firmware
     if check_command fwupdmgr; then
         print_header "Firmware Updates"
         sudo fwupdmgr refresh 2>&1 | tee -a "$LOGFILE" &
@@ -154,42 +265,12 @@ perform_updates() {
         sudo fwupdmgr update 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Applying firmware updates"
         if [ $? -ne 0 ]; then
-            log_message "${RED}Firmware update failed. Check log for details.${NC}"
+            log_message "${RED}❌ Firmware update failed. Check log for details.${NC}"
         else
-            log_message "${LIME}Firmware updates completed successfully.${NC}"
+            log_message "${LIME}✔ Firmware updates completed successfully.${NC}"
         fi
     else
-        log_message "${RED}fwupdmgr not installed. Skipping firmware updates.${NC}"
-    fi
-
-    # Update Rust
-    if check_command rustup; then
-        print_header "Rust Updates"
-        rustup update 2>&1 | tee -a "$LOGFILE" &
-        spinner $! "Updating Rust toolchain"
-        if [ $? -ne 0 ]; then
-            log_message "${RED}Rust update failed. Check log for details.${NC}"
-        else
-            log_message "${LIME}Rust updates completed successfully.${NC}"
-        fi
-    else
-        log_message "${RED}rustup not installed. Skipping Rust updates.${NC}"
-    fi
-
-    # Update Node.js (nvm)
-    if check_command nvm; then
-        print_header "Node.js Updates"
-        # Source nvm script to ensure it's available
-        [ -s "$HOME/.nvm/nvm.sh" ] && \. "$HOME/.nvm/nvm.sh"
-        nvm install node --reinstall-packages-from=node 2>&1 | tee -a "$LOGFILE" &
-        spinner $! "Updating Node.js and npm packages"
-        if [ $? -ne 0 ]; then
-            log_message "${RED}Node.js update failed. Check log for details.${NC}"
-        else
-            log_message "${LIME}Node.js updates completed successfully.${NC}"
-        fi
-    else
-        log_message "${RED}nvm not installed. Skipping Node.js updates.${NC}"
+        log_message "${RED}❌ fwupdmgr not installed. Skipping firmware updates.${NC}"
     fi
 
     # Update Plymouth
@@ -211,13 +292,17 @@ perform_updates() {
             spinner $! "Copying $(basename "$src")"
             plymouth_updated=true
         else
-            log_message "${RED}File $(basename "$src") not found in $source_dir.${NC}"
+            log_message "${RED}❌ File $(basename "$src") not found in $source_dir.${NC}"
         fi
     done
-    $plymouth_updated && log_message "${LIME}Plymouth updates completed successfully.${NC}"
+    if $plymouth_updated; then
+        log_message "${LIME}✔ Plymouth updates completed successfully.${NC}"
+    else
+        log_message "${RED}❌ Plymouth update failed. No files were updated.${NC}"
+    fi
 }
 
-# Function to display menu with reduced options
+# Function to display menu
 show_menu() {
     while true; do
         print_header "Update Options"
