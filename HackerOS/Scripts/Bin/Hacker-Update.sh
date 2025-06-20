@@ -29,6 +29,11 @@ RELEASE_FILE="/usr/share/HackerOS/Release.txt"
 CLONE_DIR="/tmp/HackerOS-Updates"
 GITHUB_REPO="https://github.com/HackerOS-Linux-System/HackerOS-Updates.git"
 
+# Proton-GE Configuration
+VERSION_FILE="$HOME/.hackeros/proton-version"
+PROTON_DIR="$HOME/.steam/root/compatibilitytools.d"
+TMP_DIR="/tmp/proton-ge-update"
+
 # Function to log messages
 log_message() {
     local message="$1"
@@ -39,7 +44,7 @@ log_message() {
 spinner() {
     local pid=$1
     local delay=0.08
-    local spinstr='⠇⠋⠙⠸⠴⠦⠧⠏' # Refined Unicode spinner
+    local spinstr='⠇⠋⠙⠸⠴⠦⠧⠏'
     local message="$2"
     local max_width=60
     local trunc_message="${message:0:$((max_width-4))}"
@@ -62,7 +67,7 @@ check_command() {
     command -v "$1" &>/dev/null
 }
 
-# Function to print section header with refined Unicode
+# Function to print section header
 print_header() {
     local message="$1"
     local width=80
@@ -74,7 +79,7 @@ print_header() {
     log_message "${GOLD}╘$(printf '═%.0s' $(seq 1 $width))╛${NC}"
 }
 
-# Function to print table row with enhanced styling
+# Function to print table row
 print_table_row() {
     local name="$1"
     local status="$2"
@@ -209,15 +214,121 @@ update_hackeros() {
     rm "$temp_log"
 }
 
+# Function to update Proton-GE
+update_proton() {
+    print_header "Proton-GE Update"
+    local proton_count=0
+    local temp_log=$(mktemp)
+
+    # Create necessary directories
+    mkdir -p "$PROTON_DIR" "$(dirname "$VERSION_FILE")" "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Creating Proton-GE directories"
+
+    # Fetch latest Proton-GE version
+    log_message "${SKYBLUE}🔄 Checking latest Proton-GE version...${NC}"
+    LATEST_URL=$(curl -s https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest \
+        | grep "browser_download_url.*tar.gz" \
+        | cut -d '"' -f 4) 2>&1 | tee -a "$temp_log" &
+    spinner $! "Fetching latest Proton-GE release"
+    if [ $? -ne 0 ] || [[ -z "$LATEST_URL" ]]; then
+        log_message "${RED}❌ Failed to fetch Proton-GE release info. Check log for details.${NC}"
+        print_table_row "Proton-GE" "${RED}Failed${NC}" "N/A"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 1
+    fi
+
+    FILENAME=$(basename "$LATEST_URL")
+    LATEST_VERSION="${FILENAME%.tar.gz}"
+
+    # Read installed version
+    if [[ -f "$VERSION_FILE" ]]; then
+        INSTALLED_VERSION=$(cat "$VERSION_FILE")
+    else
+        INSTALLED_VERSION="Brak"
+    fi
+
+    log_message "${SKYBLUE}[2/5] Zainstalowana wersja: $INSTALLED_VERSION${NC}"
+    log_message "${SKYBLUE}[2/5] Najnowsza dostępjourney wersja: $LATEST_VERSION${NC}"
+
+    # Check if latest version is already installed
+    if [[ -d "$PROTON_DIR/$LATEST_VERSION" ]]; then
+        log_message "${EMERALD}✅ Masz już najnowszą wersję Proton-GE ($LATEST_VERSION).${NC}"
+        echo "$LATEST_VERSION" > "$VERSION_FILE"
+        print_table_row "Proton-GE" "${EMERALD}Up-to-date${NC}" "$LATEST_VERSION"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 0
+    fi
+
+    # Prompt user for update confirmation
+    log_message "${YELLOW}➤ Czy chcesz zaktualizować do wersji $LATEST_VERSION? [t/n]: ${NC}"
+    read -t 30 -n 1 -r CONFIRM
+    echo
+    if [[ "$CONFIRM" != "t" && "$CONFIRM" != "T" ]]; then
+        log_message "${YELLOW}Anulowano aktualizację Proton-GE.${NC}"
+        print_table_row "Proton-GE" "${YELLOW}Skipped${NC}" "N/A"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 0
+    fi
+
+    # Remove previous version if exists
+    if [[ -n "$INSTALLED_VERSION" && "$INSTALLED_VERSION" != "Brak" && -d "$PROTON_DIR/$INSTALLED_VERSION" ]]; then
+        log_message "${SKYBLUE}[3/5] Usuwanie poprzedniej wersji: $INSTALLED_VERSION${NC}"
+        rm -rf "$PROTON_DIR/$INSTALLED_VERSION" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Removing previous Proton-GE version"
+    fi
+
+    # Download new version
+    log_message "${SKYBLUE}[4/5] Pobieranie $FILENAME...${NC}"
+    curl -L -o "$TMP_DIR/$FILENAME" "$LATEST_URL" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Downloading Proton-GE $LATEST_VERSION"
+    if [ $? -ne 0 ] || [[ ! -f "$TMP_DIR/$FILENAME" ]]; then
+        log_message "${RED}❌ Pobieranie zakończone niepowodzeniem. Check log for details.${NC}"
+        print_table_row "Proton-GE" "${RED}Failed${NC}" "N/A"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 1
+    fi
+
+    # Install new version
+    log_message "${SKYBLUE}[5/5] Instalowanie nowej wersji...${NC}"
+    tar -xf "$TMP_DIR/$FILENAME" -C "$PROTON_DIR" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Installing Proton-GE $LATEST_VERSION"
+    if [ $? -ne 0 ]; then
+        log_message "${RED}❌ Instalacja zakończona niepowodzeniem. Check log for details.${NC}"
+        print_table_row "Proton-GE" "${RED}Failed${NC}" "N/A"
+        cat "$temp_log" >> "$LOGFILE"
+        rm "$temp_log"
+        return 1
+    fi
+
+    # Update version file
+    echo "$LATEST_VERSION" > "$VERSION_FILE" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Updating Proton-GE version file"
+    ((proton_count++))
+
+    log_message "${EMERALD}✅ Zainstalowano Proton-GE: $LATEST_VERSION${NC}"
+    print_table_row "Proton-GE" "${EMERALD}Success${NC}" "$proton_count version"
+
+    # Cleanup
+    rm -rf "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
+    spinner $! "Cleaning up temporary files"
+
+    cat "$temp_log" >> "$LOGFILE"
+    rm "$temp_log"
+}
+
 # Function to perform updates and track counts
 perform_updates() {
-    local apt_count=0 snap_count=0 flatpak_count=0 firmware_count=0 rust_count=0 npm_count=0
+    local apt_count=0 snap_count=0 flatpak_count=0 firmware_count=0 proton_count=0
     local temp_log=$(mktemp)
 
     print_header "System Update Process"
     log_message "${SKYBLUE}🚀 Starting system updates...${NC}"
 
-    # Display table header with refined Unicode
+    # Display table header
     log_message "${GOLD}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓${NC}"
     log_message "${GOLD}┃ Package Manager                  ┃ Status                           ┃ Updated Packages  ┃${NC}"
     log_message "${GOLD}┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━┫${NC}"
@@ -249,6 +360,9 @@ perform_updates() {
     # Update HackerOS
     update_hackeros
 
+    # Update Proton-GE
+    update_proton
+
     # Update Snap
     if check_command snap; then
         print_header "Snap Package Updates"
@@ -263,7 +377,9 @@ perform_updates() {
             log_message "${EMERALD}✔ Snap updates completed successfully.${NC}"
         fi
     else
-        print_table_row "Snap" "${RED}Not Installed${NC}" "N/A"
+        print
+
+_table_row "Snap" "${RED}Not Installed${NC}" "N/A"
         log_message "${RED}❌ Snap not installed. Skipping Snap updates.${NC}"
     fi
 
@@ -305,44 +421,6 @@ perform_updates() {
         log_message "${RED}❌ fwupdmgr not installed. Skipping firmware updates.${NC}"
     fi
 
-    # Update Rust
-    if check_command rustup; then
-        print_header "Rust Updates"
-        rustup update 2>&1 | tee -a "$temp_log" &
-        spinner $! "Updating Rust toolchain"
-        if [ $? -ne 0 ]; then
-            print_table_row "Rust" "${RED}Failed${NC}" "N/A"
-            log_message "${RED}❌ Rust update failed. Check log for details.${NC}"
-        else
-            rust_count=$(rustup toolchain list | wc -l)
-            print_table_row "Rust" "${EMERALD}Success${NC}" "$rust_count toolchains"
-            log_message "${EMERALD}✔ Rust updates completed successfully.${NC}"
-        fi
-    else
-        print_table_row "Rust" "${RED}Not Installed${NC}" "N/A"
-        log_message "${RED}❌ rustup not installed. Skipping Rust updates.${NC}"
-    fi
-
-    # Update Node.js (via npm)
-    if check_command npm; then
-        print_header "Node.js Package Updates"
-        sudo npm install -g npm@latest 2>&1 | tee -a "$temp_log" &
-        spinner $! "Upgrading npm"
-        sudo npm update -g 2>&1 | tee -a "$temp_log" &
-        spinner $! "Updating global Node.js packages"
-        if [ $? -ne 0 ]; then
-            print_table_row "Node.js" "${RED}Failed${NC}" "N/A"
-            log_message "${RED}❌ Node.js package update failed. Check log for details.${NC}"
-        else
-            npm_count=$(npm list -g --depth=0 | grep -c "@" || echo 0)
-            print_table_row "Node.js" "${EMERALD}Success${NC}" "$npm_count packages"
-            log_message "${EMERALD}✔ Node.js package updates completed successfully.${NC}"
-        fi
-    else
-        print_table_row "Node.js" "${RED}Not Installed${NC}" "N/A"
-        log_message "${RED}❌ npm not installed. Skipping Node.js package updates.${NC}"
-    fi
-
     # Update Plymouth
     print_header "Plymouth Updates"
     local plymouth_updated=false
@@ -380,7 +458,7 @@ perform_updates() {
     rm "$temp_log"
 }
 
-# Function to display menu with enhanced Unicode table
+# Function to display menu
 show_menu() {
     print_header "Update Options"
     log_message "${SKYBLUE}Available actions:${NC}"
@@ -396,7 +474,7 @@ show_menu() {
     log_message "${GOLD}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${NC}"
     printf "${GOLD}➤ Select an option [e/r/s/l/t/v]: ${NC}"
     read -n 1 -r choice
-    read -t 0.1 -r -s -d ''  # Clear any remaining input (e.g., newline)
+    read -t 0.1 -r -s -d ''  # Clear any remaining input
     echo
 
     case "${choice,,}" in
