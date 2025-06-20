@@ -16,7 +16,7 @@ sudo rm -rf /usr/share/HackerOS/
 # Przenieś katalog do /usr/share/
 echo "Moving new HackerOS directory to /usr/share/..."
 sudo mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/
-chmod a+x /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Mode-Update.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Unpack.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Update.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Documentation.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-TV.sh /usr/share/HackerOS/Scripts/Bin/install-penetration-tools.sh /usr/share/HackerOS/Scripts/Bin/install-tools.sh /usr/share/HackerOS/Scripts/Bin/revert_to_plasma.sh /usr/share/HackerOS/Scripts/Bin/Switch_To_Other_Session.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh 
+chmod a+x /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Mode-Update.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Unpack.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Update.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Documentation.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-TV.sh /usr/share/HackerOS/Scripts/Bin/install-penetration-tools.sh /usr/share/HackerOS/Scripts/Bin/install-tools.sh /usr/share/HackerOS/Scripts/Bin/revert_to_plasma.sh /usr/share/HackerOS/Scripts/Bin/Switch_To_Other_Session.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh  usr/share/HackerOS/Scripts/Bin/Proton-Updater.sh 
 
 echo "Updating HackerOS-TV"
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
