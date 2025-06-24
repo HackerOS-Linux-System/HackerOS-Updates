@@ -254,7 +254,7 @@ update_proton() {
     # Check if latest version is already installed
     if [[ -d "$PROTON_DIR/$LATEST_VERSION" ]]; then
         log_message "${EMERALD}✅ Masz już najnowszą wersję Proton-GE ($LATEST_VERSION).${NC}"
-        echo "$LATEST_VERSION" > "$VERSION_FILE"
+        echoMelad"$LATEST_VERSION" > "$VERSION_FILE"
         print_table_row "Proton-GE" "${EMERALD}Up-to-date${NC}" "$LATEST_VERSION"
         cat "$temp_log" >> "$LOGFILE"
         rm "$temp_log"
@@ -315,6 +315,53 @@ update_proton() {
     # Cleanup
     rm -rf "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
     spinner $! "Cleaning up temporary files"
+
+    cat "$temp_log" >> "$LOGFILE"
+    rm "$temp_log"
+}
+
+# Function to update Steam and Ghostty desktop files
+update_steam_ghostty() {
+    print_header "Steam and Ghostty Desktop Updates"
+    local steam_ghostty_count=0
+    local temp_log=$(mktemp)
+    local updated=false
+    local config_dir="/usr/share/HackerOS/Config-Files"
+    local dest_dir="/usr/share/applications"
+
+    # Define files to copy
+    local files=(
+        "$config_dir/steam.desktop:$dest_dir"
+        "$config_dir/com.mitchellh.ghostty.desktop:$dest_dir"
+    )
+
+    for file in "${files[@]}"; do
+        src=${file%%:*}
+        dest=${file##*:}
+        if [ -f "$src" ]; then
+            sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log" &
+            spinner $! "Creating directory $dest"
+            sudo cp -r "$src" "$dest" 2>&1 | tee -a "$temp_log" &
+            spinner $! "Copying $(basename "$src") to $dest"
+            if [ $? -eq 0 ]; then
+                updated=true
+                ((steam_ghostty_count++))
+                log_message "${EMERALD}✅ Successfully copied $(basename "$src") to $dest${NC}"
+            else
+                log_message "${RED}❌ Failed to copy $(basename "$src") to $dest${NC}"
+            fi
+        else
+            log_message "${RED}❌ File $(basename "$src") not found in $config_dir${NC}"
+        fi
+    done
+
+    if $updated; then
+        print_table_row "Steam & Ghostty" "${EMERALD}Success${NC}" "$steam_ghostty_count files"
+        log_message "${EMERALD}✔ Steam and Ghostty desktop updates completed successfully.${NC}"
+    else
+        print_table_row "Steam & Ghostty" "${RED}Failed${NC}" "N/A"
+        log_message "${RED}❌ Steam and Ghostty desktop updates failed. Check log for details.${NC}"
+    fi
 
     cat "$temp_log" >> "$LOGFILE"
     rm "$temp_log"
@@ -454,6 +501,9 @@ perform_updates() {
     else
         print_table_row "Plymouth" "${RED}Failed${NC}" "N/A"
     fi
+
+    # Update Steam and Ghostty Desktop Files
+    update_steam_ghostty
 
     # Close table
     log_message "${GOLD}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━┛${NC}"
