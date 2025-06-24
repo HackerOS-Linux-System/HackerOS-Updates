@@ -193,6 +193,51 @@ update_proton() {
     rm "$temp_log"
 }
 
+# Function to update Steam and Ghostty desktop files
+update_steam_ghostty() {
+    print_header "Steam and Ghostty Updates"
+    local temp_log=$(mktemp)
+    local updated=false
+    local steam_ghostty_count=0
+    local config_dir="/usr/share/HackerOS/Config-Files"
+    local dest_dir="/usr/share/applications"
+
+    # Define files to copy
+    local files=(
+        "$config_dir/steam.desktop:$dest_dir"
+        "$config_dir/com.mitchellh.ghostty.desktop:$dest_dir"
+    )
+
+    for file in "${files[@]}"; do
+        src=${file%%:*}
+        dest=${file##*:}
+        if [ -f "$src" ]; then
+            sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log" &
+            spinner $! "Creating directory $dest"
+            sudo cp -r "$src" "$dest" 2>&1 | tee -a "$temp_log" &
+            spinner $! "Copying $(basename "$src") to $dest"
+            if [ $? -eq 0 ]; then
+                updated=true
+                ((steam_ghostty_count++))
+                log_message "${LIME}✅ Successfully copied $(basename "$src") to $dest${NC}"
+            else
+                log_message "${RED}❌ Failed to copy $(basename "$src") to $dest${NC}"
+            fi
+        else
+            log_message "${RED}❌ File $(basename "$src") not found in $config_dir${NC}"
+        fi
+    done
+
+    if $updated; then
+        log_message "${LIME}✔ Steam and Ghostty updates completed successfully. Copied $steam_ghostty_count files.${NC}"
+    else
+        log_message "${RED}❌ Steam and Ghostty updates failed. No files were copied.${NC}"
+    fi
+
+    cat "$temp_log" >> "$LOGFILE"
+    rm "$temp_log"
+}
+
 # Function to perform updates
 perform_updates() {
     print_header "System Update Process"
@@ -300,6 +345,9 @@ perform_updates() {
     else
         log_message "${RED}❌ Plymouth update failed. No files were updated.${NC}"
     fi
+
+    # Update Steam and Ghostty
+    update_steam_ghostty
 }
 
 # Function to display menu
