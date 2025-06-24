@@ -254,7 +254,7 @@ update_proton() {
     # Check if latest version is already installed
     if [[ -d "$PROTON_DIR/$LATEST_VERSION" ]]; then
         log_message "${EMERALD}✅ Masz już najnowszą wersję Proton-GE ($LATEST_VERSION).${NC}"
-        echoMelad"$LATEST_VERSION" > "$VERSION_FILE"
+        echo "$LATEST_VERSION" > "$VERSION_FILE"
         print_table_row "Proton-GE" "${EMERALD}Up-to-date${NC}" "$LATEST_VERSION"
         cat "$temp_log" >> "$LOGFILE"
         rm "$temp_log"
@@ -320,47 +320,39 @@ update_proton() {
     rm "$temp_log"
 }
 
-# Function to update Steam and Ghostty desktop files
-update_steam_ghostty() {
-    print_header "Steam and Ghostty Desktop Updates"
-    local steam_ghostty_count=0
+# Function to update Steam desktop file
+update_steam() {
+    print_header "Steam Desktop Update"
+    local steam_count=0
     local temp_log=$(mktemp)
     local updated=false
     local config_dir="/usr/share/HackerOS/Config-Files"
     local dest_dir="/usr/share/applications"
+    local src_file="$config_dir/steam.desktop"
+    local dest_file="$dest_dir/steam.desktop"
 
-    # Define files to copy
-    local files=(
-        "$config_dir/steam.desktop:$dest_dir"
-        "$config_dir/com.mitchellh.ghostty.desktop:$dest_dir"
-    )
-
-    for file in "${files[@]}"; do
-        src=${file%%:*}
-        dest=${file##*:}
-        if [ -f "$src" ]; then
-            sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log" &
-            spinner $! "Creating directory $dest"
-            sudo cp -r "$src" "$dest" 2>&1 | tee -a "$temp_log" &
-            spinner $! "Copying $(basename "$src") to $dest"
-            if [ $? -eq 0 ]; then
-                updated=true
-                ((steam_ghostty_count++))
-                log_message "${EMERALD}✅ Successfully copied $(basename "$src") to $dest${NC}"
-            else
-                log_message "${RED}❌ Failed to copy $(basename "$src") to $dest${NC}"
-            fi
+    if [ -f "$src_file" ]; then
+        sudo mkdir -p "$dest_dir" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Creating directory $dest_dir"
+        sudo cp "$src_file" "$dest_file" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Copying steam.desktop to $dest_dir"
+        if [ $? -eq 0 ]; then
+            updated=true
+            ((steam_count++))
+            log_message "${EMERALD}✅ Successfully copied steam.desktop to $dest_dir${NC}"
         else
-            log_message "${RED}❌ File $(basename "$src") not found in $config_dir${NC}"
+            log_message "${RED}❌ Failed to copy steam.desktop to $dest_dir${NC}"
         fi
-    done
+    else
+        log_message "${RED}❌ File steam.desktop not found in $config_dir${NC}"
+    fi
 
     if $updated; then
-        print_table_row "Steam & Ghostty" "${EMERALD}Success${NC}" "$steam_ghostty_count files"
-        log_message "${EMERALD}✔ Steam and Ghostty desktop updates completed successfully.${NC}"
+        print_table_row "Steam" "${EMERALD}Success${NC}" "$steam_count file"
+        log_message "${EMERALD}✔ Steam desktop update completed successfully.${NC}"
     else
-        print_table_row "Steam & Ghostty" "${RED}Failed${NC}" "N/A"
-        log_message "${RED}❌ Steam and Ghostty desktop updates failed. Check log for details.${NC}"
+        print_table_row "Steam" "${RED}Failed${NC}" "N/A"
+        log_message "${RED}❌ Steam desktop update failed. Check log for details.${NC}"
     fi
 
     cat "$temp_log" >> "$LOGFILE"
@@ -486,7 +478,7 @@ perform_updates() {
         src=${file%%:*}
         dest=${file##*:}
         if [ -f "$src" ]; then
-            sudo mkdir -p "$dest" 2>&1 | tee -a "$LOGFILE"
+            sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log"
             sudo cp -f "$src" "$dest" 2>&1 | tee -a "$temp_log" &
             spinner $! "Copying $(basename "$src")"
             plymouth_updated=true
@@ -502,8 +494,8 @@ perform_updates() {
         print_table_row "Plymouth" "${RED}Failed${NC}" "N/A"
     fi
 
-    # Update Steam and Ghostty Desktop Files
-    update_steam_ghostty
+    # Update Steam Desktop File
+    update_steam
 
     # Close table
     log_message "${GOLD}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━┛${NC}"
