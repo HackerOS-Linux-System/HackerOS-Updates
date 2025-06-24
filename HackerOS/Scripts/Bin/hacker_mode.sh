@@ -1,2 +1,5 @@
 #!/bin/bash
-python3 /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/Hacker-Mode.py
+
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/
+
+npm start
