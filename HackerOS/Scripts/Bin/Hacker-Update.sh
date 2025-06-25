@@ -328,8 +328,8 @@ update_steam() {
     local updated=false
     local config_dir="/usr/share/HackerOS/Config-Files"
     local dest_dir="/usr/share/applications"
-    local src_file="$config_dir/steam.desktop"
-    local dest_file="$dest_dir/steam.desktop"
+    local src_file="$config_dir/HackerOS-Steam.desktop"
+    local dest_file="$dest_dir/HackerOS-Steam.desktop"
 
     if [ -f "$src_file" ]; then
         sudo mkdir -p "$dest_dir" 2>&1 | tee -a "$temp_log" &
