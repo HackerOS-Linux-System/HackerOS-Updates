@@ -92,7 +92,7 @@ cat << "EOF"
 
        ══════════════════════════════════════════════════
        ║      W E L C O M E   T O   H A C K E R O S     ║
-       ║                   v2.2                         ║
+       ║                   v2.5                         ║
        ══════════════════════════════════════════════════
 
 ┗┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┛
@@ -133,17 +133,17 @@ alias hacker-update="/usr/share/HackerOS/Scripts/Bin/Hacker-Update.sh"
 
 
 #hacker-unpack
-alias hacker-unpack="hacker-update && hacker-unpack-cybersecurity && hacker-unpack-gaming && hacker-devtools && hacker-add-ons"
+alias hacker-unpack="&& hacker-unpack-cybersecurity && hacker-unpack-gaming && hacker-devtools && hacker-add-ons"
 
 alias hacker-unpack-cybersecurity="hacker-update && echo ========== Penetration Tools Install ========== && sudo apt install nmap wireshark nikto john hydra aircrack-ng sqlmap ettercap-text-only tcpdump zmap bettercap wfuzz hashcat fail2ban rkhunter chkrootkit lynis clamav tor proxychains4 httrack sublist3r macchanger inxi htop openvas openvpn && echo ========== Install Metasploit Framework ========== && sudo snap install metasploit-framework && echo ========== Install Ghidra ========== && flatpak install flathub org.ghidra_sre.Ghidra && echo ========== Hacker-Unpack-Cybersecurity Compl3te =========="
 
-alias hacker-unpack-gaming="hacker-update && echo ========== Install OBS STUDIO LUTRIS and STEAM ========== && sudo apt install obs-studio lutris steam && echo ========== Install Heroic Games Launcher ProtonTricks and Discord ========== && flatpak install flathub net.davidotek.pupgui2 && flatpak install heroicgameslauncher protontricks discord && echo ========== Install Roblox ========== && flatpak install --user https://sober.vinegarhq.org/sober.flatpakref && echo ========== Install Roblox Studio ========== flatpak install flathub org.vinegarhq.Vinegar && echo ========== Hacker-Unpack-Gaming Complete =========="
+alias hacker-unpack-gaming="hacker-update && echo ========== Install OBS STUDIO and LUTRIS ========== && sudo apt install obs-studio lutris && echo ========== STEAM installation ========== && flatpak install flathub com.valvesoftware.Steam && echo ========== Pika Torrent installation ========== && flatpak install flathub com.pikatorrent.PikaTorrent && echo ========== Install Heroic Games Launcher ProtonTricks and Discord ========== && flatpak install flathub net.davidotek.pupgui2 && flatpak install heroicgameslauncher protontricks discord && echo ========== Install Roblox ========== && flatpak install --user https://sober.vinegarhq.org/sober.flatpakref && echo ========== Install Roblox Studio ========== flatpak install flathub org.vinegarhq.Vinegar && echo ========== Hacker-Unpack-Gaming Complete =========="
 
-alias hacker-unpack-gaming-noroblox="hacker-update && echo ========== Install OBS STUDIO LUTRIS and STEAM ========== && sudo apt install obs-studio lutris steam && echo ========== Install Heroic Games Launcher ProtonTricks and Discord ========== && flatpak install flathub net.davidotek.pupgui2 && flatpak install heroicgameslauncher protontricks discord && echo ========== Hacker-Unpack-Gaming-NoRoblox Complete =========="
+alias hacker-unpack-gaming-noroblox="hacker-update && echo ========== Install OBS STUDIO and LUTRIS ========== && sudo apt install obs-studio lutris && echo ========== STEAM installation ========== && flatpak install flathub com.valvesoftware.Steam && echo ========== Pika Torrent installation ========== && flatpak install flathub com.pikatorrent.PikaTorrent && echo ========== Install Heroic Games Launcher ProtonTricks and Discord ========== && flatpak install flathub net.davidotek.pupgui2 && flatpak install heroicgameslauncher protontricks discord && echo ========== Hacker-Unpack-Gaming-NoRoblox Complete =========="
 
 alias hacker-unpack-emulators="hacker-update && echo ========== Install PlayStation Emulator ========== flatpak install shadPS4 && echo ========== Install Emulator Nintendo ========== && flatpak install flathub io.github.ryubing.Ryujinx && echo ========== Install DOSBOX ========== && flatpak install flathub com.dosbox_x.DOSBox-X && echo ========== Install PlayStation 3 Emulator ========== && sudo snap install rpcs3-emu && echo ========== Hacker-Unpack-Emulators Complete =========="
 
-alias hacker-mode-install="echo Updating System && flatpak install flathub com.valvesoftware.Steam && flatpak install heroicgameslauncher && sudo apt install lutrs"
+alias hacker-mode-install="echo Updating System && flatpak install flathub com.valvesoftware.Steam && flatpak install heroicgameslauncher && sudo apt install lutris"
 
 
 #Hacker-SysLogs
