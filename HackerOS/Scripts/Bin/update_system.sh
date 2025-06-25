@@ -160,7 +160,7 @@ update_proton() {
     # Download new version
     log_message "${CYAN}[4/5] Pobieranie $FILENAME...${NC}"
     curl -L -o "$TMP_DIR/$FILENAME" "$LATEST_URL" 2>&1 | tee -a "$temp_log" &
-    spinner $! "Downloading Proton-GE $LATEST_VERSION"
+    spinner $! "Download Proton-GE $LATEST_VERSION"
     if [ $? -ne 0 ] || [[ ! -f "$TMP_DIR/$FILENAME" ]]; then
         log_message "${RED}❌ Błąd: Pobieranie zakończone niepowodzeniem.${NC}"
         cat "$temp_log" >> "$LOGFILE"
@@ -193,45 +193,37 @@ update_proton() {
     rm "$temp_log"
 }
 
-# Function to update Steam and Ghostty desktop files
-update_steam_ghostty() {
-    print_header "Steam and Ghostty Updates"
+# Function to update Steam desktop file
+update_steam() {
+    print_header "Steam Updates"
     local temp_log=$(mktemp)
     local updated=false
-    local steam_ghostty_count=0
+    local steam_count=0
     local config_dir="/usr/share/HackerOS/Config-Files"
     local dest_dir="/usr/share/applications"
+    local src="$config_dir/HackerOS-Steam.desktop"
+    local dest="$dest_dir"
 
-    # Define files to copy
-    local files=(
-        "$config_dir/steam.desktop:$dest_dir"
-        "$config_dir/com.mitchellh.ghostty.desktop:$dest_dir"
-    )
-
-    for file in "${files[@]}"; do
-        src=${file%%:*}
-        dest=${file##*:}
-        if [ -f "$src" ]; then
-            sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log" &
-            spinner $! "Creating directory $dest"
-            sudo cp -r "$src" "$dest" 2>&1 | tee -a "$temp_log" &
-            spinner $! "Copying $(basename "$src") to $dest"
-            if [ $? -eq 0 ]; then
-                updated=true
-                ((steam_ghostty_count++))
-                log_message "${LIME}✅ Successfully copied $(basename "$src") to $dest${NC}"
-            else
-                log_message "${RED}❌ Failed to copy $(basename "$src") to $dest${NC}"
-            fi
+    if [ -f "$src" ]; then
+        sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Creating directory $dest"
+        sudo cp -r "$src" "$dest" 2>&1 | tee -a "$temp_log" &
+        spinner $! "Copying $(basename "$src") to $dest"
+        if [ $? -eq 0 ]; then
+            updated=true
+            ((steam_count++))
+            log_message "${LIME}✅ Successfully copied $(basename "$src") to $dest${NC}"
         else
-            log_message "${RED}❌ File $(basename "$src") not found in $config_dir${NC}"
+            log_message "${RED}❌ Failed to copy $(basename "$src") to $dest${NC}"
         fi
-    done
+    else
+        log_message "${RED}❌ File $(basename "$src") not found in $config_dir${NC}"
+    fi
 
     if $updated; then
-        log_message "${LIME}✔ Steam and Ghostty updates completed successfully. Copied $steam_ghostty_count files.${NC}"
+        log_message "${LIME}✔ Steam updates completed successfully. Copied $steam_count file.${NC}"
     else
-        log_message "${RED}❌ Steam and Ghostty updates failed. No files were copied.${NC}"
+        log_message "${RED}❌ Steam updates failed. No files were copied.${NC}"
     fi
 
     cat "$temp_log" >> "$LOGFILE"
@@ -346,8 +338,8 @@ perform_updates() {
         log_message "${RED}❌ Plymouth update failed. No files were updated.${NC}"
     fi
 
-    # Update Steam and Ghostty
-    update_steam_ghostty
+    # Update Steam
+    update_steam
 }
 
 # Function to display menu
