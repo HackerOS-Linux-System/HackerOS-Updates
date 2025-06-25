@@ -176,6 +176,9 @@ alias nvidia-dkms-560="hacker-update && sudo apt install nvidia-dkms-560"
 #hacker-unpack-g-s
 alias hacker-unpack-g-s="hacker-update && hacker-unpack-gaming && hacker-unpack-cybersecurity"
 
+#Fast-Update
+alias update="/usr/share/HackerOS/Scripts/Bin/update.sh"
+
 #neofetch
 alias fastfetch="neofetch"
 
