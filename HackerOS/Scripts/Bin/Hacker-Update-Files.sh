@@ -5,6 +5,7 @@
 echo "Kopiowanie plików .desktop..."
 sudo cp -r /usr/share/HackerOS/Config-Files/HackerOS-Steam.desktop /usr/share/applications/
 sudo cp -r /usr/share/HackerOS/Config-Files/org.gnome.Software.desktop /usr/share/applications/
+sudo cp -r /usr/share/HackerOS/Config-Files/vivaldi-stable.desktop /usr/share/applications/
 
 echo "Kopiowanie ikon Plymouth..."
 sudo cp -r /usr/share/HackerOS/ICONS/Plymouth-Icons/bgrt-fallback.png /usr/share/plymouth/themes/spinner/
