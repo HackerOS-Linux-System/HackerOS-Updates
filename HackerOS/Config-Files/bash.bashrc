@@ -145,6 +145,11 @@ alias hacker-unpack-emulators="hacker-update && echo ========== Install PlayStat
 
 alias hacker-mode-install="echo Updating System && flatpak install flathub com.valvesoftware.Steam && flatpak install heroicgameslauncher && sudo apt install lutris"
 
+#hacker install gamescope steam
+alias hacker-install-gamescope-steam="/usr/share/HackerOS/Scripts/Bin/hacker-install-gamescope-steam.sh"
+
+#Hacker Menu
+alias hacker-menu="ruby /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Menu/Hacker-Menu.rb"
 
 #Hacker-SysLogs
 alias hacker-syslog="echo ========== System Logs ========== && sudo journalctl -xe"
