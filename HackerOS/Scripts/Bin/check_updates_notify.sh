@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ICON_PATH="/usr/share/HackerOS/ICONS/HackerOS.png"
-AUTOSTART_FILE="/etc/xdg/autostart/updates_notify.desktop"
+AUTOSTART_FILE="/etc/xdg/autostart/hackeros-update-check.desktop"
 CONFIG_FILE="$HOME/.HackerOS/updates_notify.json"
 STAMP_FILE="$HOME/.cache/last_update_check"
 UPDATE_SCRIPT="/usr/share/HackerOS/Scripts/Bin/update_system.sh"
