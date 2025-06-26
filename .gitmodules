@@ -16,3 +16,6 @@
 [submodule "HackerOS/Scripts/HackerOS-Apps/Hacker-Unpack"]
 	path = HackerOS/Scripts/HackerOS-Apps/Hacker-Unpack
 	url = https://github.com/HackerOS-Linux-System/Hacker-Unpack.git
+[submodule "HackerOS/Scripts/HackerOS-Apps/Hacker-Menu"]
+	path = HackerOS/Scripts/HackerOS-Apps/Hacker-Menu
+	url = https://github.com/HackerOS-Linux-System/Hacker-Menu.git
