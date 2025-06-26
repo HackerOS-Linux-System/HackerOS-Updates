@@ -1,3 +1,18 @@
 [submodule "HackerOS/Scripts/HackerOS-Apps/HackerOS-Search-Engine"]
 	path = HackerOS/Scripts/HackerOS-Apps/HackerOS-Search-Engine
 	url = https://github.com/HackerOS-Linux-System/HackerOS-Search-Engine.git
+[submodule "HackerOS/Scripts/HackerOS-Apps/Hacker-Mode"]
+	path = HackerOS/Scripts/HackerOS-Apps/Hacker-Mode
+	url = https://github.com/HackerOS-Linux-System/Hacker-Mode.git
+[submodule "HackerOS/Scripts/HackerOS-Apps/HackerOS-TV"]
+	path = HackerOS/Scripts/HackerOS-Apps/HackerOS-TV
+	url = https://github.com/HackerOS-Linux-System/HackerOS-TV.git
+[submodule "HackerOS/Scripts/HackerOS-Apps/HackerOS-Cockpit"]
+	path = HackerOS/Scripts/HackerOS-Apps/HackerOS-Cockpit
+	url = https://github.com/HackerOS-Linux-System/HackerOS-Cockpit.git
+[submodule "HackerOS/Scripts/HackerOS-Apps/Penetration-Mode"]
+	path = HackerOS/Scripts/HackerOS-Apps/Penetration-Mode
+	url = https://github.com/HackerOS-Linux-System/Penetration-Mode.git
+[submodule "HackerOS/Scripts/HackerOS-Apps/Hacker-Unpack"]
+	path = HackerOS/Scripts/HackerOS-Apps/Hacker-Unpack
+	url = https://github.com/HackerOS-Linux-System/Hacker-Unpack.git
