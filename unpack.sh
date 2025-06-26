@@ -21,7 +21,12 @@ chmod a+x /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh /usr/share/HackerOS/Scr
 echo "Updating bash"
 sudo mv /usr/share/HackerOS/Config-Files/bash.bashrc /etc/
 
-echo "Updating Hacker Mode"
+echo "Updating Hacker Mode and HackerOS TV"
+#Updating HackerOS TV
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
+npm insttall
+
+# Updating Hacker Mode
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/
 npm install
 
