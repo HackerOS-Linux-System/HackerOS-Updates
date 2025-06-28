@@ -143,7 +143,7 @@ alias hacker-unpack-gaming-noroblox="hacker-update && echo ========== Install OB
 
 alias hacker-unpack-emulators="hacker-update && echo ========== Install PlayStation Emulator ========== flatpak install shadPS4 && echo ========== Install Emulator Nintendo ========== && flatpak install flathub io.github.ryubing.Ryujinx && echo ========== Install DOSBOX ========== && flatpak install flathub com.dosbox_x.DOSBox-X && echo ========== Install PlayStation 3 Emulator ========== && sudo snap install rpcs3-emu && echo ========== Hacker-Unpack-Emulators Complete =========="
 
-alias hacker-mode-install="echo Updating System && flatpak install flathub com.valvesoftware.Steam && sudo apt install lutris steam"
+alias hacker-mode-install="echo Updating System && hacker-update && flathub install heroicgameslauncher && flatpak install --user https://sober.vinegarhq.org/sober.flatpakref && flatpak install flathub xyz.hyperplay.HyperPlay && sudo apt install lutris steam"
 
 #hacker install gamescope steam
 alias hacker-install-gamescope-steam="/usr/share/HackerOS/Scripts/Bin/hacker-install-gamescope-steam.sh"
@@ -229,4 +229,3 @@ alias gp='echo ⬆️ && git push'
 
 # Kolorowe PS1 (jeśli nie używasz Starship)
 PS1='\[\e[1;32m\]\u@\h \[\e[1;34m\]\w \[\e[0;33m\]$\[\e[0m\] '
-
