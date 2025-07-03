@@ -1,6 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-#Sudo Mode
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+CYAN="\e[36m"
+RESET="\e[0m"
+
+USER_NAME=$(whoami)
+PREF_FILE="/home/$USER_NAME/.hackeros/Preferences.txt"
+APPS_DIR="/usr/share/HackerOS/Scripts/HackerOS-Apps"
+
+# Sudo Mode
 sudo su
 
 # Daj uprawnienia do wykonywania dla samego siebie
@@ -8,41 +18,60 @@ chmod a+x "$0"
 
 # Sprawdź, czy katalog źródłowy istnieje
 if [ ! -d "/tmp/HackerOS-Updates/HackerOS/" ]; then
-    echo "Error: Directory /tmp/HackerOS-Updates/HackerOS/ does not exist."
+    echo -e "${RED}Brak katalogu /tmp/HackerOS-Updates/HackerOS/. Przerywam.${RESET}"
     exit 1
 fi
 
 # Usuń istniejący katalog /usr/share/HackerOS/
-echo "Deleting /usr/share/HackerOS/..."
+echo -e "${YELLOW}Usuwanie /usr/share/HackerOS/...${RESET}"
 rm -rf /usr/share/HackerOS/
 
 # Przenieś katalog do /usr/share/
-echo "Moving new HackerOS directory to /usr/share/..."
-
-#HackerOS File Update
+echo -e "${CYAN}Przenoszenie nowego HackerOS do /usr/share/...${RESET}"
 mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/
 
-#Permission Update
-chmod a+x /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Mode-Update.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Unpack.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Update.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Documentation.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-TV.sh /usr/share/HackerOS/Scripts/Bin/install-penetration-tools.sh /usr/share/HackerOS/Scripts/Bin/install-tools.sh /usr/share/HackerOS/Scripts/Bin/revert_to_plasma.sh /usr/share/HackerOS/Scripts/Bin/Switch_To_Other_Session.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh  /usr/share/HackerOS/Scripts/Bin/Proton-Updater.sh /usr/share/HackerOS/Scripts/Bin/Hacker-Update-Files.sh /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam.sh /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam-Animation.sh /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam-For-Hacker-Mode.sh /usr/share/HackerOS/Scripts/Bin/update.sh /usr/share/HackerOS/Scripts/Bin/hacker-install-gamescope-steam.sh /usr/share/HackerOS/Scripts/Bin/Penetration-Mode.sh
+# Permission Update
+chmod a+x /usr/share/HackerOS/Scripts/Bin/* \
+/usr/share/HackerOS/Scripts/Steam/*
 
-echo "Updating bash"
+echo -e "${CYAN}Aktualizacja bash.bashrc...${RESET}"
 mv /usr/share/HackerOS/Config-Files/bash.bashrc /etc/
 
-echo "Updating Hacker Mode and HackerOS TV"
+echo -e "${CYAN}Instalowanie zależności npm dla HackerOS-TV...${RESET}"
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/ && npm install
 
-#Updating HackerOS TV
-cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
-npm insttall
+echo -e "${CYAN}Instalowanie zależności npm dla Hacker-Mode...${RESET}"
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/ && npm install
 
-# Updating Hacker Mode
-cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/
-npm install
+echo -e "${CYAN}Instalowanie zależności npm dla Penetration-Mode...${RESET}"
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Penetration-Mode/ && npm install
 
-#Updating Penetration Mode
-cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Penetration-Mode/
-npm install
+if [ -f "$PREF_FILE" ] && [ -s "$PREF_FILE" ]; then
+    echo -e "${CYAN}[UNPACK] Usuwanie aplikacji wg Preferences.txt...${RESET}"
+    while IFS= read -r app; do
+        case $app in
+            penetration-mode)
+                echo -e "${YELLOW}[REMOVE] penetration-mode...${RESET}"
+                rm -rf "$APPS_DIR/Penetration-Mode"
+                ;;
+            hacker-mode)
+                echo -e "${YELLOW}[REMOVE] hacker-mode...${RESET}"
+                rm -rf "$APPS_DIR/Hacker-Mode"
+                ;;
+            hackeros-tv)
+                echo -e "${YELLOW}[REMOVE] hackeros-tv...${RESET}"
+                rm -rf "$APPS_DIR/HackerOS-TV"
+                ;;
+            *)
+                echo -e "${RED}[ERROR] Nieznana aplikacja: $app${RESET}"
+                ;;
+        esac
+    done < "$PREF_FILE"
+else
+    echo -e "${CYAN}[UNPACK] Preferences.txt jest pusty lub nie istnieje. Nic do usunięcia.${RESET}"
+fi
 
-#exiting from sudo mode
+#exit from sudo mode
 exit
 
-echo "The operation was completed successfully."
+echo -e "${GREEN}Operacja zakończona.${RESET}"
