@@ -27,7 +27,7 @@ echo -e "${YELLOW}Usuwanie /usr/share/HackerOS/...${RESET}"
 rm -rf /usr/share/HackerOS/
 
 #Update Hacker.sh
-cp -r /tmp/HackerOS-Updates/HackerOS/Scripts/Bin/hacker.sh /bin/
+mv /tmp/HackerOS-Updates/HackerOS/Scripts/Bin/hacker.sh /bin/
 chmod a+x /bin/hacker.sh
 
 # Przenieś katalog do /usr/share/
