@@ -22,6 +22,8 @@ echo "Updating bash"
 sudo mv /usr/share/HackerOS/Config-Files/bash.bashrc /etc/
 
 echo "Updating Hacker Mode and HackerOS TV"
+#Admin Mode
+sudo su
 #Updating HackerOS TV
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
 npm insttall
@@ -29,5 +31,12 @@ npm insttall
 # Updating Hacker Mode
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/
 npm install
+
+#Updating Penetration Mode
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Penetration-Mode/
+npm install
+
+#exiting from sudo mode
+exit
 
 echo "The operation was completed successfully."
