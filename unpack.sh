@@ -28,6 +28,7 @@ rm -rf /usr/share/HackerOS/
 
 #Update Hacker.sh
 cp -r /tmp/HackerOS-Updates/HackerOS/Scripts/Bin/hacker.sh /bin/
+chmod a+x /bin/hacker.sh
 
 # Przenieś katalog do /usr/share/
 echo -e "${CYAN}Przenoszenie nowego HackerOS do /usr/share/...${RESET}"
