@@ -23,31 +23,24 @@ if [ ! -d "/tmp/HackerOS-Updates/HackerOS/" ]; then
 fi
 
 # Usuń istniejący katalog /usr/share/HackerOS/
-echo -e "${YELLOW}Usuwanie /usr/share/HackerOS/...${RESET}"
 rm -rf /usr/share/HackerOS/
 
 #Update Hacker.sh
 mv /tmp/HackerOS-Updates/HackerOS/Scripts/Bin/hacker.sh /bin/
 chmod a+x /bin/hacker.sh
 
-# Przenieś katalog do /usr/share/
-echo -e "${CYAN}Przenoszenie nowego HackerOS do /usr/share/...${RESET}"
 mv /tmp/HackerOS-Updates/HackerOS/ /usr/share
 
 # Permission Update
 chmod a+x /usr/share/HackerOS/Scripts/Bin/* \
 /usr/share/HackerOS/Scripts/Steam/*
 
-echo -e "${CYAN}Aktualizacja bash.bashrc...${RESET}"
 mv /usr/share/HackerOS/Config-Files/bash.bashrc /etc/
 
-echo -e "${CYAN}Instalowanie zależności npm dla HackerOS-TV...${RESET}"
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/ && npm install
 
-echo -e "${CYAN}Instalowanie zależności npm dla Hacker-Mode...${RESET}"
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/ && npm install
 
-echo -e "${CYAN}Instalowanie zależności npm dla Penetration-Mode...${RESET}"
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Penetration-Mode/ && npm install
 
 if [ -f "$PREF_FILE" ] && [ -s "$PREF_FILE" ]; then
@@ -77,5 +70,3 @@ fi
 
 #exit from sudo mode
 exit
-
-echo -e "${GREEN}Operacja zakończona.${RESET}"
