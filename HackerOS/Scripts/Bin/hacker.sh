@@ -83,7 +83,7 @@ progress_bar() {
             color="${BLUE}"
             operation_name="Update Check"
             ;;
-        menu|cockpit)
+        menu|cockpit|sound)
             color="${MAGENTA}"
             operation_name="${operation^} Launch"
             ;;
@@ -160,6 +160,7 @@ print_help() {
     printf "  %-30s %-60s %-30s\n" "hacker update" "Performs full system update" "hacker update"
     printf "  %-30s %-60s %-30s\n" "hacker fast-update" "Performs quick system update" "hacker fast-update"
     printf "  %-30s %-60s %-30s\n" "hacker check-updates" "Checks for available updates" "hacker check-updates"
+    printf "  %-30s %-60s %-30s\n" "hacker sound" "Launches HackerOS sound script" "hacker sound"
     print_separator
 
     echo -e "${WHITE}${BOLD}┃ Tool Commands ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
@@ -263,6 +264,26 @@ hacker_cockpit() {
     else
         print_error "Script $cockpit_script does not exist"
         log "Failed to launch HackerOS Cockpit - script not found"
+    fi
+}
+
+# Funkcja uruchamiania skryptu dźwiękowego
+hacker_sound() {
+    local sound_script="/usr/share/HackerOS/Scripts/Bin/hacker-sound.sh"
+    print_separator
+    echo -e "${YELLOW}${BOLD}Launching HackerOS Sound Script${RESET}"
+    print_separator
+    progress_bar "sound"
+
+    if [ -f "$sound_script" ]; then
+        print_info "Running $sound_script"
+        sudo chmod +x "$sound_script" &>> "$LOG"
+        bash "$sound_script" &>> "$LOG"
+        print_status "HackerOS Sound Script launched"
+        log "Launched HackerOS Sound Script"
+    else
+        print_error "Script $sound_script does not exist"
+        log "Failed to launch HackerOS Sound Script - script not found"
     fi
 }
 
@@ -716,6 +737,9 @@ case "$1" in
     cockpit)
         hacker_cockpit
         ;;
+    sound)
+        hacker_sound
+        ;;
     help)
         print_help
         ;;
@@ -731,6 +755,7 @@ case "$1" in
         printf "  %-30s %s\n" "hacker check-updates" "Checks for available updates"
         printf "  %-30s %s\n" "hacker menu" "Launches HackerOS Menu"
         printf "  %-30s %s\n" "hacker cockpit" "Launches HackerOS Cockpit"
+        printf "  %-30s %s\n" "hacker sound" "Launches HackerOS Sound Script"
         printf "  %-30s %s\n" "hacker help" "Displays help"
         echo -e "${YELLOW}${BOLD}Run 'hacker help' for a list of packages and commands${RESET}"
         print_separator
