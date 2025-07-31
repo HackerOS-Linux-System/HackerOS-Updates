@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penetration Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-900 text-white font-mono">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar w-16 bg-gray-800 flex flex-col items-center py-4 space-y-4 hover:w-64 transition-all duration-300">
+            <button id="wifi-btn" class="gradient-button p-2 rounded-full animate-pulse" title="Manage Wi-Fi connections">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path></svg>
+                <span class="sidebar-text hidden ml-2">Wi-Fi</span>
+            </button>
+            <button id="bluetooth-btn" class="gradient-button p-2 rounded-full animate-pulse" title="Manage Bluetooth devices">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 12h12l3-12H3zm9 6v6m0-6l-3 3m3-3l3 3"></path></svg>
+                <span class="sidebar-text hidden ml-2">Bluetooth</span>
+            </button>
+            <button id="vpn-btn" class="gradient-button p-2 rounded-full animate-pulse" title="Toggle VPN connection">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0-4.418-3.582-8-8-8H3v18h1c4.418 0 8-3.582 8-8zm0 0c0 4.418 3.582 8 8 8h1V1h-1c-4.418 0-8 3.582-8 8z"></path></svg>
+                <span class="sidebar-text hidden ml-2">VPN</span>
+            </button>
+            <button id="tor-btn" class="gradient-button p-2 rounded-full animate-pulse" title="Toggle Tor network">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 00-8 4m16 0a10 10 0 00-8-4m8 4v12a10 10 0 01-8 4m-8-4a10 10 0 018-4m0 0v12"></path></svg>
+                <span class="sidebar-text hidden ml-2">Tor</span>
+            </button>
+            <button id="anonymity-btn" class="gradient-button p-2 rounded-full animate-pulse" title="Enable full anonymity mode">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.313 0-6 2.687-6 6v1h12v-1c0-3.313-2.687-6-6-6z"></path></svg>
+                <span class="sidebar-text hidden ml-2">Anonymity</span>
+            </button>
+            <button id="settings-btn" class="gradient-button p-2 rounded-full animate-pulse" title="Configure application settings">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37 1 .608 2.296.07 2.572-1.065z"></path></svg>
+                <span class="sidebar-text hidden ml-2">Settings</span>
+            </button>
+            <div class="flex-1"></div>
+            <button id="hacker-menu-btn" class="gradient-button p-2 rounded-full animate-pulse" title="System control menu">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                <span class="sidebar-text hidden ml-2">Hacker Menu</span>
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="bg-gray-800 p-4 flex justify-between items-center">
+                <h1 class="text-4xl font-bold animate-glow">Penetration Mode</h1>
+                <img src="/usr/share/HackerOS/ICONS/Penetration-Mode.png" alt="Penetration Mode Icon" class="w-12 h-12">
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex-1 p-6 overflow-auto">
+                <div class="flex space-x-4 mb-6">
+                    <button class="tab-btn gradient-button px-6 py-3 rounded-lg text-lg animate-pulse" data-tab="tools">Tools</button>
+                    <button class="tab-btn gradient-button px-6 py-3 rounded-lg text-lg animate-pulse" data-tab="learning">Learning</button>
+                    <button class="tab-btn gradient-button px-6 py-3 rounded-lg text-lg animate-pulse" data-tab="logs">Logs</button>
+                    <button class="tab-btn gradient-button px-6 py-3 rounded-lg text-lg animate-pulse" data-tab="anonymity">Anonymity</button>
+                    <button class="tab-btn gradient-button px-6 py-3 rounded-lg text-lg animate-pulse" data-tab="monitoring">Monitoring</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div id="tools" class="tab-content hidden animate-fade-in">
+                    <div class="grid grid-cols-4 gap-6">
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Nmap</h3>
+                            <p class="text-sm">Network scanning and discovery tool</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., nmap -sP 192.168.1.0/24" data-tool="nmap">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="nmap">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Metasploit</h3>
+                            <p class="text-sm">Exploit development framework</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., msfconsole" data-tool="metasploit">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="metasploit">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Aircrack-ng</h3>
+                            <p class="text-sm">Wi-Fi security testing suite</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., aircrack-ng -b <BSSID>" data-tool="aircrack-ng">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="aircrack-ng">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Hydra</h3>
+                            <p class="text-sm">Password cracking tool</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., hydra -l user -P passlist.txt ssh://192.168.1.1" data-tool="hydra">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="hydra">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Sqlmap</h3>
+                            <p class="text-sm">Automated SQL injection tool</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., sqlmap -u http://example.com" data-tool="sqlmap">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="sqlmap">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Wireshark</h3>
+                            <p class="text-sm">Network packet analyzer</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., wireshark" data-tool="wireshark">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="wireshark">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Burp Suite</h3>
+                            <p class="text-sm">Web application testing tool</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., burpsuite" data-tool="burpsuite">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="burpsuite">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Nikto</h3>
+                            <p class="text-sm">Web server vulnerability scanner</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., nikto -h http://example.com" data-tool="nikto">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="nikto">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Hashcat</h3>
+                            <p class="text-sm">Advanced password recovery tool</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., hashcat -m 0 hash.txt" data-tool="hashcat">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="hashcat">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">John</h3>
+                            <p class="text-sm">Password cracker for hashes</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., john hash.txt" data-tool="john">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="john">Run</button>
+                        </div>
+                        <div class="tool-card bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                            <h3 class="text-xl font-bold">Masscan</h3>
+                            <p class="text-sm">High-speed port scanner</p>
+                            <input type="text" class="w-full bg-gray-700 p-2 mt-2 rounded" placeholder="e.g., masscan 192.168.1.0/24 -p1-65535" data-tool="masscan">
+                            <button class="run-tool-btn gradient-button w-full mt-2 p-2 rounded animate-pulse" data-tool="masscan">Run</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="learning" class="tab-content hidden animate-fade-in">
+                    <select id="learning-topic" class="bg-gray-700 p-2 rounded mb-4 animate-slide-in w-full max-w-md">
+                        <option value="basics">Penetration Testing Basics</option>
+                        <option value="scanning">Network Scanning</option>
+                        <option value="exploits">Exploits and Payloads</option>
+                        <option value="wireless">Wireless Attacks</option>
+                        <option value="passwords">Password Cracking</option>
+                        <option value="web">Web Application Testing</option>
+                        <option value="anonymity">Anonymity and Privacy</option>
+                        <option value="monitoring">Network Monitoring</option>
+                    </select>
+                    <div id="learning-content" class="bg-gray-800 p-6 rounded-lg prose prose-invert max-w-none">
+                        <h2 id="learning-title" class="text-2xl font-bold mb-4"></h2>
+                        <div id="learning-text"></div>
+                    </div>
+                </div>
+                <div id="logs" class="tab-content hidden animate-fade-in">
+                    <div id="logs-content" class="bg-gray-800 p-6 rounded-lg output-log"></div>
+                </div>
+                <div id="anonymity" class="tab-content hidden animate-fade-in">
+                    <div class="bg-gray-800 p-6 rounded-lg">
+                        <p id="ip-info" class="text-lg">IP: Unknown</p>
+                        <p id="anonymity-report" class="mt-2">Anonymity report will appear here.</p>
+                        <button id="check-anonymity" class="gradient-button px-6 py-2 mt-4 rounded animate-pulse">Check Anonymity</button>
+                    </div>
+                </div>
+                <div id="monitoring" class="tab-content hidden animate-fade-in">
+                    <div class="bg-gray-800 p-6 rounded-lg">
+                        <p id="resource-info" class="text-lg">CPU: N/A | RAM: N/A | Disk: N/A</p>
+                        <button id="refresh-monitoring" class="gradient-button px-6 py-2 mt-4 rounded animate-pulse">Refresh</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Dock -->
+            <div class="bg-gray-800 p-4">
+                <div id="output" class="output-log bg-gray-700 p-4 rounded-lg"></div>
+                <div id="progress-bar" class="hidden h-3 bg-gray-600 rounded mt-2">
+                    <div id="progress-fill" class="h-full bg-blue-500 rounded animate-progress" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center animate-fade-in">
+        <div class="bg-gray-800 p-8 rounded-lg w-1/3 shadow-xl">
+            <h2 class="text-2xl font-bold mb-6 animate-glow">Settings</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm">Default Interface</label>
+                    <input id="interface-input" type="text" class="w-full bg-gray-700 p-2 rounded mt-1" value="wlan0">
+                </div>
+                <div>
+                    <label class="block text-sm">VPN Config Path</label>
+                    <div class="flex space-x-2">
+                        <input id="vpn-path-input" type="text" class="flex-1 bg-gray-700 p-2 rounded mt-1" value="">
+                        <button id="vpn-path-browse" class="gradient-button px-4 py-2 rounded animate-pulse">Browse</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm">Command Timeout (seconds)</label>
+                    <input id="timeout-input" type="number" class="w-full bg-gray-700 p-2 rounded mt-1" value="60" min="1" max="300">
+                </div>
+                <div>
+                    <label class="block text-sm">Log Level</label>
+                    <select id="log-level" class="w-full bg-gray-700 p-2 rounded mt-1">
+                        <option value="INFO">INFO</option>
+                        <option value="DEBUG">DEBUG</option>
+                        <option value="WARNING">WARNING</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="save-settings" class="gradient-button flex-1 p-2 rounded animate-pulse">Save</button>
+                    <button id="close-settings" class="gradient-button flex-1 p-2 rounded animate-pulse">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Modal -->
+    <div id="network-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center animate-fade-in">
+        <div class="bg-gray-800 p-8 rounded-lg w-1/3 shadow-xl">
+            <h2 id="network-title" class="text-2xl font-bold mb-6 animate-glow"></h2>
+            <div id="network-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
+            <div class="flex space-x-2 mt-6">
+                <button id="refresh-network" class="gradient-button px-4 py-2 rounded animate-pulse">Refresh</button>
+                <button id="connect-network" class="gradient-button px-4 py-2 rounded animate-pulse">Connect</button>
+                <button id="disconnect-network" class="gradient-button px-4 py-2 rounded animate-pulse">Disconnect</button>
+                <button id="close-network" class="gradient-button px-4 py-2 rounded animate-pulse">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hacker Menu -->
+    <div id="hacker-menu" class="absolute bottom-4 left-4 hidden">
+        <div class="bg-gray-800 p-4 rounded-lg shadow-xl">
+            <button id="shutdown-btn" class="block w-full text-left p-2 hover:bg-gray-700 rounded">Shutdown</button>
+            <button id="restart-btn" class="block w-full text-left p-2 hover:bg-gray-700 rounded">Restart</button>
+            <button id="logout-btn" class="block w-full text-left p-2 hover:bg-gray-700 rounded">Logout</button>
+        </div>
+    </div>
+
+    <script src="./main.js"></script>
+</body>
+</html>
