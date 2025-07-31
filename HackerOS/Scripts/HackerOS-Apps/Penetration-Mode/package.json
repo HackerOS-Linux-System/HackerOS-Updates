@@ -1,0 +1,11 @@
+{
+    "name": "Penetration-Mode",
+    "version": "1.0.3",
+    "main": "main-process.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "dependencies": {
+        "electron": "^25.0.0"
+    }
+}
