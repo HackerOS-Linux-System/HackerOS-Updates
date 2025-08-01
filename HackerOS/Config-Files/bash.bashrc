@@ -92,7 +92,7 @@ cat << "EOF"
 
        ══════════════════════════════════════════════════
        ║      W E L C O M E   T O   H A C K E R O S     ║
-       ║                   v2.7                         ║
+       ║                   v2.5                         ║
        ══════════════════════════════════════════════════
 
 ┗┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┉┛
@@ -127,11 +127,6 @@ EOF
 #Custom-Commands
 
 
-
-#hacker-update
-alias hacker-update="/usr/share/HackerOS/Scripts/Bin/Hacker-Update.sh"
-
-
 #hacker-unpack
 alias hacker-unpack="&& hacker-unpack-cybersecurity && hacker-unpack-gaming && hacker-devtools && hacker-add-ons"
 
@@ -148,26 +143,11 @@ alias hacker-mode-install="echo Updating System && hacker-update && flathub inst
 #hacker install gamescope steam
 alias hacker-install-gamescope-steam="/usr/share/HackerOS/Scripts/Bin/hacker-install-gamescope-steam.sh"
 
-#Hacker Menu
-alias hacker-menu="ruby /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Menu/Hacker-Menu.rb"
-
 #Hacker-SysLogs
 alias hacker-syslog="echo ========== System Logs ========== && sudo journalctl -xe"
 
-#Hacker/Apt
-alias zypper='sudo apt'
-alias yum='sudo apt'
-alias dnf='sudo apt'
-alias hacker='sudo apt'
-alias fhacker='flatpak'
-alias shacker='sudo snap'
-
-
-#Hacker-retro-term
-alias hacker-retro-term="hacker-update && echo ========== Install Cool Retro Term ========== && sudo apt install cool-retro-term && echo ========== Installation Cool Retro Term Complete =========="
-
 #Lista Komend
-alias hacker-commands="echo ========== Commands List ==========  hacker-update hacker-unpack hacker-unpack-cybersecurity hacker-unpack-gaming hacker-unpack-gaming-noroblox hacker-syslogs hacker-unpack-emulators hacker-retro-term remove-calamares && echo ========== Instead of the sudo apt command you can use hacker =========="
+alias hacker-commands="echo ========== Commands List ==========  hacker-update hacker-unpack hacker-unpack-cybersecurity hacker-unpack-gaming hacker-unpack-gaming-noroblox hacker-syslogs hacker-unpack-emulators && echo ========== Instead of the sudo apt command you can use hacker =========="
 
 #Hacker-DevTools
 alias hacker-devtools="hacker-update && echo ========== Install Atom ========== && flatpak install flathub io.atom.Atom && echo ========== Install Dev Tools Complete =========="
