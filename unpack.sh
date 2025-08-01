@@ -28,6 +28,8 @@ rm -rf /usr/share/HackerOS/
 #Update Hacker.sh
 mv /tmp/HackerOS-Updates/HackerOS/Scripts/Bin/hacker.sh /bin/
 chmod a+x /bin/hacker.sh
+mv /tmp/HackerOS-Updates/HackerOS/Scripts/Bin/hacker-update /bin
+chmod a+x /bin/hacker-update
 
 mv /tmp/HackerOS-Updates/HackerOS/ /usr/share
 
