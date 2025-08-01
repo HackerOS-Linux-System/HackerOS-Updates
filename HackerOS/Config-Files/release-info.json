@@ -2,9 +2,9 @@
   "image-name": "HackerOS-Official-Edition",
   "image-flavor": "official-edition",
   "image-vendor": "HackerOS-Team",
-  "image-tag": "2.5",
+  "image-tag": "2.7",
   "image-branch": "stable",
   "ubuntu-version": "25.04",
-  "version": "25.04 -> HackerOS 2.5",
-  "version-pretty": "Official (HackerOS 2.5)"
+  "version": "25.04 -> HackerOS 2.7",
+  "version-pretty": "Official (HackerOS 2.7)"
 }
