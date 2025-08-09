@@ -22,9 +22,6 @@ if [ ! -d "/tmp/HackerOS-Updates/HackerOS/" ]; then
     exit 1
 fi
 
-# Usuń istniejący katalog /usr/share/HackerOS/
-rm -rf /usr/share/HackerOS/
-
 #Update files in /bin
 mv /tmp/HackerOS-Updates/Config-Files/hacker /bin/
 chmod a+x /bin/hacker
@@ -33,6 +30,10 @@ chmod a+x /bin/hacker-update
 #Update bash.bashrc
 mv /tmp/HackerOS-Updates/Config-Files/bash.bashrc /etc/
 
+# Usuń istniejący katalog /usr/share/HackerOS/
+rm -rf /usr/share/HackerOS/
+
+# nowy katalog /usr/share/HackerOS/
 mv /tmp/HackerOS-Updates/HackerOS/ /usr/share
 
 # Permission Update
