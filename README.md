@@ -1,5 +1,4 @@
 # HackerOS-Updates
 Updates Repo for HackerOS
 
-# Using in HackerOS
-
+### HackerOS based on fedora linux
