@@ -23,16 +23,16 @@ else
 fi
 
 # Sprawdź aktualizacje
-APT_UPDATES=$(apt list --upgradable 2>/dev/null | grep -c "upgradable")
+DNF_UPDATES=$(/usr/lib/HackerOS/dnf list --upgradable 2>/dev/null | grep -c "upgradable")
 FLATPAK_UPDATES=$(flatpak remote-ls --updates | grep -c "^")
 SNAP_UPDATES=$(snap refresh --list | grep -c "^")
-TOTAL_UPDATES=$((APT_UPDATES + FLATPAK_UPDATES + SNAP_UPDATES))
+TOTAL_UPDATES=$((DNF_UPDATES + FLATPAK_UPDATES + SNAP_UPDATES))
 
 [ "$TOTAL_UPDATES" -eq 0 ] && exit 0
 
 # Jeśli wybrano powiadomienie systemowe
 if [ "$PREF" = "notify" ]; then
-    notify-send "Aktualizacje systemowe" "Dostępne:\nAPT: $APT_UPDATES\nFlatpak: $FLATPAK_UPDATES\nSnap: $SNAP_UPDATES"
+    notify-send "Aktualizacje systemowe" "Dostępne:\nDNF: $DNF_UPDATES\nFlatpak: $FLATPAK_UPDATES\nSnap: $SNAP_UPDATES"
     exit 0
 fi
 
@@ -42,7 +42,7 @@ RESPONSE=$(zenity --question \
     --window-icon="$ICON_PATH" \
     --width=400 \
     --height=250 \
-    --text="Wykryto aktualizacje:\n• APT: $APT_UPDATES\n• Flatpak: $FLATPAK_UPDATES\n• Snap: $SNAP_UPDATES\n\nCzy chcesz zaktualizować system?\n\nMożesz też zmienić formę powiadomień lub zobaczyć szczegóły." \
+    --text="Wykryto aktualizacje:\n• DNF: $DNF_UPDATES\n• Flatpak: $FLATPAK_UPDATES\n• Snap: $SNAP_UPDATES\n\nCzy chcesz zaktualizować system?\n\nMożesz też zmienić formę powiadomień lub zobaczyć szczegóły." \
     --ok-label="Zaktualizuj" \
     --extra-button="Ustawienia powiadomień" \
     --extra-button="Szczegóły" \
@@ -80,8 +80,8 @@ case "$RESPONSE" in
         esac
         ;;
     "Szczegóły")
-        DETAILS=$(printf "APT:\n%s\n\nFlatpak:\n%s\n\nSnap:\n%s\n" \
-            "$(apt list --upgradable 2>/dev/null)" \
+        DETAILS=$(printf "DNF:\n%s\n\nFlatpak:\n%s\n\nSnap:\n%s\n" \
+            "$(/usr/lib/HackerOS/dnf list --upgradable 2>/dev/null)" \
             "$(flatpak remote-ls --updates)" \
             "$(snap refresh --list)")
         echo "$DETAILS" | zenity --text-info --title="Szczegóły aktualizacji" --width=600 --height=400
