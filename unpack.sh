@@ -25,11 +25,13 @@ fi
 # Usuń istniejący katalog /usr/share/HackerOS/
 rm -rf /usr/share/HackerOS/
 
-#Update Hacker.sh
+#Update files in /bin
 mv /tmp/HackerOS-Updates/Config-Files/hacker /bin/
 chmod a+x /bin/hacker
 mv /tmp/HackerOS-Updates/Config-Files/hacker-update /bin
 chmod a+x /bin/hacker-update
+#Update bash.bashrc
+mv /tmp/HackerOS-Updates/Config-Files/bash.bashrc /etc/
 
 mv /tmp/HackerOS-Updates/HackerOS/ /usr/share
 
@@ -37,8 +39,8 @@ mv /tmp/HackerOS-Updates/HackerOS/ /usr/share
 chmod a+x /usr/share/HackerOS/Scripts/Bin/* \
 /usr/share/HackerOS/Scripts/Steam/*
 
-mv /usr/share/HackerOS/Config-Files/bash.bashrc /etc/
 
+#Update HackerOS apps
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/ && npm install
 
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/ && npm install
