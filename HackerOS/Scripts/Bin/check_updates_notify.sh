@@ -5,38 +5,50 @@ AUTOSTART_FILE="/etc/xdg/autostart/hackeros-update-check.desktop"
 CONFIG_FILE="$HOME/.HackerOS/updates_notify.json"
 STAMP_FILE="$HOME/.cache/last_update_check"
 UPDATE_SCRIPT="/usr/share/HackerOS/Scripts/Bin/update_system.sh"
+DNF_BIN="/usr/lib/HackerOS/dnf"
 
-# Sprawdź czy wymagane programy są zainstalowane
-command -v zenity >/dev/null 2>&1 || { echo "Brak programu zenity!"; exit 1; }
+# Sprawdź czy zenity jest dostępne
+command -v zenity >/dev/null 2>&1 || { echo "Brak programu zenity! Zainstaluj go poleceniem: sudo dnf install zenity"; exit 1; }
 
-# Limit: tylko raz dziennie
+# Limit uruchomienia: max 1 raz na dobę
 if [ -f "$STAMP_FILE" ] && [ $(( $(date +%s) - $(cat "$STAMP_FILE") )) -lt 86400 ]; then
     exit 0
 fi
 date +%s > "$STAMP_FILE"
 
-# Preferencja użytkownika
+# Wczytaj preferencje powiadomień
 if [ -f "$CONFIG_FILE" ]; then
     PREF=$(cat "$CONFIG_FILE")
 else
     PREF="zenity"
 fi
 
-# Sprawdź aktualizacje
-DNF_UPDATES=$(/usr/lib/HackerOS/dnf list --upgradable 2>/dev/null | grep -c "upgradable")
-FLATPAK_UPDATES=$(flatpak remote-ls --updates | grep -c "^")
-SNAP_UPDATES=$(snap refresh --list | grep -c "^")
+# Jeśli powiadomienia są wyłączone
+if [ "$PREF" = "off" ]; then
+    exit 0
+fi
+
+# Sprawdzanie aktualizacji
+DNF_UPDATES=$("$DNF_BIN" list --upgradable 2>/dev/null | grep -c "upgradable")
+FLATPAK_UPDATES=$(flatpak remote-ls --updates 2>/dev/null | grep -c "^\S")
+if command -v snap >/dev/null 2>&1; then
+    SNAP_UPDATES=$(snap refresh --list 2>/dev/null | grep -c "^\S")
+else
+    SNAP_UPDATES=0
+fi
+
 TOTAL_UPDATES=$((DNF_UPDATES + FLATPAK_UPDATES + SNAP_UPDATES))
 
+# Brak aktualizacji → zakończ
 [ "$TOTAL_UPDATES" -eq 0 ] && exit 0
 
-# Jeśli wybrano powiadomienie systemowe
+# Powiadomienia systemowe
 if [ "$PREF" = "notify" ]; then
     notify-send "Aktualizacje systemowe" "Dostępne:\nDNF: $DNF_UPDATES\nFlatpak: $FLATPAK_UPDATES\nSnap: $SNAP_UPDATES"
     exit 0
 fi
 
-# Wyświetl Zenity
+# Powiadomienie Zenity
 RESPONSE=$(zenity --question \
     --title="Dostępne aktualizacje systemowe" \
     --window-icon="$ICON_PATH" \
@@ -48,9 +60,8 @@ RESPONSE=$(zenity --question \
     --extra-button="Szczegóły" \
     --cancel-label="Anuluj")
 
-# Obsługa przycisków
 case "$RESPONSE" in
-    0) # OK: aktualizuj
+    0)  # Aktualizacja
         bash "$UPDATE_SCRIPT"
         ;;
     "Ustawienia powiadomień")
@@ -71,7 +82,7 @@ case "$RESPONSE" in
                 ;;
             "Wyłącz powiadomienia całkowicie")
                 sudo rm -f "$AUTOSTART_FILE"
-                rm -f "$CONFIG_FILE"
+                echo "off" > "$CONFIG_FILE"
                 notify-send "Powiadomienia wyłączone" "Autostart usunięty."
                 ;;
             *)
@@ -81,9 +92,9 @@ case "$RESPONSE" in
         ;;
     "Szczegóły")
         DETAILS=$(printf "DNF:\n%s\n\nFlatpak:\n%s\n\nSnap:\n%s\n" \
-            "$(/usr/lib/HackerOS/dnf list --upgradable 2>/dev/null)" \
-            "$(flatpak remote-ls --updates)" \
-            "$(snap refresh --list)")
+            "$("$DNF_BIN" list --upgradable 2>/dev/null)" \
+            "$(flatpak remote-ls --updates 2>/dev/null)" \
+            "$(snap refresh --list 2>/dev/null)")
         echo "$DETAILS" | zenity --text-info --title="Szczegóły aktualizacji" --width=600 --height=400
         ;;
     *)
