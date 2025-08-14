@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo cp -r /usr/share/HackerOS/Config-Files/org.gnome.Software.desktop /usr/share/applications/
+
 # Check if Release.txt exists
 if [ ! -f /usr/share/HackerOS/Release.txt ]; then
     echo "Error: /usr/share/HackerOS/Release.txt not found"
