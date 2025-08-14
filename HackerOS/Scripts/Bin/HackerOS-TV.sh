@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Przejdź do katalogu aplikacji
-cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
+source /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/HackerOS-TV/bin/activate
 
-#Uruchamiamy
-npm start
+python3 /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/main.py
