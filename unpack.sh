@@ -42,7 +42,9 @@ chmod a+x /usr/share/HackerOS/Scripts/Bin/* \
 
 
 #Update HackerOS apps
-cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/ && npm install
+cd /usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-TV/
+python3 -m venv HackerOS-TV
+pip install pyqt6
 
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker-Mode/ && npm install
 
