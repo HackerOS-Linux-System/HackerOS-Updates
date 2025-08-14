@@ -1,8 +1,6 @@
 #!/bin/bash
-
 # Log file for updates in /tmp
 LOGFILE="/tmp/update_log_$(date +%Y%m%d_%H%M%S).txt"
-
 # Expanded color palette for vibrant output
 RED='\033[1;31m'
 GREEN='\033[1;32m'
@@ -23,12 +21,10 @@ AQUA='\033[1;38;5;45m'
 EMERALD='\033[1;38;5;48m'
 FUCHSIA='\033[1;38;5;198m'
 NC='\033[0m' # No Color
-
 # Proton-GE Configuration
 VERSION_FILE="$HOME/.hackeros/proton-version"
 PROTON_DIR="$HOME/.steam/root/compatibilitytools.d"
 TMP_DIR="/tmp/proton-ge-update"
-
 # Check if running in Alacritty
 if [ -z "$ALACRITTY_WINDOW_ID" ]; then
     if command -v alacritty >/dev/null 2>&1; then
@@ -38,13 +34,11 @@ if [ -z "$ALACRITTY_WINDOW_ID" ]; then
         exit 1
     fi
 fi
-
 # Function to log messages
 log_message() {
     local message="$1"
     echo -e "$message" | tee -a "$LOGFILE"
 }
-
 # Function to display a spinner with enhanced Unicode
 spinner() {
     local pid=$1
@@ -66,12 +60,10 @@ spinner() {
     tput cnorm
     return $exit_status
 }
-
 # Function to check command existence
 check_command() {
     command -v "$1" &>/dev/null
 }
-
 # Function to print section header
 print_header() {
     local message="$1"
@@ -83,7 +75,6 @@ print_header() {
     log_message "${GOLD}│$(printf '%*s' "$left_pad" '') ${FUCHSIA}${message}${NC} $(printf '%*s' "$right_pad" '')│${NC}"
     log_message "${GOLD}└$(printf '─%.0s' $(seq 1 $width))┘${NC}"
 }
-
 # Function to authenticate sudo upfront
 authenticate_sudo() {
     log_message "${YELLOW}🔐 Authenticating sudo credentials...${NC}"
@@ -93,16 +84,13 @@ authenticate_sudo() {
         exit 1
     fi
 }
-
 # Function to update Proton-GE
 update_proton() {
     print_header "Proton-GE Update"
     local temp_log=$(mktemp)
-
     # Create necessary directories
     mkdir -p "$PROTON_DIR" "$(dirname "$VERSION_FILE")" "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
     spinner $! "Creating Proton-GE directories"
-
     # Fetch latest Proton-GE version
     log_message "${CYAN}[1/5] Sprawdzanie najnowszej wersji...${NC}"
     LATEST_URL=$(curl -s https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest \
@@ -115,20 +103,16 @@ update_proton() {
         rm "$temp_log"
         return 1
     fi
-
     FILENAME=$(basename "$LATEST_URL")
     LATEST_VERSION="${FILENAME%.tar.gz}"
-
     # Read installed version
     if [[ -f "$VERSION_FILE" ]]; then
         INSTALLED_VERSION=$(cat "$VERSION_FILE")
     else
         INSTALLED_VERSION="Brak"
     fi
-
     log_message "${CYAN}[2/5] Zainstalowana wersja: $INSTALLED_VERSION${NC}"
     log_message "${CYAN}[2/5] Najnowsza dostępna wersja: $LATEST_VERSION${NC}"
-
     # Check if latest version is already installed
     if [[ -d "$PROTON_DIR/$LATEST_VERSION" ]]; then
         log_message "${LIME}✅ Masz już najnowszą wersję Proton-GE ($LATEST_VERSION).${NC}"
@@ -138,7 +122,6 @@ update_proton() {
         rm "$temp_log"
         return 0
     fi
-
     # Prompt user for update confirmation
     log_message "${YELLOW}➤ Czy chcesz zaktualizować do wersji $LATEST_VERSION? [t/n]: ${NC}"
     read -t 30 -n 1 -r CONFIRM
@@ -149,14 +132,12 @@ update_proton() {
         rm "$temp_log"
         return 0
     fi
-
     # Remove previous version if exists
     if [[ -n "$INSTALLED_VERSION" && "$INSTALLED_VERSION" != "Brak" && -d "$PROTON_DIR/$INSTALLED_VERSION" ]]; then
         log_message "${CYAN}[3/5] Usuwanie poprzedniej wersji: $INSTALLED_VERSION${NC}"
         rm -rf "$PROTON_DIR/$INSTALLED_VERSION" 2>&1 | tee -a "$temp_log" &
         spinner $! "Removing previous Proton-GE version"
     fi
-
     # Download new version
     log_message "${CYAN}[4/5] Pobieranie $FILENAME...${NC}"
     curl -L -o "$TMP_DIR/$FILENAME" "$LATEST_URL" 2>&1 | tee -a "$temp_log" &
@@ -167,7 +148,6 @@ update_proton() {
         rm "$temp_log"
         return 1
     fi
-
     # Install new version
     log_message "${CYAN}[5/5] Instalowanie nowej wersji...${NC}"
     tar -xf "$TMP_DIR/$FILENAME" -C "$PROTON_DIR" 2>&1 | tee -a "$temp_log" &
@@ -178,21 +158,16 @@ update_proton() {
         rm "$temp_log"
         return 1
     fi
-
     # Update version file
     echo "$LATEST_VERSION" > "$VERSION_FILE" 2>&1 | tee -a "$temp_log" &
     spinner $! "Updating Proton-GE version file"
-
     log_message "${LIME}✅ Instalacja zakończona. Zainstalowano Proton-GE: $LATEST_VERSION${NC}"
-
     # Cleanup
     rm -rf "$TMP_DIR" 2>&1 | tee -a "$temp_log" &
     spinner $! "Cleaning up temporary files"
-
     cat "$temp_log" >> "$LOGFILE"
     rm "$temp_log"
 }
-
 # Function to update Steam desktop file
 update_steam() {
     print_header "Steam Updates"
@@ -203,7 +178,6 @@ update_steam() {
     local dest_dir="/usr/share/applications"
     local src="$config_dir/HackerOS-Steam.desktop"
     local dest="$dest_dir"
-
     if [ -f "$src" ]; then
         sudo mkdir -p "$dest" 2>&1 | tee -a "$temp_log" &
         spinner $! "Creating directory $dest"
@@ -219,53 +193,47 @@ update_steam() {
     else
         log_message "${RED}❌ File $(basename "$src") not found in $config_dir${NC}"
     fi
-
     if $updated; then
         log_message "${LIME}✔ Steam updates completed successfully. Copied $steam_count file.${NC}"
     else
         log_message "${RED}❌ Steam updates failed. No files were copied.${NC}"
     fi
-
     cat "$temp_log" >> "$LOGFILE"
     rm "$temp_log"
 }
-
 # Function to perform updates
 perform_updates() {
     print_header "System Update Process"
     log_message "${CYAN}🚀 Starting system updates...${NC}"
-
     # Update APT
-    if check_command apt-get; then
+    if check_command /usr/lib/HackerOS/apt; then
         print_header "APT Package Updates"
-        sudo apt-get update -y 2>&1 | tee -a "$LOGFILE" &
+        sudo /usr/lib/HackerOS/apt update -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Updating package lists"
         if [ $? -ne 0 ]; then
             log_message "${RED}❌ APT update failed. Check log for details.${NC}"
             return 1
         fi
-        sudo apt-get upgrade -y 2>&1 | tee -a "$LOGFILE" &
+        sudo /usr/lib/HackerOS/apt upgrade -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Installing package upgrades"
         if [ $? -ne 0 ]; then
             log_message "${RED}❌ APT upgrade failed. Check log for details.${NC}"
             return 1
         fi
-        sudo apt-get autoremove -y 2>&1 | tee -a "$LOGFILE" &
+        sudo /usr/lib/HackerOS/apt autoremove -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Removing unused packages"
-        sudo apt-get autoclean -y 2>&1 | tee -a "$LOGFILE" &
+        sudo /usr/lib/HackerOS/apt autoclean -y 2>&1 | tee -a "$LOGFILE" &
         spinner $! "Cleaning package cache"
         log_message "${LIME}✔ APT updates completed successfully.${NC}"
     else
-        log_message "${RED}❌ APT not found. Skipping APT updates.${NC}"
+        log_message "${RED}❌ APT not found at /usr/lib/HackerOS/apt. Skipping APT updates.${NC}"
     fi
-
     # Update Proton-GE
     if check_command curl; then
         update_proton
     else
         log_message "${RED}❌ curl not installed. Skipping Proton-GE updates.${NC}"
     fi
-
     # Update Snap
     if check_command snap; then
         print_header "Snap Package Updates"
@@ -279,7 +247,6 @@ perform_updates() {
     else
         log_message "${RED}❌ Snap not installed. Skipping Snap updates.${NC}"
     fi
-
     # Update Flatpak
     if check_command flatpak; then
         print_header "Flatpak Package Updates"
@@ -293,7 +260,6 @@ perform_updates() {
     else
         log_message "${RED}❌ Flatpak not installed. Skipping Flatpak updates.${NC}"
     fi
-
     # Update Firmware
     if check_command fwupdmgr; then
         print_header "Firmware Updates"
@@ -309,13 +275,11 @@ perform_updates() {
     else
         log_message "${RED}❌ fwupdmgr not installed. Skipping firmware updates.${NC}"
     fi
-
     # Update Plymouth
     print_header "Plymouth Updates"
     local plymouth_updated=false
     local source_dir="/usr/share/HackerOS/ICONS/Plymouth-Icons"
     local config_dir="/usr/share/HackerOS/Config-Files"
-
     for file in \
         "$source_dir/ubuntu-logo.png:/usr/share/plymouth" \
         "$source_dir/watermark.png:/usr/share/plymouth/themes/spinner" \
@@ -337,25 +301,22 @@ perform_updates() {
     else
         log_message "${RED}❌ Plymouth update failed. No files were updated.${NC}"
     fi
-
     # Update Steam
     update_steam
 }
-
 # Function to display menu
 show_menu() {
     while true; do
         print_header "Update Options"
         log_message "${CYAN}Available actions:${NC}"
-        log_message "${WHITE}  e) Exit          Close the terminal${NC}"
-        log_message "${WHITE}  r) Reboot        Reboot the system${NC}"
-        log_message "${WHITE}  s) Shutdown      Shut down the system${NC}"
-        log_message "${WHITE}  l) Log out       Log out of the current session${NC}"
-        log_message "${WHITE}  t) Try again     Rerun the update process${NC}"
+        log_message "${WHITE} e) Exit Close the terminal${NC}"
+        log_message "${WHITE} r) Reboot Reboot the system${NC}"
+        log_message "${WHITE} s) Shutdown Shut down the system${NC}"
+        log_message "${WHITE} l) Log out Log out of the current session${NC}"
+        log_message "${WHITE} t) Try again Rerun the update process${NC}"
         printf "${ORANGE}⤷ Select an option [e/r/s/l/t]: ${NC}"
         read -n 1 choice
         echo
-
         case "${choice,,}" in
             e)
                 log_message "${GREEN}Exiting update mode...${NC}"
@@ -388,7 +349,6 @@ show_menu() {
         esac
     done
 }
-
 # Main execution
 {
     print_header "System Update Script"
