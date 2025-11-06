@@ -34,13 +34,13 @@ sudo chmod a+x bit-jump.love
 sudo chmod a+x starblaster
 cd /usr/bin/
 sudo rm -rf hacker
-curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v1.0/hacker"
+curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v1.1/hacker"
 sudo chmod a+x hacker
 cd ~/.hackeros/
 sudo rm -rf hacker-shell
 sudo rm -rf hacker-help
-curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v1.0/hacker-shell"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v1.0/hacker-help"
+curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v1.1/hacker-shell"
+curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v1.1/hacker-help"
 sudo chmod a+x hacker-help
 sudo chmod a+x hacker-shell
 cd hacker-lang
