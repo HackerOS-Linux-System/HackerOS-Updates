@@ -55,7 +55,7 @@ sudo chmod a+x hacker-compiler
 cd /usr/bin/
 sudo rm -rf hackerc
 curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hackerc"
-curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hacker-editor"
+curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hacker-editor"
 sudo chmod a+x hackerc 
 cd ~
 echo "[INFO] updated complete"
