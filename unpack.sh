@@ -49,14 +49,14 @@ cd bin
 sudo rm -rf hacker-compiler
 sudo rm -rf hacker-parser
 sudo rm -rf hacker-editor
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hacker-compiler"
-curl -L -o hacker-library "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hacker-parser"
+curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.9/hacker-compiler"
+curl -L -o hacker-library "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.9/hacker-parser"
 sudo chmod a+x hacker-library
 sudo chmod a+x hacker-compiler
 cd /usr/bin/
 sudo rm -rf hackerc
-curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hackerc"
-curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.8/hacker-editor"
+curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.9/hackerc"
+curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.0.9/hacker-editor"
 sudo chmod a+x hackerc 
 cd ~
 echo "[INFO] updated complete"
