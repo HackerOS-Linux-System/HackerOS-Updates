@@ -26,11 +26,10 @@ sudo chmod a+x Hacker-Term
 cd ..
 cd HackerOS-Games
 curl -L -o HackerOS-Games.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.4/HackerOS-Games"
-curl -L -o the-racer ""
-curl -L -o starblaster ""
-curl -L -o bit-jump.love ""
-curl -L -o  ""
-sudo chmod a+x HackerOS-Games.AppImage
+curl -L -o the-racer "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.4/the-racer"
+curl -L -o starblaster "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.4/starblaster"
+curl -L -o bit-jump.love "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.4/bit-jump.love"
+sudo chmod a+x HackerOS-Games
 sudo chmod a+x the-racer
 sudo chmod a+x bit-jump.love
 sudo chmod a+x starblaster
