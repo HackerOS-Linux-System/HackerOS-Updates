@@ -63,8 +63,11 @@ curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/r
 sudo chmod a+x repl
 sudo chmod a+x help-ui
 cd /usr/bin/
+sudo rm -rf bytes
 sudo rm -rf hackerc
 curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hackerc"
+curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.4/bytes"
 sudo chmod a+x hackerc 
+sudo chmod a+x bytes
 cd ~
 echo "[INFO] updated complete"
