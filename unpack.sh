@@ -33,14 +33,18 @@ sudo chmod a+x bit-jump.love
 sudo chmod a+x starblaster
 cd /usr/bin/
 sudo rm -rf hacker
-curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.3/hacker"
+curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.4/hacker"
 sudo chmod a+x hacker
 cd ~/.hackeros/
 sudo rm -rf hacker-shell
 sudo rm -rf hacker-help
-curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.3/hacker-shell"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.3/hacker-help"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.3/hacker-select"
+sudo rm -rf hacker-select
+sudo rm -rf hacker-docs
+curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.4/hacker-shell"
+curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.4/hacker-help"
+curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.4/hacker-select"
+curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.4/hacker-docs"
+sudo chmod a+x hacker-docs
 sudo chmod a+x hacker-help
 sudo chmod a+x hacker-shell
 sudo chmod a+x hacker-select
