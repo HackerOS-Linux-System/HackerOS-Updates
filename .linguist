@@ -1,0 +1,9 @@
+languages:
+  Hacker Lang:
+    type: programming
+    color: "#ced1ab"
+    extensions:
+      - ".hacker"
+    tm_scope: source.hacker
+    ace_mode: text
+    language_id: 0689999999
