@@ -37,7 +37,7 @@ if [[ $(echo -e "$LOCAL_VERSION\n$REMOTE_VERSION" | sort -V | tail -n1) != "$LOC
     sudo chmod a+x /tmp/HackerOS-Updates/unpack.hacker
     
     # Run using hacker run
-    hacker run /tmp/HackerOS-Updates/unpack.hacker
+    hackerc run /tmp/HackerOS-Updates/unpack.hacker
 else
     :
 fi
