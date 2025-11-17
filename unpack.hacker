@@ -50,30 +50,30 @@
 > sudo chmod a+x hacker-help
 > sudo chmod a+x hacker-shell
 > sudo chmod a+x hacker-select
-cd hacker-lang
-cd bin
-sudo rm -rf hacker-compiler
-sudo rm -rf hacker-parser
-sudo rm -rf hacker-editor
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-compiler"
-curl -L -o hacker-library "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-parser"
-curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-editor"
-sudo chmod a+x hacker-editor
-sudo chmod a+x hacker-parser
-sudo chmod a+x hacker-compiler
-cd hackerc
-sudo rm -rf repl
-sudo rm -rf help-ui
-curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/repl"
-curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/help-ui"
-sudo chmod a+x repl
-sudo chmod a+x help-ui
-cd /usr/bin/
-sudo rm -rf bytes
-sudo rm -rf hackerc
-curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hackerc"
-curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.4/bytes"
-sudo chmod a+x hackerc 
-sudo chmod a+x bytes
-cd ~
-echo "[INFO] updated complete"
+> cd hacker-lang
+> cd bin
+> sudo rm -rf hacker-compiler
+> sudo rm -rf hacker-parser
+> sudo rm -rf hacker-editor
+> curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-compiler"
+> curl -L -o hacker-library "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-parser"
+> curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-editor"
+> sudo chmod a+x hacker-editor
+> sudo chmod a+x hacker-parser
+> sudo chmod a+x hacker-compiler
+> cd hackerc
+> sudo rm -rf repl
+> sudo rm -rf help-ui
+> curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/repl"
+> curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/help-ui"
+> sudo chmod a+x repl
+> sudo chmod a+x help-ui
+> cd /usr/bin/
+> sudo rm -rf bytes
+> sudo rm -rf hackerc
+> curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hackerc"
+> curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.4/bytes"
+> sudo chmod a+x hackerc 
+> sudo chmod a+x bytes
+> cd ~
+> echo "[INFO] updated complete"
