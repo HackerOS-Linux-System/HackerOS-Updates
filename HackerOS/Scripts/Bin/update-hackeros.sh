@@ -18,7 +18,7 @@ LOCAL_FILE="/usr/share/HackerOS/Config-Files/release-info.json"
 REMOTE_URL="https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
 curl -s -o /tmp/version.hacker "$REMOTE_URL" || { echo "Failed to download remote version file."; exit 1; }
 
-# Extract local version from JSON (assuming jq is installed; if not, use sed/awk alternative)
+# Extract local version from JSON (supports jq or fallback)
 if command -v jq &> /dev/null; then
     LOCAL_VERSION=$(jq -r '.version' "$LOCAL_FILE" | awk '{print $1}')
 else
@@ -28,20 +28,19 @@ fi
 # Extract remote version
 REMOTE_VERSION=$(sed 's/^\[\(.*\)\]$/\1/' /tmp/version.hacker)
 
-# Compare versions numerically (using sort -V for version comparison)
+# Compare versions
 if [[ $(echo -e "$LOCAL_VERSION\n$REMOTE_VERSION" | sort -V | tail -n1) != "$LOCAL_VERSION" ]]; then
     # Clone the repo to /tmp
     git clone https://github.com/HackerOS-Linux-System/HackerOS-Updates.git /tmp/HackerOS-Updates || { echo "Failed to clone repository."; exit 1; }
     
-    # Give execute permissions to unpack.sh
-    sudo chmod a+x /tmp/HackerOS-Updates/unpack.sh
+    # Give execute permissions to unpack.hacker
+    sudo chmod a+x /tmp/HackerOS-Updates/unpack.hacker
     
-    # Run the script
-    /tmp/HackerOS-Updates/unpack.sh
+    # Run using hacker run
+    hacker run /tmp/HackerOS-Updates/unpack.hacker
 else
-    # No newer version, do nothing
     :
 fi
 
-# Clean up temporary file
+# Clean up
 rm -f /tmp/version.hacker
