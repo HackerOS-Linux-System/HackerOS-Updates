@@ -42,7 +42,7 @@ if [ "$is_newer" = "$REMOTE_VERSION" ] && [ "$REMOTE_VERSION" != "$LOCAL_VERSION
     cd "$TMP_DIR/wallpaper-updates" || exit 1
 
     # Uruchomienie komendy hacker
-    hacker run unpack.hacker
+    hackerc run unpack.hacker
 
     echo "Aktualizacja tapet zakończona."
 else
