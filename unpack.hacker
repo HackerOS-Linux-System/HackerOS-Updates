@@ -57,13 +57,14 @@
 > sudo chmod a+x hacker-help
 > sudo chmod a+x hacker-shell
 > sudo chmod a+x hacker-select
+> cd ..
 > cd hacker-lang
 > cd bin
 > sudo rm -rf hacker-compiler
 > sudo rm -rf hacker-parser
 > sudo rm -rf hacker-editor
 > curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-compiler"
-> curl -L -o hacker-library "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-parser"
+> curl -L -o hacker-parser "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-parser"
 > curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-editor"
 > sudo chmod a+x hacker-editor
 > sudo chmod a+x hacker-parser
