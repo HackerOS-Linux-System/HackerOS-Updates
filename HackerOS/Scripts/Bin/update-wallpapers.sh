@@ -1,7 +1,7 @@
 #!/bin/bash
 
 LOCAL_JSON="/usr/share/wallpapers/release-info.json"
-REMOTE_VERSION_URL="https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/wallpaper-updates/version.hacker"
+REMOTE_VERSION_URL="https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main//version.hacker"
 TMP_DIR="/tmp/HackerOS-Updates"
 
 # --- Odczyt wersji lokalnej ---
