@@ -35,7 +35,7 @@
 #   / \  \  \                                                         
 # ./__;   ;  \                                                        
 # |   :/\  \ ;                                                        
-# `---'  `--`                                                         
+# `---'  `--`                                                                         
 
 set -euo pipefail
 
@@ -138,7 +138,7 @@ fi
 
 echo "${LOGPREFIX} Dopasowano: '${SELECTED_PATTERN}' -> '${SELECTED_TARGET}'"
 
-# 5) Wybór wariantu – zostaje, choć Liquorix tego nie używa
+# 5) Wariant CPU
 if echo "${SELECTED_TARGET}" | grep -q "v3"; then
   CPU_VARIANT="x64v3"
 elif echo "${SELECTED_TARGET}" | grep -q "v2"; then
@@ -149,7 +149,7 @@ fi
 
 echo "${LOGPREFIX} Wariant CPU: ${CPU_VARIANT}"
 
-# 6) Instalacja Liquorix zamiast Xanmod
+# 6) Instalacja Liquorix
 echo "${LOGPREFIX} Instaluję jądro Liquorix..."
 
 if ! curl -s 'https://liquorix.net/install-liquorix.sh' | sudo bash; then
@@ -158,6 +158,16 @@ if ! curl -s 'https://liquorix.net/install-liquorix.sh' | sudo bash; then
 fi
 
 echo "${LOGPREFIX} Jądro Liquorix zainstalowane."
+
+# 6.1) Usuwanie starego jądra — Z MODYFIKACJĄ KTÓREJ CHCIAŁEŚ
+current_kernel="$(uname -r)"
+
+echo "${LOGPREFIX} Usuwam stare jądro: ${current_kernel}"
+
+export DEBIAN_FRONTEND=noninteractive
+sudo apt remove --purge -y "${current_kernel}" || true
+
+echo "${LOGPREFIX} Stare jądro usunięte."
 
 # 7) NVIDIA
 echo "${LOGPREFIX} Sprawdzam NVIDIA..."
