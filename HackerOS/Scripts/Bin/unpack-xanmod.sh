@@ -130,7 +130,7 @@ fi
 
 echo "${LOGPREFIX} Dopasowano: '${SELECTED_PATTERN}' -> '${SELECTED_TARGET}'"
 
-# 5) Mapowanie na wariant
+# 5) Mapowanie wariantu
 if echo "${SELECTED_TARGET}" | grep -q "v3"; then
   XANMOD_VARIANT="x64v3"
 elif echo "${SELECTED_TARGET}" | grep -q "v2"; then
@@ -156,6 +156,10 @@ remove_old_image() {
   echo "${LOGPREFIX} Usuwam aktualne jądro: ${current_kernel}"
 
   if dpkg -l | awk '{print $2}' | grep -q "^${current_kernel}$"; then
+    echo "${LOGPREFIX} Ustawiam DEBIAN_FRONTEND=noninteractive"
+    export DEBIAN_FRONTEND=noninteractive
+
+    echo "${LOGPREFIX} Usuwam jądro bez interakcji"
     sudo apt remove --purge -y "${current_kernel}" || true
   else
     echo "${LOGPREFIX} Bieżące jądro nie jest pakietem z apt lub nie istnieje jako pakiet."
@@ -221,4 +225,3 @@ else
 fi
 
 echo "${LOGPREFIX} GOTOWE. Zrestartuj system, aby uruchomić nowe jądro."
-
