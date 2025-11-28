@@ -41,8 +41,10 @@ if [ "$is_newer" = "$REMOTE_VERSION" ] && [ "$REMOTE_VERSION" != "$LOCAL_VERSION
     # Przejście do katalogu
     cd "$TMP_DIR/wallpaper-updates" || exit 1
 
-    # Uruchomienie komendy hacker
-    hackerc run unpack.hacker
+    sudo chmod a+x /tmp/HackerOS-Updates/unpack.sh
+    
+    # Uruchomienie komendy
+    /tmp/HackerOS-Updates/unpack.sh
 
     echo "Aktualizacja tapet zakończona."
 else
