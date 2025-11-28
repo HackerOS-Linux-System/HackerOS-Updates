@@ -34,10 +34,10 @@ if [[ $(echo -e "$LOCAL_VERSION\n$REMOTE_VERSION" | sort -V | tail -n1) != "$LOC
     git clone https://github.com/HackerOS-Linux-System/HackerOS-Updates.git /tmp/HackerOS-Updates || { echo "Failed to clone repository."; exit 1; }
     
     # Give execute permissions to unpack.hacker
-    sudo chmod a+x /tmp/HackerOS-Updates/unpack.hacker
+    sudo chmod a+x /tmp/HackerOS-Updates/unpack.sh
     
     # Run using hacker run
-    hackerc run /tmp/HackerOS-Updates/unpack.hacker
+    /tmp/HackerOS-Updates/unpack.sh
 else
     :
 fi
