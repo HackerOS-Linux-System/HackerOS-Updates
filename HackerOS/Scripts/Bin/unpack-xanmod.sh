@@ -141,32 +141,19 @@ fi
 
 echo "${LOGPREFIX} Wybrana wersja xanmod: ${XANMOD_VARIANT}"
 
-# 6) Instalacja
+# 6) Instalacja repozytorium i pakietu
 add_xanmod_repo() {
   echo "${LOGPREFIX} Dodaję repozytorium xanmod..."
   sudo mkdir -p /etc/apt/keyrings
+  if ! command -v wget >/dev/null 2>&1; then
+    echo "${LOGPREFIX} wget nieznalezione, instaluję wget..."
+    sudo apt update
+    sudo apt install -y wget
+  fi
   wget -qO - https://dl.xanmod.org/archive.key | sudo gpg --dearmor -o /etc/apt/keyrings/xanmod-archive-keyring.gpg
   echo "deb [signed-by=/etc/apt/keyrings/xanmod-archive-keyring.gpg] http://deb.xanmod.org $(lsb_release -sc) main" \
     | sudo tee /etc/apt/sources.list.d/xanmod-release.list > /dev/null
   sudo apt update
-}
-
-remove_old_image() {
-  local current_kernel="linux-image-$(uname -r)"
-  echo "${LOGPREFIX} Usuwam aktualne jądro: ${current_kernel}"
-
-  if dpkg -l | awk '{print $2}' | grep -q "^${current_kernel}$"; then
-    echo "${LOGPREFIX} Ustawiam DEBIAN_FRONTEND=noninteractive"
-    export DEBIAN_FRONTEND=noninteractive
-
-    echo "${LOGPREFIX} Usuwam jądro bez interakcji"
-    sudo apt remove --purge -y "${current_kernel}" || true
-  else
-    echo "${LOGPREFIX} Bieżące jądro nie jest pakietem z apt lub nie istnieje jako pakiet."
-  fi
-
-  echo "${LOGPREFIX} Aktualizuję GRUB..."
-  sudo update-grub || true
 }
 
 install_xanmod_pkg() {
@@ -175,27 +162,30 @@ install_xanmod_pkg() {
   sudo apt install -y "${pkg}"
 }
 
+# NOTE: Nie usuwamy aktualnego jądra przed zainstalowaniem nowego.
+# Usuwanie (purge) będzie wykonywane dopiero przez zewnętrzny skrypt
+# /usr/share/HackerOS/Scripts/Bin/remove-debian-kernel.sh po zakończeniu instalacji.
+
 case "${XANMOD_VARIANT}" in
   x64v3)
     add_xanmod_repo
     install_xanmod_pkg "linux-xanmod-lts-x64v3"
-    remove_old_image
     ;;
   x64v2)
     add_xanmod_repo
     install_xanmod_pkg "linux-xanmod-lts-x64v2"
-    remove_old_image
     ;;
   x64v1)
     add_xanmod_repo
     install_xanmod_pkg "linux-xanmod-lts-x64v1"
-    remove_old_image
     ;;
   *)
     echo "${LOGPREFIX} Nieznany wariant. STOP."
     exit 1
     ;;
 esac
+
+echo "${LOGPREFIX} Instalacja kernela xanmod zakończona (jeśli nie było błędów)."
 
 # 7) NVIDIA
 echo "${LOGPREFIX} Sprawdzam NVIDIA..."
@@ -224,4 +214,33 @@ else
   echo "${LOGPREFIX} Nie wykryto NVIDIA."
 fi
 
+# 8) Po instalacji: uruchom zewnętrzny skrypt usuwający debianowe jądra (jeśli istnieje)
+REMOVE_SCRIPT="/usr/share/HackerOS/Scripts/Bin/remove-debian-kernel.sh"
+if [ -x "${REMOVE_SCRIPT}" ]; then
+  echo "${LOGPREFIX} Uruchamiam skrypt usuwający stare jądra: ${REMOVE_SCRIPT}"
+  # Uruchamiamy z sudo, bo skrypt może wymagać uprawnień do usunięcia pakietów.
+  if sudo "${REMOVE_SCRIPT}"; then
+    echo "${LOGPREFIX} Skrypt usuwania starych jąder zakończony pomyślnie."
+  else
+    echo "${LOGPREFIX} Skrypt usuwania jąder zakończył się błędem (kod niezerowy)."
+  fi
+else
+  echo "${LOGPREFIX} Skrypt do usuwania debianowych jąder nie istnieje lub nie jest wykonywalny: ${REMOVE_SCRIPT}"
+fi
+
+# 9) Utwórz plik konfiguracyjny informujący o użyciu xanmod
+CONFIG_DIR="${HOME}/.config/hackeros"
+CONFIG_FILE="${CONFIG_DIR}/kernel.hacker"
+
+echo "${LOGPREFIX} Tworzę katalog konfiguracji: ${CONFIG_DIR}"
+mkdir -p "${CONFIG_DIR}"
+echo "[xanmod]" > "${CONFIG_FILE}"
+chmod 644 "${CONFIG_FILE}"
+echo "${LOGPREFIX} Zapisano: ${CONFIG_FILE}"
+
+# 10) Aktualizuj GRUB i poinformuj użytkownika
+echo "${LOGPREFIX} Aktualizuję GRUB..."
+sudo update-grub || true
+
 echo "${LOGPREFIX} GOTOWE. Zrestartuj system, aby uruchomić nowe jądro."
+
