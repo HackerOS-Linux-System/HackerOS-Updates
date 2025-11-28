@@ -1,0 +1,2 @@
+echo "[INFO] starting update"
+sudo cp -r /tmp/HackerOS-Updates/wallpaper-updates/wallpapers/ /usr/share/

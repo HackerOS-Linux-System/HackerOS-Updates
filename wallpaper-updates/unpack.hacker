@@ -1,6 +1,0 @@
-// echo
-// sudo
-// curl
-> echo "[INFO] starting update"
-> sudo rm -rf /usr/share/wallpapers/
-> sudo mv /tmp/HackerOS-Updates/wallpaper-updates/wallpapers/ /usr/share/
