@@ -38,7 +38,7 @@ sudo chmod a+x bit-jump.love
 sudo chmod a+x starblaster
 cd /usr/bin/
 sudo rm -rf hacker
-curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.8/hacker"
+curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker"
 sudo chmod a+x hacker
 cd ~/.hackeros/hacker/
 sudo rm -rf hacker-shell
@@ -46,11 +46,11 @@ sudo rm -rf hacker-help
 sudo rm -rf hacker-select
 sudo rm -rf hacker-docs
 sudo rm -rf HackerOS-Updater
-curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.8/hacker-shell"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.8/hacker-help"
-curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.8/hacker-select"
-curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.8/hacker-docs"
-curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.8/HackerOS-Updater"
+curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-shell"
+curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-help"
+curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-select"
+curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-docs"
+curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/HackerOS-Updater"
 sudo chmod a+x HackerOS-Updater
 sudo chmod a+x hacker-docs
 sudo chmod a+x hacker-help
