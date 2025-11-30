@@ -37,9 +37,12 @@ sudo chmod a+x the-racer
 sudo chmod a+x bit-jump.love
 sudo chmod a+x starblaster
 cd /usr/bin/
+sudo rm -rf hpm
 sudo rm -rf hacker
 curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker"
+curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.3/hpm"
 sudo chmod a+x hacker
+sudo chmod a+x hpm
 cd ~/.hackeros/hacker/
 sudo rm -rf hacker-shell
 sudo rm -rf hacker-help
@@ -78,5 +81,12 @@ curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/release
 curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.4/bytes"
 sudo chmod a+x hackerc 
 sudo chmod a+x bytes
+cd ~/.hackeros/hpm/
+sudo rm -rf tui
+sudo rm -rf apt-fronted
+curl -L -o tui "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.3/tui"
+curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.3/apt-fronted"
+sudo chmod a+x tui
+sudo chmod a+x apt-fronted
 cd ~
 echo "[INFO] updated complete"
