@@ -82,7 +82,7 @@ sudo rm -rf hlh
 curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hackerc"
 curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hli"
 curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hlh"
-curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.4/bytes"
+curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.5/bytes"
 sudo chmod a+x hackerc
 sudo chmod a+x hli
 sudo chmod a+x hlh
