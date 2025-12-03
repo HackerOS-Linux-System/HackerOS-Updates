@@ -64,11 +64,11 @@ cd hacker-lang
 cd bin
 sudo rm -rf hacker-compiler
 sudo rm -rf hacker-parser
-sudo rm -rf hacker-editor
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.1/hacker-compiler"
-curl -L -o hacker-parser "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.1/hacker-parser"
-curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1.0/hacker-editor"
-sudo chmod a+x hacker-editor
+sudo rm -rf hacker-runtime
+curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hacker-compiler"
+curl -L -o hacker-parser "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hacker-parser"
+curl -L -o hacker-editor "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hacker-runtime"
+sudo chmod a+x hacker-runtime
 sudo chmod a+x hacker-parser
 sudo chmod a+x hacker-compiler
 sudo rm -rf repl
@@ -77,9 +77,15 @@ sudo chmod a+x repl
 cd /usr/bin/
 sudo rm -rf bytes
 sudo rm -rf hackerc
-curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.1/hackerc"
+sudo rm -rf hli
+sudo rm -rf hlh
+curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hackerc"
+curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hli"
+curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.2/hlh"
 curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.4/bytes"
-sudo chmod a+x hackerc 
+sudo chmod a+x hackerc
+sudo chmod a+x hli
+sudo chmod a+x hlh
 sudo chmod a+x bytes
 cd ~/.hackeros/hpm/
 sudo rm -rf tui
