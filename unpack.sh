@@ -2,7 +2,7 @@ echo "[INFO] starting update"
 sudo rm -rf /usr/share/HackerOS/
 sudo mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/HackerOS/
 cd /usr/share/HackerOS/Scripts/Bin/
-sudo chmod a+x /usr/share/HackerOS/Scripts/Bin/Bit-Jump.sh /usr/share/HackerOS/Scripts/Bin/check_updates_notify.sh /usr/share/HackerOS/Scripts/Bin/hacker_mode.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Games.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Information.sh /usr/share/HackerOS/Scripts/Bin/Proton-Updater.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh /usr/share/HackerOS/Scripts/Bin/update-hackeros.sh /usr/share/HackerOS/Scripts/Bin/unpack-xanmod.sh /usr/share/HackerOS/Scripts/Bin/update-liquorix.sh
+sudo chmod a+x /usr/share/HackerOS/Scripts/Bin/Bit-Jump.sh /usr/share/HackerOS/Scripts/Bin/check_updates_notify.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Games.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Information.sh /usr/share/HackerOS/Scripts/Bin/Proton-Updater.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh /usr/share/HackerOS/Scripts/Bin/update-hackeros.sh /usr/share/HackerOS/Scripts/Bin/unpack-xanmod.sh /usr/share/HackerOS/Scripts/Bin/update-liquorix.sh
 cd ..
 cd Steam
 sudo chmod a+x /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam.sh /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam-Animation.sh
@@ -46,12 +46,15 @@ sudo rm -rf hacker-help
 sudo rm -rf hacker-select
 sudo rm -rf hacker-docs
 sudo rm -rf HackerOS-Updater
+sudo rm -rf HackerOS-Update-Better
 curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-shell"
 curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-help"
 curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-select"
 curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/hacker-docs"
 curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v1.9/HackerOS-Updater"
+curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/HackerOS-Update-Better"
 sudo chmod a+x HackerOS-Updater
+sudo chmod a+x HackerOS-Update-Better
 sudo chmod a+x hacker-docs
 sudo chmod a+x hacker-help
 sudo chmod a+x hacker-shell
