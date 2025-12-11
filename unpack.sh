@@ -13,12 +13,18 @@ cd HackerOS-Apps
 sudo rm -rf HackerOS-Game-Mode.AppImage
 sudo rm -rf Hacker_Launcher
 sudo rm -rf HackerOS-Welcome
+sudo rm -rf HackerOS-App
+sudo rm -rf Hacker-Term
 curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
 curl -L -o Hacker_Launcher "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.5/Hacker-Launcher"
-curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5HackerOS-Welcome"
+curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
+curl -L -o Hacker-Term "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.1/Hacker-Term"
+curl -L -o Hacker-Term "https://github.com/HackerOS-Linux-System/HackerOS-App/releases/download/v0.3/HackerOS-App"
 sudo chmod a+x Hacker_Launcher
+sudo chmod a+x Hacker-Term
 sudo chmod a+x HackerOS-Welcome
 sudo chmod a+x HackerOS-Game-Mode.AppImage
+sudo chmod a+x HackerOS-App
 cd ..
 cd HackerOS-Games
 sudo rm -rf HackerOS-Games
