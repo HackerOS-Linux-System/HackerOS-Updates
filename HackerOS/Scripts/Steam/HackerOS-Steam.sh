@@ -38,7 +38,7 @@ esac
 
 # Uruchamianie odpowiedniego trybu
 if [[ "$CHOICE" == "Zwykły Steam" ]]; then
-  flatpak run com.valvesoftware.Steam
+  HackerOS-Steam run
 elif [[ "$CHOICE" == "Steam Big Picture" ]]; then
-  flatpak run com.valvesoftware.Steam -gamepadui
+  HackerOS-Steam run -gamepadui
 fi
