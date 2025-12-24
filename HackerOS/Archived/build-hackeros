@@ -8,7 +8,7 @@ sudo lb clean --purge
 
 # Konfiguracja live-build z firmware i repo non-free-firmware
 lb config \
-  --distribution trixie \
+  --distribution forky \
   --architectures amd64 \
   --apt-options "--allow-unauthenticated --yes" \
   --firmware-chroot true
