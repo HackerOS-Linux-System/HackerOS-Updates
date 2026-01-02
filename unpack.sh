@@ -42,8 +42,8 @@ sudo chmod a+x starblaster
 cd /usr/bin/
 sudo rm -rf hpm
 sudo rm -rf hacker
-curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/hacker"
-curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.3/hpm"
+curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker"
+curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
 sudo chmod a+x hacker
 sudo chmod a+x hpm
 cd ~/.hackeros/hacker/
@@ -53,12 +53,12 @@ sudo rm -rf hacker-select
 sudo rm -rf hacker-docs
 sudo rm -rf HackerOS-Updater
 sudo rm -rf HackerOS-Update-Better
-curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/hacker-shell"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/hacker-help"
-curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/hacker-select"
-curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/hacker-docs"
-curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/HackerOS-Updater"
-curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.0/HackerOS-Update-Better"
+curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-shell"
+curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-help"
+curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-select"
+curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-docs"
+curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/HackerOS-Updater"
+curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/HackerOS-Update-Better"
 sudo chmod a+x HackerOS-Updater
 sudo chmod a+x HackerOS-Update-Better
 sudo chmod a+x hacker-docs
@@ -71,34 +71,28 @@ cd bin
 sudo rm -rf hacker-compiler
 sudo rm -rf hacker-parser
 sudo rm -rf hacker-runtime
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hacker-compiler"
-curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hacker-plsa"
-curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hacker-runtime"
+curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hacker-compiler"
+curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hacker-plsa"
+curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hacker-runtime"
 sudo chmod a+x hacker-runtime
 sudo chmod a+x hacker-parser
 sudo chmod a+x hacker-compiler
 sudo rm -rf repl
-curl -L -o hacker-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/repl"
+curl -L -o hacker-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/repl"
 sudo chmod a+x repl
 cd /usr/bin/
-sudo rm -rf bytes
-sudo rm -rf hackerc
+sudo rm -rf hl
 sudo rm -rf hli
 sudo rm -rf hlh
-curl -L -o hackerc "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hackerc"
+curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hl"
 curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hli"
 curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hlh"
-curl -L -o bytes "https://github.com/Bytes-Repository/Bytes-CLI-Tool/releases/download/v0.5/bytes"
-sudo chmod a+x hackerc
+sudo chmod a+x hl
 sudo chmod a+x hli
 sudo chmod a+x hlh
-sudo chmod a+x bytes
 cd ~/.hackeros/hpm/
-sudo rm -rf tui
-sudo rm -rf apt-fronted
-curl -L -o tui "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.3/tui"
-curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.3/apt-fronted"
-sudo chmod a+x tui
-sudo chmod a+x apt-fronted
+sudo rm -rf backend
+curl -L -o backend "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/backend"
+sudo chmod a+x backend
 cd ~
 echo "[INFO] updated complete"
