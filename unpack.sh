@@ -42,7 +42,7 @@ sudo chmod a+x starblaster
 cd /usr/bin/
 sudo rm -rf hpm
 sudo rm -rf hacker
-curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker"
+curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker"
 curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
 sudo chmod a+x hacker
 sudo chmod a+x hpm
@@ -53,18 +53,21 @@ sudo rm -rf hacker-select
 sudo rm -rf hacker-docs
 sudo rm -rf HackerOS-Updater
 sudo rm -rf HackerOS-Update-Better
-curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-shell"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-help"
-curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-select"
-curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/hacker-docs"
-curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/HackerOS-Updater"
-curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.1/HackerOS-Update-Better"
+sudo rm -rf apt-fronted
+curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-shell"
+curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-help"
+curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-select"
+curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-docs"
+curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/HackerOS-Updater"
+curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/HackerOS-Update-Better"
+curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/apt-fronted"
 sudo chmod a+x HackerOS-Updater
 sudo chmod a+x HackerOS-Update-Better
 sudo chmod a+x hacker-docs
 sudo chmod a+x hacker-help
 sudo chmod a+x hacker-shell
 sudo chmod a+x hacker-select
+sudo chmod a+x apt-fronted
 cd ..
 cd hacker-lang
 cd bin
