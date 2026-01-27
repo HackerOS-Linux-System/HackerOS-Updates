@@ -14,14 +14,14 @@ sudo rm -rf HackerOS-Game-Mode.AppImage
 sudo rm -rf Hacker_Launcher
 sudo rm -rf HackerOS-Welcome
 sudo rm -rf HackerOS-App
-sudo rm -rf Hacker-Term
+sudo rm -rf Hacker-Term.AppImage
 curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
 curl -L -o Hacker_Launcher "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.5/Hacker-Launcher"
 curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
-curl -L -o Hacker-Term "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.3/Hacker-Term"
+curl -L -o Hacker-Term.AppImage "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.4/Hacker-Term.AppImage"
 curl -L -o HackerOS-App "https://github.com/HackerOS-Linux-System/HackerOS-App/releases/download/v0.3/HackerOS-App"
 sudo chmod a+x Hacker_Launcher
-sudo chmod a+x Hacker-Term
+sudo chmod a+x Hacker-Term.AppImage
 sudo chmod a+x HackerOS-Welcome
 sudo chmod a+x HackerOS-Game-Mode.AppImage
 sudo chmod a+x HackerOS-App
@@ -74,22 +74,22 @@ cd bin
 sudo rm -rf hacker-compiler
 sudo rm -rf hacker-parser
 sudo rm -rf hacker-runtime
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hacker-compiler"
-curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hacker-plsa"
-curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hacker-runtime"
+curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-compiler"
+curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-plsa"
+curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-runtime"
 sudo chmod a+x hacker-runtime
 sudo chmod a+x hacker-parser
 sudo chmod a+x hacker-compiler
 sudo rm -rf repl
-curl -L -o hacker-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/repl"
+curl -L -o hacker-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/repl"
 sudo chmod a+x repl
 cd /usr/bin/
 sudo rm -rf hl
 sudo rm -rf hli
 sudo rm -rf hlh
-curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.4/hl"
-curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hli"
-curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.3/hlh"
+curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hl"
+curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hli"
+curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hlh"
 sudo chmod a+x hl
 sudo chmod a+x hli
 sudo chmod a+x hlh
