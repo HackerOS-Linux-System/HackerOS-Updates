@@ -44,7 +44,7 @@ sudo rm -rf hpm
 sudo rm -rf hacker
 sudo rm -rf ngt
 sudo rm -rf hedit
-curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.2/hedit"
+curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.3/hedit"
 curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.2/ngt"
 curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker"
 curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
