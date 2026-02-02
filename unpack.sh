@@ -35,12 +35,13 @@ sudo chmod a+x Hacker_Launcher.AppImage Hacker-Term.AppImage HackerOS-Welcome Ha
 sudo mkdir -p /usr/share/HackerOS/Scripts/HackerOS-Games
 cd /usr/share/HackerOS/Scripts/HackerOS-Games || exit
 
-sudo rm -f HackerOS-Games.AppImage the-racer starblaster bit-jump.love
+sudo rm -f HackerOS-Games.AppImage the-racer starblaster bit-jump.love bark-squadron.AppImage
 
 sudo curl -L -o HackerOS-Games.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.6/HackerOS-Games"
 sudo curl -L -o the-racer "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.5/the-racer"
 sudo curl -L -o starblaster "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.6/starblaster"
 sudo curl -L -o bit-jump.love "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.6/bit-jump.love"
+sudo curl -L -o bark-squadron.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.6/bark-squadron.AppImage"
 
 sudo chmod a+x HackerOS-Games.AppImage the-racer bit-jump.love starblaster bark-squadron.AppImage
 
