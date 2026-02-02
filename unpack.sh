@@ -78,10 +78,10 @@ mkdir -p ~/.hackeros/hacker-lang/bin
 cd ~/.hackeros/hacker-lang/bin || exit
 rm -f hl-compiler hl-plsa hl-runtime hl-repl
 
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-compiler"
-curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-plsa"
-curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-runtime"
-curl -L -o repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-repl"
+curl -L -o hl-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-compiler"
+curl -L -o hl-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-plsa"
+curl -L -o hl-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-runtime"
+curl -L -o hl-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-repl"
 
 chmod a+x hl-runtime hl-compiler hl-plsa hl-repl
 
