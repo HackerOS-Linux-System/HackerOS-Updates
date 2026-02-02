@@ -21,7 +21,7 @@ fi
 sudo mkdir -p /usr/share/HackerOS/Scripts/HackerOS-Apps
 cd /usr/share/HackerOS/Scripts/HackerOS-Apps || exit
 
-sudo rm -f HackerOS-Game-Mode.AppImage Hacker_Launcher HackerOS-Welcome HackerOS-App Hacker-Term.AppImage
+sudo rm -f HackerOS-Game-Mode.AppImage Hacker_Launcher HackerOS-Welcome HackerOS-Store Hacker-Term.AppImage
 
 sudo curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
 sudo curl -L -o Hacker_Launcher.AppImage "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.6/Hacker_Launcher.AppImage"
@@ -76,14 +76,14 @@ chmod a+x HackerOS-Updater HackerOS-Update-Better hacker-docs hacker-help hacker
 # 7. Hacker-Lang
 mkdir -p ~/.hackeros/hacker-lang/bin
 cd ~/.hackeros/hacker-lang/bin || exit
-rm -f hacker-compiler hacker-plsa hacker-runtime repl
+rm -f hl-compiler hl-plsa hl-runtime hl-repl
 
-curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-compiler"
-curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-plsa"
-curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-runtime"
-curl -L -o repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-repl"
+curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-compiler"
+curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-plsa"
+curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-runtime"
+curl -L -o repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-repl"
 
-chmod a+x hacker-runtime hacker-compiler hacker-plsa hacker-repl
+chmod a+x hl-runtime hl-compiler hl-plsa hl-repl
 
 # 8. Binarki systemowe Hacker-Lang
 cd /usr/bin/ || exit
