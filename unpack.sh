@@ -27,9 +27,9 @@ sudo curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-S
 sudo curl -L -o Hacker_Launcher "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.5/Hacker_Launcher"
 sudo curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
 sudo curl -L -o Hacker-Term.AppImage "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.4/Hacker-Term.AppImage"
-sudo curl -L -o HackerOS-App "https://github.com/HackerOS-Linux-System/HackerOS-App/releases/download/v0.3/HackerOS-App"
+sudo curl -L -o HackerOS-App "https://github.com/HackerOS-Linux-System/HackerOS-Store/releases/download/v0.3/HackerOS-Store"
 
-sudo chmod a+x Hacker_Launcher Hacker-Term.AppImage HackerOS-Welcome HackerOS-Game-Mode.AppImage HackerOS-App
+sudo chmod a+x Hacker_Launcher Hacker-Term.AppImage HackerOS-Welcome HackerOS-Game-Mode.AppImage HackerOS-Store
 
 # 4. Gry HackerOS (Przeniesione do /usr/share/HackerOS/Scripts/HackerOS-Games)
 sudo mkdir -p /usr/share/HackerOS/Scripts/HackerOS-Games
@@ -52,8 +52,9 @@ sudo curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/d
 sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.2/ngt"
 sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker"
 sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
+sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.1/a"
 
-sudo chmod a+x hacker hpm hedit ngt
+sudo chmod a+x hacker hpm hedit ngt a
 
 # 6. Konfiguracja użytkownika ~/.hackeros (bez sudo, to pliki lokalne)
 mkdir -p ~/.hackeros/hacker/
