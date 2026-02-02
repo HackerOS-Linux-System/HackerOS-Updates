@@ -87,11 +87,10 @@ chmod a+x hacker-runtime hacker-compiler hacker-plsa hacker-repl
 
 # 8. Binarki systemowe Hacker-Lang
 cd /usr/bin/ || exit
-sudo rm -f hl hli hlh
+sudo rm -f hl hlh
 sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hl"
-sudo curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hli"
 sudo curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hlh"
-sudo chmod a+x hl hli hlh
+sudo chmod a+x hl hlh
 
 # 9. HPM Backend
 mkdir -p ~/.hackeros/hpm/
