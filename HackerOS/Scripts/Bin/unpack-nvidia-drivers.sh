@@ -1,1 +1,1 @@
-
+sudo apt remove --purgd nvidia-driver* nvidia-kernel-dkms* nvidia-smi* libnvidia-ml1* nvidia-settings* nvidia-cuda-mps*
