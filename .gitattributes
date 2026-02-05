@@ -1,6 +1,6 @@
 *.hacker linguist-detectable=true
 *.hacker linguist-documentation=false
-*.hacker linguist-language=Hacker
+*.hacker linguist-language=Hacker-Lang
 
 *.json linguist-detectable=true
 *.json linguist-documentation=false
