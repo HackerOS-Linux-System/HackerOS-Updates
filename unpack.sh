@@ -78,18 +78,18 @@ mkdir -p ~/.hackeros/hacker-lang/bin
 cd ~/.hackeros/hacker-lang/bin || exit
 rm -f hl-compiler hl-plsa hl-runtime hl-repl
 
-curl -L -o hl-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-compiler"
-curl -L -o hl-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-plsa"
-curl -L -o hl-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-runtime"
-curl -L -o hl-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6/hl-repl"
+curl -L -o hl-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.2/hl-compiler"
+curl -L -o hl-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.2/hl-plsa"
+curl -L -o hl-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.2/hl-runtime"
+curl -L -o hl-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.2/hl-repl"
 
 chmod a+x hl-runtime hl-compiler hl-plsa hl-repl
 
 # 8. Binarki systemowe Hacker-Lang
 cd /usr/bin/ || exit
 sudo rm -f hl hlh
-sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hl"
-sudo curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hlh"
+sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.2/hl"
+sudo curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.2/hlh"
 sudo chmod a+x hl hlh
 
 # 9. HPM Backend
