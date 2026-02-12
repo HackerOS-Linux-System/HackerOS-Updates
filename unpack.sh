@@ -54,7 +54,7 @@ sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/downl
 sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker"
 sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
 sudo curl -L -o HackerOS-Steam "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.2/HackerOS-Steam"
-sudo curl -L -o HackerOS-Steam "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.2/hbuild"
+sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.2/hbuild"
 sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.1/a"
 
 sudo chmod a+x hacker hpm hedit ngt a HackerOS-Steam hbuild
