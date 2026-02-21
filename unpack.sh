@@ -27,7 +27,7 @@ sudo curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-S
 sudo curl -L -o Hacker_Launcher.AppImage "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.6/Hacker_Launcher.AppImage"
 sudo curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
 sudo curl -L -o Hacker-Term.AppImage "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.4/Hacker-Term.AppImage"
-sudo curl -L -o HackerOS-Store "https://github.com/HackerOS-Linux-System/HackerOS-Store/releases/download/v0.4/HackerOS-Store"
+sudo curl -L -o HackerOS-Store "https://github.com/HackerOS-Linux-System/HackerOS-Store/releases/download/v0.5/HackerOS-Store"
 
 sudo chmod a+x Hacker_Launcher.AppImage Hacker-Term.AppImage HackerOS-Welcome HackerOS-Game-Mode.AppImage HackerOS-Store
 
