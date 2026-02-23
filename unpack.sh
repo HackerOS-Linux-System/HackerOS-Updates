@@ -52,7 +52,7 @@ sudo rm -f hpm hacker ngt hedit a HackerOS-Steam hbuild ghdir
 sudo curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.3/hedit"
 sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.3/ngt"
 sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker"
-sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
+sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/hpm"
 sudo curl -L -o HackerOS-Steam "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.2/HackerOS-Steam"
 sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.2/hbuild"
 sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.1/a"
@@ -99,7 +99,7 @@ sudo chmod a+x hl hlh
 mkdir -p ~/.hackeros/hpm/
 cd ~/.hackeros/hpm/ || exit
 rm -f backend
-curl -L -o backend "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/backend"
+curl -L -o backend "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/backend"
 chmod a+x backend
 
 cd ~
