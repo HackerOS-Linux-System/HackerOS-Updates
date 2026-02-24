@@ -63,17 +63,17 @@ sudo chmod a+x hacker hpm hedit ngt a HackerOS-Steam hbuild ghdir
 # 6. Konfiguracja użytkownika ~/.hackeros (bez sudo, to pliki lokalne)
 mkdir -p ~/.hackeros/hacker/
 cd ~/.hackeros/hacker/ || exit
-rm -f hacker-shell hacker-help hacker-select hacker-docs HackerOS-Updater HackerOS-Update-Better apt-fronted
+rm -f hacker-shell hacker-help hacker-select hacker-docs HackerOS-Updater update-system apt-fronted
 
 curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-shell"
 curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-help"
 curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-select"
 curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-docs"
 curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/HackerOS-Updater"
-curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/HackerOS-Update-Better"
+curl -L -o update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/update-system"
 curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/apt-fronted"
 
-chmod a+x HackerOS-Updater HackerOS-Update-Better hacker-docs hacker-help hacker-shell hacker-select apt-fronted
+chmod a+x HackerOS-Updater update-system hacker-docs hacker-help hacker-shell hacker-select apt-fronted
 
 # 7. Hacker-Lang
 mkdir -p ~/.hackeros/hacker-lang/bin
@@ -95,9 +95,7 @@ sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/release
 sudo curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hlh"
 sudo chmod a+x hl hlh
 
-# 9. HPM Backend
-mkdir -p ~/.hackeros/hpm/
-cd ~/.hackeros/hpm/ || exit
+cd /usr/lib/HackerOS/hpm/ || exit
 rm -f backend
 curl -L -o backend "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/backend"
 chmod a+x backend
