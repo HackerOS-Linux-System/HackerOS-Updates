@@ -47,7 +47,7 @@ sudo chmod a+x HackerOS-Games.AppImage the-racer bit-jump.love starblaster bark-
 
 # 5. Narzędzia CLI w /usr/bin/
 cd /usr/bin/ || exit
-sudo rm -f hpm hacker ngt hedit a HackerOS-Steam hbuild ghdir chker
+sudo rm -f hpm hacker ngt hedit a HackerOS-Steam hbuild getit chker
 
 sudo curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.3/hedit"
 sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.3/ngt"
@@ -56,10 +56,10 @@ sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/HackerOS-Package-M
 sudo curl -L -o HackerOS-Steam "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.2/HackerOS-Steam"
 sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.2/hbuild"
 sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.1/a"
-sudo curl -L -o ghdir "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.3/ghdir"
+sudo curl -L -o getit "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.4/getit"
 sudo curl -L -o chcker "https://github.com/HackerOS-Linux-System/chker/releases/download/v0.1/chker"
 
-sudo chmod a+x hacker hpm hedit ngt a HackerOS-Steam hbuild ghdir chker
+sudo chmod a+x hacker hpm hedit ngt a HackerOS-Steam hbuild getit chker
 
 # 6. Konfiguracja użytkownika ~/.hackeros (bez sudo, to pliki lokalne)
 mkdir -p ~/.hackeros/hacker/
