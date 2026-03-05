@@ -9,7 +9,7 @@ sudo mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/HackerOS/
 # Upewniamy się, że katalog istnieje zanim do niego wejdziemy
 if [ -d "/usr/share/HackerOS/Scripts/Bin/" ]; then
     cd /usr/share/HackerOS/Scripts/Bin/ || exit
-    sudo chmod a+x Bit-Jump.sh check_updates_notify.sh HackerOS-Games.sh HackerOS-Information.sh Proton-Updater.sh update_system.sh update-hackeros.sh unpack-xanmod.sh update-liquorix.sh
+    sudo chmod a+x Bit-Jump.sh check_updates_notify.sh HackerOS-Games.sh Proton-Updater.sh update_system.sh update-hackeros.sh update-wallpapers.sh
 fi
 
 if [ -d "/usr/share/HackerOS/Scripts/Steam/" ]; then
