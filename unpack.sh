@@ -58,7 +58,7 @@ sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases
 sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.1/a"
 sudo curl -L -o getit "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.4/getit"
 sudo curl -L -o chcker "https://github.com/HackerOS-Linux-System/chker/releases/download/v0.1/chker"
-sudo curl -L -o hsh "https://github.com/HackerOS-Linux-System/hsh/releases/download/v0.2/hsh"
+sudo curl -L -o hsh "https://github.com/HackerOS-Linux-System/hsh/releases/download/v0.3.4/hsh"
 
 sudo chmod a+x hacker hpm hedit ngt a HackerOS-Steam hbuild getit chker hsh
 
