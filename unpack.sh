@@ -15,6 +15,11 @@ fi
 if [ -d "/usr/share/HackerOS/Scripts/Steam/" ]; then
     cd /usr/share/HackerOS/Scripts/Steam/ || exit
     sudo chmod a+x HackerOS-Steam.sh HackerOS-Steam-Animation.sh
+ 
+    sudo mkdir -p bin
+    sudo curl -L -o bin/gui "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/gui"
+    sudo curl -L -o bin/tui "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/tui"
+    sudo chmod a+x bin/gui bin/tui
 fi
 
 # 3. Aplikacje HackerOS (Przeniesione do /usr/share/HackerOS/Scripts/HackerOS-Apps)
