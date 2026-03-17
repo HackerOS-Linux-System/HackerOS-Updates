@@ -54,7 +54,7 @@ sudo chmod a+x HackerOS-Games.AppImage the-racer bit-jump.love starblaster bark-
 cd /usr/bin/ || exit
 sudo rm -f hpm hacker ngt hedit a hackeros-steam hbuild getit chker hsh
 
-sudo curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.3/hedit"
+sudo curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.4/hedit"
 sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.3/ngt"
 sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker"
 sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/hpm"
