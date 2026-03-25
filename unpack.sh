@@ -31,7 +31,7 @@ sudo rm -f HackerOS-Game-Mode.AppImage Hacker_Launcher HackerOS-Welcome HackerOS
 sudo curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
 sudo curl -L -o Hacker_Launcher "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.8/Hacker_Launcher"
 sudo curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
-sudo curl -L -o Hacker-Term "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.5/Hacker-Term"
+sudo curl -L -o Hacker-Term "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.6/Hacker-Term"
 sudo curl -L -o HackerOS-Store "https://github.com/HackerOS-Linux-System/HackerOS-Store/releases/download/v0.5/HackerOS-Store"
 
 sudo chmod a+x Hacker_Launcher Hacker-Term.AppImage HackerOS-Welcome HackerOS-Game-Mode.AppImage HackerOS-Store
@@ -59,8 +59,8 @@ sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/downl
 sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker"
 sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/hpm"
 sudo curl -L -o hackeros-steam "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.3/hackeros-steam"
-sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.2/hbuild"
-sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.1/a"
+sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.3/hbuild"
+sudo curl -L -o a "https://github.com/HackerOS-Linux-System/a/releases/download/v0.2/a"
 sudo curl -L -o getit "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.4/getit"
 sudo curl -L -o chcker "https://github.com/HackerOS-Linux-System/chker/releases/download/v0.1/chker"
 sudo curl -L -o hsh "https://github.com/HackerOS-Linux-System/hsh/releases/download/v0.3.4/hsh"
