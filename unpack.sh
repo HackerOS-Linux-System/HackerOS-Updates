@@ -56,7 +56,7 @@ sudo rm -f hpm hacker ngt hedit a hackeros-steam hbuild getit chker hsh
 
 sudo curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.4/hedit"
 sudo curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.3/ngt"
-sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker"
+sudo curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker"
 sudo curl -L -o hpm "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/hpm"
 sudo curl -L -o hackeros-steam "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.3/hackeros-steam"
 sudo curl -L -o hbuild "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.3/hbuild"
@@ -72,14 +72,14 @@ mkdir -p ~/.hackeros/hacker/
 cd ~/.hackeros/hacker/ || exit
 rm -f hacker-shell hacker-help hacker-select hacker-docs HackerOS-Updater update-system apt-fronted hacker-repair
 
-curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker-shell"
-curl -L -o hacker-repair "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker-repair"
-curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker-help"
-curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker-select"
-curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/hacker-docs"
-curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/HackerOS-Updater"
-curl -L -o update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/update-system"
-curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.3/apt-fronted"
+curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-shell"
+curl -L -o hacker-repair "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-repair"
+curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-help"
+curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-select"
+curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-docs"
+curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/HackerOS-Updater"
+curl -L -o update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/update-system"
+curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/apt-fronted"
 
 chmod a+x HackerOS-Updater update-system hacker-docs hacker-help hacker-shell hacker-select apt-fronted hacker-repair
 
