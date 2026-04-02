@@ -83,30 +83,11 @@ curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool
 
 chmod a+x HackerOS-Updater update-system hacker-docs hacker-help hacker-shell hacker-select apt-fronted hacker-repair
 
-# 7. Hacker-Lang
-mkdir -p ~/.hackeros/hacker-lang/bin
-cd ~/.hackeros/hacker-lang/bin || exit
-rm -f hl-compiler hl-plsa hl-runtime hl-repl hl-containers
-
-curl -L -o hl-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hl-compiler"
-curl -L -o hl-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hl-plsa"
-curl -L -o hl-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hl-runtime"
-curl -L -o hl-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hl-repl"
-curl -L -o hl-containers "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hl-containers"
-
-chmod a+x hl-runtime hl-compiler hl-plsa hl-repl hl-containers
-
-# 8. Binarki systemowe Hacker-Lang
+# 8. Hacker Lang
 cd /usr/bin/ || exit
-sudo rm -f hl hlh
-sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hl"
-sudo curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.6.3/hlh"
-sudo chmod a+x hl hlh
-
-cd /usr/lib/HackerOS/hpm/ || exit
-rm -f backend
-curl -L -o backend "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.6/backend"
-chmod a+x backend
+sudo rm -f hl
+sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.1/hl"
+sudo chmod a+x hl 
 
 cd ~
 echo "[INFO] updated complete"
