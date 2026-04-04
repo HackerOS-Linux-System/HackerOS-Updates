@@ -86,7 +86,7 @@ chmod a+x HackerOS-Updater update-system hacker-docs hacker-help hacker-shell ha
 # 8. Hacker Lang
 cd /usr/bin/ || exit
 sudo rm -f hl
-sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.2/hl"
+sudo curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.3/hl"
 sudo chmod a+x hl 
 
 cd ~
