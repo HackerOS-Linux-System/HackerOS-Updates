@@ -1,107 +1,202 @@
-> echo "[INFO] starting update"
-> sudo rm -rf /usr/share/HackerOS/
-> sudo mv /tmp/HackerOS-Updates/HackerOS/ /usr/share/HackerOS/
-> cd /usr/share/HackerOS/Scripts/Bin/
-> sudo chmod a+x /usr/share/HackerOS/Scripts/Bin/Bit-Jump.sh /usr/share/HackerOS/Scripts/Bin/check_updates_notify.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Games.sh /usr/share/HackerOS/Scripts/Bin/HackerOS-Information.sh /usr/share/HackerOS/Scripts/Bin/Proton-Updater.sh /usr/share/HackerOS/Scripts/Bin/update_system.sh /usr/share/HackerOS/Scripts/Bin/update-hackeros.sh /usr/share/HackerOS/Scripts/Bin/unpack-xanmod.sh /usr/share/HackerOS/Scripts/Bin/update-liquorix.sh
-> cd ..
-> cd Steam
-> sudo chmod a+x /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam.sh /usr/share/HackerOS/Scripts/Steam/HackerOS-Steam-Animation.sh
-> cd ..
-> sudo mkdir HackerOS-Games
-> sudo mkdir HackerOS-Apps
-> cd HackerOS-Apps
-> sudo rm -rf HackerOS-Game-Mode.AppImage
-> sudo rm -rf Hacker_Launcher
-> sudo rm -rf HackerOS-Welcome
-> sudo rm -rf HackerOS-App
-> sudo rm -rf Hacker-Term.AppImage
-> curl -L -o HackerOS-Game-Mode.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
-> curl -L -o Hacker_Launcher "https://github.com/HackerOS-Linux-System/Hacker-Launcher/releases/download/v0.5/Hacker-Launcher"
-> curl -L -o HackerOS-Welcome "https://github.com/HackerOS-Linux-System/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
-> curl -L -o Hacker-Term.AppImage "https://github.com/HackerOS-Linux-System/Hacker-Term/releases/download/v0.4/Hacker-Term.AppImage"
-> curl -L -o HackerOS-App "https://github.com/HackerOS-Linux-System/HackerOS-App/releases/download/v0.3/HackerOS-App"
-> sudo chmod a+x Hacker_Launcher
-> sudo chmod a+x Hacker-Term.AppImage
-> sudo chmod a+x HackerOS-Welcome
-> sudo chmod a+x HackerOS-Game-Mode.AppImage
-> sudo chmod a+x HackerOS-App
-> cd ..
-> cd HackerOS-Games
-> sudo rm -rf HackerOS-Games
-> sudo rm -rf the-racer
-> sudo rm -rf starblaster
-> sudo rm -rf bit-jump.love
-> curl -L -o HackerOS-Games.AppImage "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.5/HackerOS-Games"
-> curl -L -o the-racer "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.5/the-racer"
-> curl -L -o starblaster "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.5/starblaster"
-> curl -L -o bit-jump.love "https://github.com/HackerOS-Linux-System/HackerOS-Games/releases/download/v0.5/bit-jump.love"
-> sudo chmod a+x HackerOS-Games
-> sudo chmod a+x the-racer
-> sudo chmod a+x bit-jump.love
-> sudo chmod a+x starblaster
-> cd /usr/bin/
-> sudo rm -rf hpm
-> sudo rm -rf hacker
-> sudo rm -rf ngt
-> sudo rm -rf hedit
-> curl -L -o hedit "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.3/hedit"
-> curl -L -o ngt "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.2/ngt"
-> curl -L -o hacker "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker"
-> curl -L -o hpm "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/hpm"
-> sudo chmod a+x hacker
-> sudo chmod a+x hpm
-> sudo chmod a+x hedit
-> sudo chmod a+x ngt
-> cd ~/.hackeros/hacker/
-> sudo rm -rf hacker-shell
-> sudo rm -rf hacker-help
-> sudo rm -rf hacker-select
-> sudo rm -rf hacker-docs
-> sudo rm -rf HackerOS-Updater
-> sudo rm -rf HackerOS-Update-Better
-> sudo rm -rf apt-fronted
-> curl -L -o hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-shell"
-> curl -L -o hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-help"
-> curl -L -o hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-select"
-> curl -L -o hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/hacker-docs"
-> curl -L -o HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/HackerOS-Updater"
-> curl -L -o HackerOS-Update-Better "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/HackerOS-Update-Better"
-> curl -L -o apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.2/apt-fronted"
-> sudo chmod a+x HackerOS-Updater
-> sudo chmod a+x HackerOS-Update-Better
-> sudo chmod a+x hacker-docs
-> sudo chmod a+x hacker-help
-> sudo chmod a+x hacker-shell
-> sudo chmod a+x hacker-select
-> sudo chmod a+x apt-fronted
-> cd ..
-> cd hacker-lang
-> cd bin
-> sudo rm -rf hacker-compiler
-> sudo rm -rf hacker-parser
-> sudo rm -rf hacker-runtime
-> curl -L -o hacker-compiler "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-compiler"
-> curl -L -o hacker-plsa "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-plsa"
-> curl -L -o hacker-runtime "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hacker-runtime"
-> sudo chmod a+x hacker-runtime
-> sudo chmod a+x hacker-parser
-> sudo chmod a+x hacker-compiler
-> sudo rm -rf repl
-> curl -L -o hacker-repl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/repl"
-> sudo chmod a+x repl
-> cd /usr/bin/
-> sudo rm -rf hl
-> sudo rm -rf hli
-> sudo rm -rf hlh
-> curl -L -o hl "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hl"
-> curl -L -o hli "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hli"
-> curl -L -o hlh "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v1.5/hlh"
-> sudo chmod a+x hl
-> sudo chmod a+x hli
-> sudo chmod a+x hlh
-> cd ~/.hackeros/hpm/
-> sudo rm -rf backend
-> curl -L -o backend "https://github.com/HackerOS-Linux-System/Hacker-Package-Manager/releases/download/v0.5/backend"
-> sudo chmod a+x backend
-> cd ~
-> echo "[INFO] updated complete"
+/// HackerOS System Update Script
+/// Przebudowany z update.sh → update.hl
+
+// curl
+
+% hackeros_share = /usr/share/HackerOS
+% hackeros_tmp   = /tmp/HackerOS-Updates/HackerOS
+% scripts_bin    = /usr/share/HackerOS/Scripts/Bin
+% scripts_steam  = /usr/share/HackerOS/Scripts/Steam
+% apps_dir       = /usr/share/HackerOS/Scripts/HackerOS-Apps
+% games_dir      = /usr/share/HackerOS/Scripts/HackerOS-Games
+% user_dir       = ~/.hackeros/hacker
+% release_cli    = https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4
+% release_apps   = https://github.com/HackerOS-Linux-System
+% hl_bin         = /usr/bin/hl
+
+::cyan === HackerOS System Update ===
+::nl
+
+// ─── 1. Główna struktura plików ──────────────────────────────────────────────
+
+~> [1/8] Aktualizacja struktury plików HackerOS...
+
+^> rm -rf @hackeros_share
+^>> mv @hackeros_tmp @hackeros_share
+
+? ok
+    ::green Struktura zaktualizowana ✓
+done
+
+? err
+    ::red Błąd aktualizacji struktury — czy HackerOS-Updates jest dostępne?
+done
+
+// ─── 2. Uprawnienia skryptów systemowych ─────────────────────────────────────
+
+~> [2/8] Ustawianie uprawnień skryptów...
+
+::exists @scripts_bin
+
+? ok
+    ^>> chmod a+x @scripts_bin/Bit-Jump.sh
+    ^>> chmod a+x @scripts_bin/check_updates_notify.sh
+    ^>> chmod a+x @scripts_bin/HackerOS-Games.sh
+    ^>> chmod a+x @scripts_bin/Proton-Updater.sh
+    ^>> chmod a+x @scripts_bin/update_system.sh
+    ^>> chmod a+x @scripts_bin/update-hackeros.sh
+    ^>> chmod a+x @scripts_bin/update-wallpapers.sh
+    ::green Scripts/Bin ✓
+done
+
+::exists @scripts_steam
+
+? ok
+    ^>> chmod a+x @scripts_steam/HackerOS-Steam.sh
+    ^>> chmod a+x @scripts_steam/HackerOS-Steam-Animation.sh
+
+    ^>> mkdir -p @scripts_steam/bin
+
+    ~> Pobieranie HackerOS-Steam GUI/TUI...
+    ^>> curl -L -o @scripts_steam/bin/gui "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/gui"
+    ^>> curl -L -o @scripts_steam/bin/tui "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/tui"
+    ^>> chmod a+x @scripts_steam/bin/gui
+    ^>> chmod a+x @scripts_steam/bin/tui
+    ::green Scripts/Steam ✓
+done
+
+// ─── 3. Aplikacje HackerOS ───────────────────────────────────────────────────
+
+~> [3/8] Aktualizacja aplikacji HackerOS...
+
+^>> mkdir -p @apps_dir
+
+^>> rm -f @apps_dir/HackerOS-Game-Mode.AppImage
+^>> rm -f @apps_dir/Hacker_Launcher
+^>> rm -f @apps_dir/HackerOS-Welcome
+^>> rm -f @apps_dir/HackerOS-Store
+^>> rm -f @apps_dir/Hacker-Term
+
+^>> curl -L -o @apps_dir/HackerOS-Game-Mode.AppImage "@release_apps/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
+^>> curl -L -o @apps_dir/Hacker_Launcher              "@release_apps/Hacker-Launcher/releases/download/v0.8/Hacker_Launcher"
+^>> curl -L -o @apps_dir/HackerOS-Welcome             "@release_apps/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
+^>> curl -L -o @apps_dir/Hacker-Term                  "@release_apps/Hacker-Term/releases/download/v0.7/Hacker-Term"
+^>> curl -L -o @apps_dir/HackerOS-Store               "@release_apps/HackerOS-Store/releases/download/v0.5/HackerOS-Store"
+
+^>> chmod a+x @apps_dir/HackerOS-Game-Mode.AppImage
+^>> chmod a+x @apps_dir/Hacker_Launcher
+^>> chmod a+x @apps_dir/HackerOS-Welcome
+^>> chmod a+x @apps_dir/Hacker-Term
+^>> chmod a+x @apps_dir/HackerOS-Store
+
+::green Aplikacje zaktualizowane ✓
+
+// ─── 4. Gry HackerOS ─────────────────────────────────────────────────────────
+
+~> [4/8] Aktualizacja gier HackerOS...
+
+^>> mkdir -p @games_dir
+
+^>> rm -f @games_dir/HackerOS-Games.AppImage
+^>> rm -f @games_dir/the-racer
+^>> rm -f @games_dir/starblaster
+^>> rm -f @games_dir/bit-jump.love
+^>> rm -f @games_dir/bark-squadron.AppImage
+
+^>> curl -L -o @games_dir/HackerOS-Games.AppImage    "@release_apps/HackerOS-Games/releases/download/v0.6/HackerOS-Games"
+^>> curl -L -o @games_dir/the-racer                  "@release_apps/HackerOS-Games/releases/download/v0.5/the-racer"
+^>> curl -L -o @games_dir/starblaster                "@release_apps/HackerOS-Games/releases/download/v0.6/starblaster"
+^>> curl -L -o @games_dir/bit-jump.love              "@release_apps/HackerOS-Games/releases/download/v0.6/bit-jump.love"
+^>> curl -L -o @games_dir/bark-squadron.AppImage     "@release_apps/HackerOS-Games/releases/download/v0.6/bark-squadron.AppImage"
+
+^>> chmod a+x @games_dir/HackerOS-Games.AppImage
+^>> chmod a+x @games_dir/the-racer
+^>> chmod a+x @games_dir/starblaster
+^>> chmod a+x @games_dir/bit-jump.love
+^>> chmod a+x @games_dir/bark-squadron.AppImage
+
+::green Gry zaktualizowane ✓
+
+// ─── 5. Narzędzia CLI /usr/bin/ ──────────────────────────────────────────────
+
+~> [5/8] Aktualizacja narzędzi CLI...
+
+^> rm -f /usr/bin/hpm /usr/bin/hacker /usr/bin/ngt /usr/bin/hedit
+^> rm -f /usr/bin/a /usr/bin/hackeros-steam /usr/bin/hbuild
+^> rm -f /usr/bin/getit /usr/bin/chker /usr/bin/hsh
+
+^> curl -L -o /usr/bin/hedit          "@release_apps/hedit/releases/download/v0.4/hedit"
+^> curl -L -o /usr/bin/ngt            "@release_apps/ngt/releases/download/v0.4/ngt"
+^> curl -L -o /usr/bin/hacker         "@release_apps/Hacker-CLI-Tool/releases/download/v2.4/hacker"
+^> curl -L -o /usr/bin/hpm            "@release_apps/HackerOS-Package-Manager/releases/download/v0.7/hpm"
+^> curl -L -o /usr/bin/hackeros-steam "@release_apps/HackerOS-Steam/releases/download/v0.3/hackeros-steam"
+^> curl -L -o /usr/bin/hbuild         "@release_apps/hbuild/releases/download/v0.3/hbuild"
+^> curl -L -o /usr/bin/a              "@release_apps/a/releases/download/v0.2/a"
+^> curl -L -o /usr/bin/getit          "@release_apps/ghdir/releases/download/v0.4/getit"
+^> curl -L -o /usr/bin/chker          "@release_apps/chker/releases/download/v0.1/chker"
+^> curl -L -o /usr/bin/hsh            "@release_apps/hsh/releases/download/v0.4/hsh"
+
+^> chmod a+x /usr/bin/hacker /usr/bin/hpm /usr/bin/hedit /usr/bin/ngt
+^> chmod a+x /usr/bin/a /usr/bin/hackeros-steam /usr/bin/hbuild
+^> chmod a+x /usr/bin/getit /usr/bin/chker /usr/bin/hsh
+
+::green Narzędzia CLI zaktualizowane ✓
+
+// ─── 6. Konfiguracja użytkownika ~/.hackeros ─────────────────────────────────
+
+~> [6/8] Aktualizacja konfiguracji użytkownika...
+
+> mkdir -p @user_dir
+
+> rm -f @user_dir/hacker-shell
+> rm -f @user_dir/hacker-repair
+> rm -f @user_dir/hacker-help
+> rm -f @user_dir/hacker-select
+> rm -f @user_dir/hacker-docs
+> rm -f @user_dir/HackerOS-Updater
+> rm -f @user_dir/update-system
+> rm -f @user_dir/apt-fronted
+
+>> curl -L -o @user_dir/hacker-shell    "@release_cli/hacker-shell"
+>> curl -L -o @user_dir/hacker-repair   "@release_cli/hacker-repair"
+>> curl -L -o @user_dir/hacker-help     "@release_cli/hacker-help"
+>> curl -L -o @user_dir/hacker-select   "@release_cli/hacker-select"
+>> curl -L -o @user_dir/hacker-docs     "@release_cli/hacker-docs"
+>> curl -L -o @user_dir/HackerOS-Updater "@release_cli/HackerOS-Updater"
+>> curl -L -o @user_dir/update-system   "@release_cli/update-system"
+>> curl -L -o @user_dir/apt-fronted     "@release_cli/apt-fronted"
+
+>> chmod a+x @user_dir/HackerOS-Updater
+>> chmod a+x @user_dir/update-system
+>> chmod a+x @user_dir/hacker-docs
+>> chmod a+x @user_dir/hacker-help
+>> chmod a+x @user_dir/hacker-shell
+>> chmod a+x @user_dir/hacker-select
+>> chmod a+x @user_dir/apt-fronted
+>> chmod a+x @user_dir/hacker-repair
+
+::green Konfiguracja użytkownika zaktualizowana ✓
+
+// ─── 7. Hacker Lang (hl) ─────────────────────────────────────────────────────
+
+~> [7/8] Aktualizacja Hacker Lang...
+
+^> rm -f @hl_bin
+^>> curl -L -o @hl_bin "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.3/hl"
+^>> chmod a+x @hl_bin
+
+? ok
+    ::green Hacker Lang zaktualizowany ✓
+done
+
+? err
+    ::red Błąd aktualizacji hl!
+done
+
+// ─── 8. Podsumowanie ─────────────────────────────────────────────────────────
+
+::nl
+::hr 50
+::bold [8/8] Aktualizacja HackerOS zakończona!
+::hr 50
+::nl
