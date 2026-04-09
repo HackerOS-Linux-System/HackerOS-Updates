@@ -1,0 +1,89 @@
+/// HackerOS Update Checker — sprawdza wersję i uruchamia aktualizację
+/// Port z update-hackeros.sh
+
+// curl
+// git
+
+% local_file    = /usr/share/HackerOS/Config-Files/release-info.json
+% remote_url    = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker
+% version_tmp   = /tmp/version.hacker
+% updates_repo  = https://github.com/HackerOS-Linux-System/HackerOS-Updates.git
+% updates_dir   = /tmp/HackerOS-Updates
+
+;; ─── Sprawdź połączenie z internetem ─────────────────────────────────────────
+
+~> Sprawdzanie połączenia z internetem...
+
+> ping -c 1 -W 1 google.com
+
+? ok
+    ::green Internet dostępny v
+done
+
+? err
+    ::red Brak połączenia z internetem. Przerywam.
+done
+
+;; ─── Pobierz zdalny plik wersji ───────────────────────────────────────────────
+
+~> Pobieranie zdalnego pliku wersji...
+
+> curl -fLS -o /tmp/version.hacker "https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
+
+? ok
+    ::green Plik wersji pobrany v
+done
+
+? err
+    ::red Nie udało się pobrać pliku wersji. Przerywam.
+done
+
+;; ─── Porównaj wersje i uruchom aktualizację jeśli potrzebna ──────────────────
+;; Porównanie wersji przez sort -V (standard Linuxa dla wersji semantycznych)
+;; Logika: jeśli remote > local → aktualizuj
+
+~> Porównuję wersje...
+
+> bash -c "LOCAL=$(grep '\"version\"' /usr/share/HackerOS/Config-Files/release-info.json | sed 's/.*: \"\\(.*\\) ->.*/\\1/' | tr -d '\"' | awk '{print $1}'); REMOTE=$(sed 's/^\\[\\(.*\\)\\]$/\\1/' /tmp/version.hacker); [ \"$(printf '%s\n' \"$LOCAL\" \"$REMOTE\" | sort -V | tail -n1)\" != \"$LOCAL\" ] && echo NEEDS_UPDATE || echo UP_TO_DATE"
+
+? ok
+    ::green System jest aktualny. Aktualizacja nie jest wymagana.
+    > rm -f /tmp/version.hacker
+done
+
+? err
+    ;; exit code != 0 oznacza że skrypt wykrył NEEDS_UPDATE lub błąd
+    ;; Sprawdzamy czy rzeczywiście potrzeba aktualizacji
+    ~> Dostępna jest nowa wersja HackerOS — uruchamiam aktualizację...
+
+    ;; Usuń stary klon jeśli istnieje
+    > rm -rf /tmp/HackerOS-Updates
+
+    ;; Klonuj repo z aktualizacją
+    ~> Klonowanie repozytorium aktualizacji...
+    > git clone --depth=1 "https://github.com/HackerOS-Linux-System/HackerOS-Updates.git" /tmp/HackerOS-Updates
+
+    ? ok
+        ::green Repozytorium sklonowane v
+
+        > chmod 755 /tmp/HackerOS-Updates/unpack.sh
+
+        ~> Uruchamianie unpack.sh...
+        > /tmp/HackerOS-Updates/unpack.sh
+
+        ? ok
+            ::green Aktualizacja zakończona pomyślnie v
+        done
+
+        ? err
+            ::red Błąd podczas wykonywania unpack.sh
+        done
+    done
+
+    ? err
+        ::red Nie udało się sklonować repozytorium aktualizacji.
+    done
+
+    ;; Sprzątanie
+    > rm -f /tmp/version.hacker
+done
