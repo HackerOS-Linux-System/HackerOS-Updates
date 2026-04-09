@@ -327,7 +327,7 @@ done
 done
 
 ~> Pobieranie hbuild...
-^> curl -fLS -o /usr/bin/hbuild.new "@release_apps/hbuild/releases/download/v0.3/hbuild"
+^> curl -fLS -o /usr/bin/hbuild.new "@release_apps/hbuild/releases/download/v0.4/hbuild"
 ? ok
     ^> mv /usr/bin/hbuild.new /usr/bin/hbuild
     ^> chmod 755 /usr/bin/hbuild
