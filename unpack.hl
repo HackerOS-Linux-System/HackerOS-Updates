@@ -1,23 +1,19 @@
-/// HackerOS System Update Script v2
-/// Zasada Złotej Kopii — atomowe podmiany, curl -fLS, chmod 755
-
 // curl
 
-;; ─── Ścieżki systemowe ────────────────────────────────────────────────────────
-% hackeros_share  = /usr/share/HackerOS
-% hackeros_old    = /usr/share/HackerOS_old
-% hackeros_new    = /tmp/HackerOS_New
-% hackeros_src    = /tmp/HackerOS-Updates/HackerOS
-% scripts_bin     = /usr/share/HackerOS/Scripts/Bin
-% scripts_steam   = /usr/share/HackerOS/Scripts/Steam
-% apps_dir        = /usr/share/HackerOS/Scripts/HackerOS-Apps
-% games_dir       = /usr/share/HackerOS/Scripts/HackerOS-Games
-% user_dir        = ~/.hackeros/hacker
+;; ─── Ścieżki systemowe ───────────────────────────────────────────────────────
+% hackeros_share = /usr/share/HackerOS
+% hackeros_old   = /usr/share/HackerOS_old
+% hackeros_new   = /tmp/HackerOS_New
+% hackeros_src   = /tmp/HackerOS-Updates/HackerOS
+% scripts_bin    = /usr/share/HackerOS/Scripts/Bin
+% scripts_steam  = /usr/share/HackerOS/Scripts/Steam
+% apps_dir       = /usr/share/HackerOS/Scripts/HackerOS-Apps
+% games_dir      = /usr/share/HackerOS/Scripts/HackerOS-Games
 
-;; ─── Źródła pobierania ────────────────────────────────────────────────────────
-% release_cli     = https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4
-% release_apps    = https://github.com/HackerOS-Linux-System
-% hl_bin          = /usr/bin/hl
+;; ─── Ścieżki pobierania ───────────────────────────────────────────────────────
+% release_cli  = https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4
+% release_apps = https://github.com/HackerOS-Linux-System
+% hl_bin       = /usr/bin/hl
 
 ;; ─── Nagłówek ─────────────────────────────────────────────────────────────────
 ::nl
@@ -27,7 +23,7 @@
 ::nl
 
 ;; ════════════════════════════════════════════════════════════════════════════════
-;; 1. ATOMOWA PODMIANA STRUKTURY (Złota Kopia)
+;; 1. ATOMOWA PODMIANA STRUKTURY (Zlota Kopia)
 ;; ════════════════════════════════════════════════════════════════════════════════
 
 ~> [1/8] Weryfikacja paczki aktualizacji...
@@ -35,34 +31,32 @@
 ::exists @hackeros_src
 
 ? ok
-    ::green Paczka aktualizacji dostępna v
+    ~> Paczka dostepna - podmieniam strukture...
+
+    ^>> cp -r @hackeros_src @hackeros_new
+
+    ? ok
+        ^>> mv @hackeros_share @hackeros_old
+        ^>> mv @hackeros_new @hackeros_share
+        ^> rm -rf /usr/share/HackerOS_old
+        ::green Struktura zaktualizowana atomowo v
+    done
+
+    ? err
+        ^> rm -rf /tmp/HackerOS_New
+        ::red BLAD: Podmiana nie powiodla sie - stara wersja zachowana
+    done
 done
 
 ? err
-    ::red BŁĄD: Brak paczki w @hackeros_src — struktura pominięta, system nienaruszony.
-done
-
-~> [1/8] Atomowa podmiana struktury HackerOS...
-
-^>> cp -r @hackeros_src @hackeros_new
-
-? ok
-    ^>> mv @hackeros_share @hackeros_old
-    ^>> mv @hackeros_new @hackeros_share
-    ^> rm -rf @hackeros_old
-    ::green Struktura zaktualizowana atomowo v
-done
-
-? err
-    ^> rm -rf @hackeros_new
-    ::red BŁĄD: Podmiana nie powiodła się — stara wersja zachowana.
+    ::yellow Brak paczki w @hackeros_src - pomijam podmiane struktury
 done
 
 ;; ════════════════════════════════════════════════════════════════════════════════
-;; 2. UPRAWNIENIA SKRYPTÓW SYSTEMOWYCH
+;; 2. UPRAWNIENIA SKRYPTOW SYSTEMOWYCH
 ;; ════════════════════════════════════════════════════════════════════════════════
 
-~> [2/8] Ustawianie uprawnień skryptów...
+~> [2/8] Ustawianie uprawnien skryptow...
 
 ::exists @scripts_bin
 
@@ -94,7 +88,7 @@ done
     done
     ? err
         ^>> rm -f @scripts_steam/bin/gui.new
-        ::yellow Steam GUI — pomijam
+        ::yellow Steam GUI - pomijam (404)
     done
 
     ~> Pobieranie HackerOS-Steam TUI...
@@ -106,7 +100,7 @@ done
     done
     ? err
         ^>> rm -f @scripts_steam/bin/tui.new
-        ::yellow Steam TUI — pomijam
+        ::yellow Steam TUI - pomijam (404)
     done
 
     ^>> chown -R root:root @scripts_steam
@@ -130,7 +124,7 @@ done
 done
 ? err
     ^>> rm -f @apps_dir/HackerOS-Game-Mode.AppImage.new
-    ::yellow HackerOS-Game-Mode — pomijam
+    ::yellow HackerOS-Game-Mode - pomijam
 done
 
 ~> Pobieranie Hacker_Launcher...
@@ -142,7 +136,7 @@ done
 done
 ? err
     ^>> rm -f @apps_dir/Hacker_Launcher.new
-    ::yellow Hacker_Launcher — pomijam
+    ::yellow Hacker_Launcher - pomijam
 done
 
 ~> Pobieranie HackerOS-Welcome...
@@ -154,7 +148,7 @@ done
 done
 ? err
     ^>> rm -f @apps_dir/HackerOS-Welcome.new
-    ::yellow HackerOS-Welcome — pomijam
+    ::yellow HackerOS-Welcome - pomijam
 done
 
 ~> Pobieranie Hacker-Term v0.7...
@@ -166,7 +160,7 @@ done
 done
 ? err
     ^>> rm -f @apps_dir/Hacker-Term.new
-    ::yellow Hacker-Term — pomijam
+    ::yellow Hacker-Term - pomijam
 done
 
 ~> Pobieranie HackerOS-Store...
@@ -178,7 +172,7 @@ done
 done
 ? err
     ^>> rm -f @apps_dir/HackerOS-Store.new
-    ::yellow HackerOS-Store — pomijam
+    ::yellow HackerOS-Store - pomijam
 done
 
 ^>> chown -R root:root @apps_dir
@@ -201,7 +195,7 @@ done
 done
 ? err
     ^>> rm -f @games_dir/HackerOS-Games.AppImage.new
-    ::yellow HackerOS-Games — pomijam
+    ::yellow HackerOS-Games - pomijam
 done
 
 ~> Pobieranie the-racer...
@@ -213,7 +207,7 @@ done
 done
 ? err
     ^>> rm -f @games_dir/the-racer.new
-    ::yellow the-racer — pomijam
+    ::yellow the-racer - pomijam
 done
 
 ~> Pobieranie starblaster...
@@ -225,7 +219,7 @@ done
 done
 ? err
     ^>> rm -f @games_dir/starblaster.new
-    ::yellow starblaster — pomijam
+    ::yellow starblaster - pomijam
 done
 
 ~> Pobieranie bit-jump...
@@ -237,7 +231,7 @@ done
 done
 ? err
     ^>> rm -f @games_dir/bit-jump.love.new
-    ::yellow bit-jump — pomijam
+    ::yellow bit-jump - pomijam
 done
 
 ~> Pobieranie bark-squadron...
@@ -249,20 +243,20 @@ done
 done
 ? err
     ^>> rm -f @games_dir/bark-squadron.AppImage.new
-    ::yellow bark-squadron — pomijam
+    ::yellow bark-squadron - pomijam
 done
 
 ^>> chown -R root:root @games_dir
 ::green Gry zaktualizowane v
 
 ;; ════════════════════════════════════════════════════════════════════════════════
-;; 5. NARZĘDZIA CLI /usr/bin/
+;; 5. NARZEDZIA CLI /usr/bin/
 ;; ════════════════════════════════════════════════════════════════════════════════
 
-~> [5/8] Aktualizacja narzędzi CLI...
+~> [5/8] Aktualizacja narzedzi CLI...
 
 ~> Pobieranie hedit...
-^> curl -fLS -o /usr/bin/hedit.new "@release_apps/hedit/releases/download/v0.4/hedit"
+^> curl -fLS -o /usr/bin/hedit.new "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.4/hedit"
 ? ok
     ^> mv /usr/bin/hedit.new /usr/bin/hedit
     ^> chmod 755 /usr/bin/hedit
@@ -271,11 +265,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/hedit.new
-    ::yellow hedit — pomijam (stara wersja zachowana)
+    ::yellow hedit - pomijam
 done
 
 ~> Pobieranie ngt...
-^> curl -fLS -o /usr/bin/ngt.new "@release_apps/ngt/releases/download/v0.4/ngt"
+^> curl -fLS -o /usr/bin/ngt.new "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.4/ngt"
 ? ok
     ^> mv /usr/bin/ngt.new /usr/bin/ngt
     ^> chmod 755 /usr/bin/ngt
@@ -284,11 +278,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/ngt.new
-    ::yellow ngt — pomijam
+    ::yellow ngt - pomijam
 done
 
 ~> Pobieranie hacker...
-^> curl -fLS -o /usr/bin/hacker.new "@release_apps/Hacker-CLI-Tool/releases/download/v2.4/hacker"
+^> curl -fLS -o /usr/bin/hacker.new "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker"
 ? ok
     ^> mv /usr/bin/hacker.new /usr/bin/hacker
     ^> chmod 755 /usr/bin/hacker
@@ -297,11 +291,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/hacker.new
-    ::yellow hacker — pomijam
+    ::yellow hacker - pomijam
 done
 
 ~> Pobieranie hpm...
-^> curl -fLS -o /usr/bin/hpm.new "@release_apps/HackerOS-Package-Manager/releases/download/v0.7/hpm"
+^> curl -fLS -o /usr/bin/hpm.new "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.7/hpm"
 ? ok
     ^> mv /usr/bin/hpm.new /usr/bin/hpm
     ^> chmod 755 /usr/bin/hpm
@@ -310,11 +304,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/hpm.new
-    ::yellow hpm — pomijam
+    ::yellow hpm - pomijam
 done
 
 ~> Pobieranie hackeros-steam...
-^> curl -fLS -o /usr/bin/hackeros-steam.new "@release_apps/HackerOS-Steam/releases/download/v0.3/hackeros-steam"
+^> curl -fLS -o /usr/bin/hackeros-steam.new "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.3/hackeros-steam"
 ? ok
     ^> mv /usr/bin/hackeros-steam.new /usr/bin/hackeros-steam
     ^> chmod 755 /usr/bin/hackeros-steam
@@ -323,11 +317,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/hackeros-steam.new
-    ::yellow hackeros-steam — pomijam
+    ::yellow hackeros-steam - pomijam
 done
 
 ~> Pobieranie hbuild...
-^> curl -fLS -o /usr/bin/hbuild.new "@release_apps/hbuild/releases/download/v0.4/hbuild"
+^> curl -fLS -o /usr/bin/hbuild.new "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.3/hbuild"
 ? ok
     ^> mv /usr/bin/hbuild.new /usr/bin/hbuild
     ^> chmod 755 /usr/bin/hbuild
@@ -336,11 +330,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/hbuild.new
-    ::yellow hbuild — pomijam
+    ::yellow hbuild - pomijam
 done
 
 ~> Pobieranie a...
-^> curl -fLS -o /usr/bin/a.new "@release_apps/a/releases/download/v0.2/a"
+^> curl -fLS -o /usr/bin/a.new "https://github.com/HackerOS-Linux-System/a/releases/download/v0.2/a"
 ? ok
     ^> mv /usr/bin/a.new /usr/bin/a
     ^> chmod 755 /usr/bin/a
@@ -349,11 +343,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/a.new
-    ::yellow a — pomijam
+    ::yellow a - pomijam
 done
 
 ~> Pobieranie getit...
-^> curl -fLS -o /usr/bin/getit.new "@release_apps/ghdir/releases/download/v0.4/getit"
+^> curl -fLS -o /usr/bin/getit.new "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.4/getit"
 ? ok
     ^> mv /usr/bin/getit.new /usr/bin/getit
     ^> chmod 755 /usr/bin/getit
@@ -362,11 +356,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/getit.new
-    ::yellow getit — pomijam
+    ::yellow getit - pomijam
 done
 
 ~> Pobieranie chker...
-^> curl -fLS -o /usr/bin/chker.new "@release_apps/chker/releases/download/v0.1/chker"
+^> curl -fLS -o /usr/bin/chker.new "https://github.com/HackerOS-Linux-System/chker/releases/download/v0.1/chker"
 ? ok
     ^> mv /usr/bin/chker.new /usr/bin/chker
     ^> chmod 755 /usr/bin/chker
@@ -375,11 +369,11 @@ done
 done
 ? err
     ^> rm -f /usr/bin/chker.new
-    ::yellow chker — pomijam
+    ::yellow chker - pomijam
 done
 
 ~> Pobieranie hsh...
-^> curl -fLS -o /usr/bin/hsh.new "@release_apps/hsh/releases/download/v0.4/hsh"
+^> curl -fLS -o /usr/bin/hsh.new "https://github.com/HackerOS-Linux-System/hsh/releases/download/v0.4/hsh"
 ? ok
     ^> mv /usr/bin/hsh.new /usr/bin/hsh
     ^> chmod 755 /usr/bin/hsh
@@ -388,116 +382,107 @@ done
 done
 ? err
     ^> rm -f /usr/bin/hsh.new
-    ::yellow hsh — pomijam
+    ::yellow hsh - pomijam
 done
 
-::green Narzędzia CLI zaktualizowane v
+::green Narzedzia CLI zaktualizowane v
 
 ;; ════════════════════════════════════════════════════════════════════════════════
-;; 6. KONFIGURACJA UŻYTKOWNIKA ~/.hackeros
+;; 6. KONFIGURACJA UZYTKOWNIKA
+;; UWAGA: HL executor nie rozwiazuje $HOME ani ~ w zmiennych
+;; Uzywamy bash -c aby powloka rozwiazala $HOME poprawnie
 ;; ════════════════════════════════════════════════════════════════════════════════
 
-~> [6/8] Aktualizacja konfiguracji użytkownika...
+~> [6/8] Aktualizacja konfiguracji uzytkownika...
 
-> mkdir -p @user_dir
+;; Tworzymy katalog przez bash (jedyna metoda zeby $HOME bylo rozwiazane)
+> bash -c "mkdir -p $HOME/.hackeros/hacker"
 
-~> Pobieranie hacker-shell...
->> curl -fLS -o @user_dir/hacker-shell.new "@release_cli/hacker-shell"
+;; Pobieramy do /tmp z prefiksem hl- zeby uniknac kolizji
+;; a potem przenosimy przez bash -c z $HOME
+
+> curl -fLS -o /tmp/hl-hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-shell"
 ? ok
-    >> mv @user_dir/hacker-shell.new @user_dir/hacker-shell
-    >> chmod 755 @user_dir/hacker-shell
+    > bash -c "mv /tmp/hl-hacker-shell $HOME/.hackeros/hacker/hacker-shell && chmod 755 $HOME/.hackeros/hacker/hacker-shell"
     ::green hacker-shell v
 done
 ? err
-    >> rm -f @user_dir/hacker-shell.new
-    ::yellow hacker-shell — pomijam
+    > rm -f /tmp/hl-hacker-shell
+    ::yellow hacker-shell - pomijam
 done
 
-~> Pobieranie hacker-repair...
->> curl -fLS -o @user_dir/hacker-repair.new "@release_cli/hacker-repair"
+> curl -fLS -o /tmp/hl-hacker-repair "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-repair"
 ? ok
-    >> mv @user_dir/hacker-repair.new @user_dir/hacker-repair
-    >> chmod 755 @user_dir/hacker-repair
+    > bash -c "mv /tmp/hl-hacker-repair $HOME/.hackeros/hacker/hacker-repair && chmod 755 $HOME/.hackeros/hacker/hacker-repair"
     ::green hacker-repair v
 done
 ? err
-    >> rm -f @user_dir/hacker-repair.new
-    ::yellow hacker-repair — pomijam
+    > rm -f /tmp/hl-hacker-repair
+    ::yellow hacker-repair - pomijam
 done
 
-~> Pobieranie hacker-help...
->> curl -fLS -o @user_dir/hacker-help.new "@release_cli/hacker-help"
+> curl -fLS -o /tmp/hl-hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-help"
 ? ok
-    >> mv @user_dir/hacker-help.new @user_dir/hacker-help
-    >> chmod 755 @user_dir/hacker-help
+    > bash -c "mv /tmp/hl-hacker-help $HOME/.hackeros/hacker/hacker-help && chmod 755 $HOME/.hackeros/hacker/hacker-help"
     ::green hacker-help v
 done
 ? err
-    >> rm -f @user_dir/hacker-help.new
-    ::yellow hacker-help — pomijam
+    > rm -f /tmp/hl-hacker-help
+    ::yellow hacker-help - pomijam
 done
 
-~> Pobieranie hacker-select...
->> curl -fLS -o @user_dir/hacker-select.new "@release_cli/hacker-select"
+> curl -fLS -o /tmp/hl-hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-select"
 ? ok
-    >> mv @user_dir/hacker-select.new @user_dir/hacker-select
-    >> chmod 755 @user_dir/hacker-select
+    > bash -c "mv /tmp/hl-hacker-select $HOME/.hackeros/hacker/hacker-select && chmod 755 $HOME/.hackeros/hacker/hacker-select"
     ::green hacker-select v
 done
 ? err
-    >> rm -f @user_dir/hacker-select.new
-    ::yellow hacker-select — pomijam
+    > rm -f /tmp/hl-hacker-select
+    ::yellow hacker-select - pomijam
 done
 
-~> Pobieranie hacker-docs...
->> curl -fLS -o @user_dir/hacker-docs.new "@release_cli/hacker-docs"
+> curl -fLS -o /tmp/hl-hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/hacker-docs"
 ? ok
-    >> mv @user_dir/hacker-docs.new @user_dir/hacker-docs
-    >> chmod 755 @user_dir/hacker-docs
+    > bash -c "mv /tmp/hl-hacker-docs $HOME/.hackeros/hacker/hacker-docs && chmod 755 $HOME/.hackeros/hacker/hacker-docs"
     ::green hacker-docs v
 done
 ? err
-    >> rm -f @user_dir/hacker-docs.new
-    ::yellow hacker-docs — pomijam
+    > rm -f /tmp/hl-hacker-docs
+    ::yellow hacker-docs - pomijam
 done
 
-~> Pobieranie HackerOS-Updater...
->> curl -fLS -o @user_dir/HackerOS-Updater.new "@release_cli/HackerOS-Updater"
+> curl -fLS -o /tmp/hl-HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/HackerOS-Updater"
 ? ok
-    >> mv @user_dir/HackerOS-Updater.new @user_dir/HackerOS-Updater
-    >> chmod 755 @user_dir/HackerOS-Updater
+    > bash -c "mv /tmp/hl-HackerOS-Updater $HOME/.hackeros/hacker/HackerOS-Updater && chmod 755 $HOME/.hackeros/hacker/HackerOS-Updater"
     ::green HackerOS-Updater v
 done
 ? err
-    >> rm -f @user_dir/HackerOS-Updater.new
-    ::yellow HackerOS-Updater — pomijam
+    > rm -f /tmp/hl-HackerOS-Updater
+    ::yellow HackerOS-Updater - pomijam
 done
 
-~> Pobieranie update-system...
->> curl -fLS -o @user_dir/update-system.new "@release_cli/update-system"
+> curl -fLS -o /tmp/hl-update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/update-system"
 ? ok
-    >> mv @user_dir/update-system.new @user_dir/update-system
-    >> chmod 755 @user_dir/update-system
+    > bash -c "mv /tmp/hl-update-system $HOME/.hackeros/hacker/update-system && chmod 755 $HOME/.hackeros/hacker/update-system"
     ::green update-system v
 done
 ? err
-    >> rm -f @user_dir/update-system.new
-    ::yellow update-system — pomijam
+    > rm -f /tmp/hl-update-system
+    ::yellow update-system - pomijam
 done
 
-~> Pobieranie apt-fronted...
->> curl -fLS -o @user_dir/apt-fronted.new "@release_cli/apt-fronted"
+;; apt-fronted zwraca 404 w tej wersji - cicha obsluga
+> curl -fLS -o /tmp/hl-apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4/apt-fronted"
 ? ok
-    >> mv @user_dir/apt-fronted.new @user_dir/apt-fronted
-    >> chmod 755 @user_dir/apt-fronted
+    > bash -c "mv /tmp/hl-apt-fronted $HOME/.hackeros/hacker/apt-fronted && chmod 755 $HOME/.hackeros/hacker/apt-fronted"
     ::green apt-fronted v
 done
 ? err
-    >> rm -f @user_dir/apt-fronted.new
-    ::yellow apt-fronted — pomijam
+    > rm -f /tmp/hl-apt-fronted
+    ::yellow apt-fronted - pomijam
 done
 
-::green Konfiguracja użytkownika zaktualizowana v
+::green Konfiguracja uzytkownika zaktualizowana v
 
 ;; ════════════════════════════════════════════════════════════════════════════════
 ;; 7. HACKER LANG (hl)
@@ -516,7 +501,7 @@ done
 
 ? err
     ^> rm -f /usr/bin/hl.new
-    ::red BŁĄD: Hacker Lang — stara wersja zachowana.
+    ::red BLAD: Hacker Lang - stara wersja zachowana
 done
 
 ;; ════════════════════════════════════════════════════════════════════════════════
@@ -525,6 +510,6 @@ done
 
 ::nl
 ::hr 52
-::bold   [8/8] Aktualizacja HackerOS zakończona!
+::bold   [8/8] Aktualizacja HackerOS zakonczona!
 ::hr 52
 ::nl
