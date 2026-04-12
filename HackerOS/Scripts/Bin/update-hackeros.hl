@@ -1,89 +1,106 @@
-/// HackerOS Update Checker — sprawdza wersję i uruchamia aktualizację
-/// Port z update-hackeros.sh
+/// HackerOS Update Checker
+/// Sprawdza wersje i uruchamia aktualizacje jesli potrzebna
 
 // curl
 // git
 
-% local_file    = /usr/share/HackerOS/Config-Files/release-info.json
-% remote_url    = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker
-% version_tmp   = /tmp/version.hacker
-% updates_repo  = https://github.com/HackerOS-Linux-System/HackerOS-Updates.git
-% updates_dir   = /tmp/HackerOS-Updates
+% local_file  = /usr/share/HackerOS/Config-Files/release-info.json
+% version_tmp = /tmp/version.hacker
+% updates_dir = /tmp/HackerOS-Updates
 
-;; ─── Sprawdź połączenie z internetem ─────────────────────────────────────────
+;; ─── Sprawdz polaczenie z internetem ─────────────────────────────────────────
 
-~> Sprawdzanie połączenia z internetem...
+~> Sprawdzanie polaczenia z internetem...
 
 > ping -c 1 -W 1 google.com
 
 ? ok
-    ::green Internet dostępny v
+    ::green Internet dostepny
 done
 
 ? err
-    ::red Brak połączenia z internetem. Przerywam.
+    ::red Brak polaczenia z internetem
+    ~> Przerywam aktualizacje
 done
 
-;; ─── Pobierz zdalny plik wersji ───────────────────────────────────────────────
+;; ─── Pobierz zdalny plik wersji ──────────────────────────────────────────────
 
-~> Pobieranie zdalnego pliku wersji...
+~> Pobieranie pliku wersji...
 
-> curl -fLS -o /tmp/version.hacker "https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
+> curl -fsSL -o /tmp/version.hacker "https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
 
 ? ok
-    ::green Plik wersji pobrany v
+    ::green Plik wersji pobrany
 done
 
 ? err
-    ::red Nie udało się pobrać pliku wersji. Przerywam.
+    ::red Nie udalo sie pobrac pliku wersji
+    ~> Przerywam
 done
 
-;; ─── Porównaj wersje i uruchom aktualizację jeśli potrzebna ──────────────────
-;; Porównanie wersji przez sort -V (standard Linuxa dla wersji semantycznych)
-;; Logika: jeśli remote > local → aktualizuj
+;; ─── Zapisz skrypt porownania wersji do pliku ────────────────────────────────
+;; Uzywamy python3 zeby uniknac problemow z apostrofami i $() w bash -c
 
-~> Porównuję wersje...
+> python3 -c "open('/tmp/hl_ver_check.sh','w').write('#!/bin/bash\nLOCAL_FILE=\"/usr/share/HackerOS/Config-Files/release-info.json\"\nVER_TMP=\"/tmp/version.hacker\"\nif [ ! -f \"$LOCAL_FILE\" ]; then exit 1; fi\nif [ ! -f \"$VER_TMP\" ]; then exit 1; fi\nLOCAL=$(grep version \"$LOCAL_FILE\" | grep -o \"[0-9][0-9.]*\" | head -1)\nREMOTE=$(cat \"$VER_TMP\" | tr -d \"[]\\n\")\nif [ -z \"$LOCAL\" ] || [ -z \"$REMOTE\" ]; then exit 1; fi\nNEWER=$(printf \"%s\n%s\" \"$LOCAL\" \"$REMOTE\" | sort -V | tail -n1)\nif [ \"$NEWER\" = \"$LOCAL\" ]; then exit 0; else exit 1; fi\n')"
+> chmod +x /tmp/hl_ver_check.sh
 
-> bash -c "LOCAL=$(grep '\"version\"' /usr/share/HackerOS/Config-Files/release-info.json | sed 's/.*: \"\\(.*\\) ->.*/\\1/' | tr -d '\"' | awk '{print $1}'); REMOTE=$(sed 's/^\\[\\(.*\\)\\]$/\\1/' /tmp/version.hacker); [ \"$(printf '%s\n' \"$LOCAL\" \"$REMOTE\" | sort -V | tail -n1)\" != \"$LOCAL\" ] && echo NEEDS_UPDATE || echo UP_TO_DATE"
+;; ─── Porownaj wersje ──────────────────────────────────────────────────────────
+
+~> Porownuje wersje...
+
+> /tmp/hl_ver_check.sh
 
 ? ok
-    ::green System jest aktualny. Aktualizacja nie jest wymagana.
-    > rm -f /tmp/version.hacker
+    ::green System jest aktualny
+    ~> Brak dostepnych aktualizacji
+    > rm -f /tmp/version.hacker /tmp/hl_ver_check.sh
 done
 
 ? err
-    ;; exit code != 0 oznacza że skrypt wykrył NEEDS_UPDATE lub błąd
-    ;; Sprawdzamy czy rzeczywiście potrzeba aktualizacji
-    ~> Dostępna jest nowa wersja HackerOS — uruchamiam aktualizację...
+    ~> Dostepna jest nowa wersja HackerOS
+    ~> Uruchamiam aktualizacje...
+    ::nl
 
-    ;; Usuń stary klon jeśli istnieje
     > rm -rf /tmp/HackerOS-Updates
 
-    ;; Klonuj repo z aktualizacją
     ~> Klonowanie repozytorium aktualizacji...
     > git clone --depth=1 "https://github.com/HackerOS-Linux-System/HackerOS-Updates.git" /tmp/HackerOS-Updates
 
     ? ok
-        ::green Repozytorium sklonowane v
+        ::green Repozytorium sklonowane
 
-        > chmod 755 /tmp/HackerOS-Updates/unpack.sh
-
-        ~> Uruchamianie unpack.sh...
-        > /tmp/HackerOS-Updates/unpack.sh
+        ::exists /tmp/HackerOS-Updates/unpack.hl
 
         ? ok
-            ::green Aktualizacja zakończona pomyślnie v
+            ~> Uruchamianie unpack.hl...
+            > hl run /tmp/HackerOS-Updates/unpack.hl
+            ? ok
+                ::green Aktualizacja zakonczona pomyslnie
+            done
+            ? err
+                ::red Blad podczas wykonywania unpack.hl
+            done
         done
 
-        ? err
-            ::red Błąd podczas wykonywania unpack.sh
+        ::exists /tmp/HackerOS-Updates/unpack.sh
+
+        ? ok
+            > chmod 755 /tmp/HackerOS-Updates/unpack.sh
+            ~> Uruchamianie unpack.sh...
+            > /tmp/HackerOS-Updates/unpack.sh
+            ? ok
+                ::green Aktualizacja zakonczona pomyslnie
+            done
+            ? err
+                ::red Blad podczas wykonywania unpack.sh
+            done
         done
     done
 
     ? err
-        ::red Nie udało się sklonować repozytorium aktualizacji.
+        ::red Nie udalo sie sklonowac repozytorium
+        ~> Sprawdz polaczenie z internetem
     done
 
-    ;; Sprzątanie
-    > rm -f /tmp/version.hacker
+    > rm -f /tmp/version.hacker /tmp/hl_ver_check.sh
 done
