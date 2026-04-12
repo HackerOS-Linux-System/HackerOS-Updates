@@ -1,0 +1,2 @@
+^> apt install nvidia-driver nvidia-kernel-dkms nvidia-smi libnvidia-ml1 nvidia-settings nvidia-cuda-mps
+;; if we wont remove ^> sudo apt remove --purge -y nvidia-driver* nvidia-kernel-dkms* nvidia-smi* libnvidia-ml1* nvidia-settings* nvidia-cuda-mps*
