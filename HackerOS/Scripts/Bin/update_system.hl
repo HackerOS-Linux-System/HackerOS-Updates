@@ -3,31 +3,16 @@
 // flatpak
 // fwupdmgr
 
-;; --- Logowanie do pliku ---
-
-> mkdir -p /tmp
-> LOGFILE="/tmp/update_log_$(date +%Y%m%d_%H%M%S).txt"
-
-;; =============================================
-;; FUNKCJA: Nagłówek sekcji
-;; =============================================
-
-: print_header def
-    ::hr 60
-    ::bold @header_title
-    ::hr 60
-done
-
 ;; =============================================
 ;; FUNKCJA: Autentykacja sudo
 ;; =============================================
 
 : authenticate_sudo def
-    ::yellow 🔐 Authenticating sudo credentials...
+    ::yellow Authenticating sudo credentials...
     ^> -v
 
     ? err
-        ::red ❌ Sudo authentication failed. Exiting.
+        ::red Sudo authentication failed. Exiting.
         > exit 1
     done
 done
@@ -44,35 +29,35 @@ done
     ::exists /usr/bin/apt
 
     ? ok
-        ::cyan 🔄 Aktualizacja list pakietów...
+        ::cyan Aktualizacja list pakietow...
         ^> apt update -y
 
         ? err
-            ::red ❌ APT update failed. Check log for details.
+            ::red APT update failed. Check log for details.
         done
 
         ? ok
-            ::cyan 🔄 Instalowanie aktualizacji pakietów...
+            ::cyan Instalowanie aktualizacji pakietow...
             ^> apt upgrade -y
 
             ? err
-                ::red ❌ APT upgrade failed. Check log for details.
+                ::red APT upgrade failed. Check log for details.
             done
 
             ? ok
-                ::cyan 🔄 Usuwanie nieużywanych pakietów...
+                ::cyan Usuwanie nieuzywanych pakietow...
                 ^> apt autoremove -y
 
-                ::cyan 🔄 Czyszczenie cache pakietów...
+                ::cyan Czyszczenie cache pakietow...
                 ^> apt autoclean -y
 
-                ::green ✔ APT updates completed successfully.
+                ::green APT updates completed successfully.
             done
         done
     done
 
     ? err
-        ::red ❌ APT not found at /usr/bin/apt. Skipping APT updates.
+        ::red APT not found at /usr/bin/apt. Skipping APT updates.
     done
 done
 
@@ -88,20 +73,20 @@ done
     > which snap > /dev/null 2>&1
 
     ? ok
-        ::cyan 🔄 Odświeżanie pakietów Snap...
+        ::cyan Odswiezanie pakietow Snap...
         ^> snap refresh
 
         ? ok
-            ::green ✔ Snap updates completed successfully.
+            ::green Snap updates completed successfully.
         done
 
         ? err
-            ::red ❌ Snap refresh failed. Check log for details.
+            ::red Snap refresh failed. Check log for details.
         done
     done
 
     ? err
-        ::yellow ⚠ Snap not installed. Skipping Snap updates.
+        ::yellow Snap not installed. Skipping Snap updates.
     done
 done
 
@@ -117,20 +102,20 @@ done
     > which flatpak > /dev/null 2>&1
 
     ? ok
-        ::cyan 🔄 Aktualizacja pakietów Flatpak...
+        ::cyan Aktualizacja pakietow Flatpak...
         > flatpak update -y
 
         ? ok
-            ::green ✔ Flatpak updates completed successfully.
+            ::green Flatpak updates completed successfully.
         done
 
         ? err
-            ::red ❌ Flatpak update failed. Check log for details.
+            ::red Flatpak update failed. Check log for details.
         done
     done
 
     ? err
-        ::yellow ⚠ Flatpak not installed. Skipping Flatpak updates.
+        ::yellow Flatpak not installed. Skipping Flatpak updates.
     done
 done
 
@@ -146,23 +131,23 @@ done
     > which fwupdmgr > /dev/null 2>&1
 
     ? ok
-        ::cyan 🔄 Odświeżanie metadanych firmware...
+        ::cyan Odswiezanie metadanych firmware...
         ^> fwupdmgr refresh
 
-        ::cyan 🔄 Stosowanie aktualizacji firmware...
+        ::cyan Stosowanie aktualizacji firmware...
         ^> fwupdmgr update
 
         ? ok
-            ::green ✔ Firmware updates completed successfully.
+            ::green Firmware updates completed successfully.
         done
 
         ? err
-            ::red ❌ Firmware update failed. Check log for details.
+            ::red Firmware update failed. Check log for details.
         done
     done
 
     ? err
-        ::yellow ⚠ fwupdmgr not installed. Skipping firmware updates.
+        ::yellow fwupdmgr not installed. Skipping firmware updates.
     done
 done
 
@@ -178,25 +163,25 @@ done
     ::exists /usr/share/HackerOS/Scripts/Bin/update-hackeros.hl
 
     ? ok
-        ::cyan 🔄 Uruchamianie skryptu aktualizacji HackerOS...
+        ::cyan Uruchamianie skryptu aktualizacji HackerOS...
         > hl run /usr/share/HackerOS/Scripts/Bin/update-hackeros.hl
 
         ? ok
-            ::green ✔ HackerOS updates completed successfully.
+            ::green HackerOS updates completed successfully.
         done
 
         ? err
-            ::red ❌ HackerOS update failed. Check log for details.
+            ::red HackerOS update failed. Check log for details.
         done
     done
 
     ? err
-        ::red ❌ Skrypt update-hackeros.hl nie istnieje. Pomijam.
+        ::red Skrypt update-hackeros.hl nie istnieje. Pomijam.
     done
 done
 
 ;; =============================================
-;; FUNKCJA: Aktualizacja Tapet (Wallpapers)
+;; FUNKCJA: Aktualizacja Tapet
 ;; =============================================
 
 : update_wallpapers def
@@ -207,25 +192,25 @@ done
     ::exists /usr/share/HackerOS/Scripts/Bin/update-wallpapers.hl
 
     ? ok
-        ::cyan 🔄 Uruchamianie skryptu aktualizacji tapet...
+        ::cyan Uruchamianie skryptu aktualizacji tapet...
         > hl run /usr/share/HackerOS/Scripts/Bin/update-wallpapers.hl
 
         ? ok
-            ::green ✔ Wallpaper updates completed successfully.
+            ::green Wallpaper updates completed successfully.
         done
 
         ? err
-            ::red ❌ Wallpaper update failed. Check log for details.
+            ::red Wallpaper update failed. Check log for details.
         done
     done
 
     ? err
-        ::red ❌ Skrypt update-wallpapers.hl nie istnieje. Pomijam.
+        ::red Skrypt update-wallpapers.hl nie istnieje. Pomijam.
     done
 done
 
 ;; =============================================
-;; FUNKCJA: Cały proces aktualizacji
+;; FUNKCJA: Caly proces aktualizacji
 ;; =============================================
 
 : perform_updates def
@@ -233,7 +218,7 @@ done
     ::bold System Update Process
     ::hr 60
 
-    ::cyan 🚀 Starting system updates...
+    ::cyan Starting system updates...
 
     -- update_apt
     -- update_snap
@@ -244,12 +229,15 @@ done
 
     ::nl
     ::hr 60
-    ::green 🎉 Wszystkie aktualizacje zakończone!
+    ::green Wszystkie aktualizacje zakonczone!
     ::hr 60
 done
 
 ;; =============================================
 ;; FUNKCJA: Menu po aktualizacji
+;; Uwaga: echo jest zabronione w HL.
+;; Wybor uzytkownika zapisujemy do pliku tymczasowego
+;; i sprawdzamy przez grep (unika zakazanego echo | grep).
 ;; =============================================
 
 : show_menu def
@@ -258,52 +246,66 @@ done
     ::hr 60
 
     ::cyan Available actions:
-    ~>  e) Exit      — Zamknij terminal
-    ~>  r) Reboot    — Uruchom ponownie system
-    ~>  s) Shutdown  — Wyłącz system
-    ~>  t) Try again — Uruchom ponownie aktualizację
+    ~>   e) Exit      -- Zamknij terminal
+    ~>   r) Reboot    -- Uruchom ponownie system
+    ~>   s) Shutdown  -- Wylacz system
+    ~>   t) Try again -- Uruchom ponownie aktualizacje
 
-    ~> Wybierz opcję [e/r/s/t]:
-    > read -n 1 choice && echo
+    ~> Wybierz opcje [e/r/s/t]:
 
-    > echo "$choice" | grep -qi "^e$"
+    ;; Wczytaj 1 znak i zapisz do pliku tmp (echo zabronione w HL)
+    > bash -c "read -n 1 choice && echo && printf '%s' \"$choice\" > /tmp/hl_menu_choice.tmp"
+
+    ;; Opcja e -- exit
+    > grep -qi "^e$" /tmp/hl_menu_choice.tmp
+
     ? ok
         ::green Exiting update mode...
+        > rm -f /tmp/hl_menu_choice.tmp
         > exit 0
     done
 
-    > echo "$choice" | grep -qi "^r$"
+    ;; Opcja r -- reboot
+    > grep -qi "^r$" /tmp/hl_menu_choice.tmp
+
     ? ok
         ::yellow Initiating system reboot...
+        > rm -f /tmp/hl_menu_choice.tmp
         ^> reboot
     done
 
-    > echo "$choice" | grep -qi "^s$"
+    ;; Opcja s -- shutdown
+    > grep -qi "^s$" /tmp/hl_menu_choice.tmp
+
     ? ok
         ::yellow Initiating system shutdown...
+        > rm -f /tmp/hl_menu_choice.tmp
         ^> shutdown -h now
     done
 
-    > echo "$choice" | grep -qi "^t$"
+    ;; Opcja t -- try again
+    > grep -qi "^t$" /tmp/hl_menu_choice.tmp
+
     ? ok
         ::yellow Restarting update process...
+        > rm -f /tmp/hl_menu_choice.tmp
         -- authenticate_sudo
         -- perform_updates
         -- show_menu
     done
 
-    ? err
-        ::red ❌ Nieprawidłowa opcja. Użyj: e, r, s lub t.
-        -- show_menu
-    done
+    ;; Nieznana opcja -- sprzatanie i ponow menu
+    > rm -f /tmp/hl_menu_choice.tmp
+    ::red Nieprawidlowa opcja. Uzyj: e, r, s lub t.
+    -- show_menu
 done
 
 ;; =============================================
-;; MAIN — Uruchomienie
+;; MAIN
 ;; =============================================
 
 ::hr 60
-::bold System Update Script — HackerOS
+::bold System Update Script -- HackerOS
 ::hr 60
 
 ::cyan Initializing update process...
