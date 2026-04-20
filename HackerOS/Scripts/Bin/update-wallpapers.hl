@@ -1,1 +1,109 @@
+/// Aktualizacja tapet HackerOS
+/// Odpowiednik: wallpaper-update.sh → .hl
+/// Wymaga: curl, git, jq
 
+// curl
+// git
+// jq
+
+% LOCAL_JSON          = /usr/share/wallpapers/release-info.json
+% REMOTE_VERSION_URL  = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main//version.hacker
+% TMP_DIR             = /tmp/HackerOS-Updates
+
+;; --- Sprawdzenie czy plik lokalny istnieje ---
+
+::exists @LOCAL_JSON
+
+? err
+    ::red Brak pliku release-info.json!
+    > exit 1
+done
+
+;; --- Odczyt wersji lokalnej ---
+
+>> jq -r '.version' @LOCAL_JSON
+
+? err
+    ::red Nie udało się odczytać lokalnej wersji.
+    > exit 1
+done
+
+;; Pobierz wersję (bez spacji i tekstu po spacji) i zapisz do zmiennej
+
+> jq -r '.version' /usr/share/wallpapers/release-info.json | sed 's/ .*//' > /tmp/hl_local_version.tmp
+> cat /tmp/hl_local_version.tmp
+
+::set LOCAL_VERSION
+> cat /tmp/hl_local_version.tmp
+::set LOCAL_VERSION
+
+;; --- Pobranie wersji zdalnej z GitHuba ---
+
+>> curl -fsSL @REMOTE_VERSION_URL
+
+? err
+    ::red Nie udało się pobrać wersji z GitHuba.
+    > exit 1
+done
+
+> curl -fsSL @REMOTE_VERSION_URL | tr -d '[]' > /tmp/hl_remote_version.tmp
+::set REMOTE_VERSION
+> cat /tmp/hl_remote_version.tmp
+::set REMOTE_VERSION
+
+;; --- Porównanie wersji ---
+
+: compare_and_update def
+    ~> Lokalna wersja : @LOCAL_VERSION
+    ~> Zdalna wersja  : @REMOTE_VERSION
+
+    ;; Sprawdź czy zdalna jest nowsza (sort -V)
+    > printf "%s\n%s" "$(cat /tmp/hl_local_version.tmp)" "$(cat /tmp/hl_remote_version.tmp)" | sort -V | head -n1 | diff - /tmp/hl_remote_version.tmp > /dev/null
+
+    ? ok
+        ~> Znaleziono nowszą wersję tapet: @REMOTE_VERSION
+        ~> Aktualna wersja: @LOCAL_VERSION
+
+        ;; Usuń stary katalog TMP
+        > rm -rf /tmp/HackerOS-Updates
+
+        ;; Klonowanie repozytorium
+        > git clone https://github.com/HackerOS-Linux-System/HackerOS-Updates.git /tmp/HackerOS-Updates
+
+        ? err
+            ::red Błąd podczas klonowania repozytorium!
+            > exit 1
+        done
+
+        ;; Sprawdź katalog wallpaper-updates
+        ::exists /tmp/HackerOS-Updates/wallpaper-updates
+
+        ? err
+            ::red Brak katalogu wallpaper-updates w repozytorium!
+            > exit 1
+        done
+
+        ;; Nadaj uprawnienia i uruchom skrypt
+        ^> chmod a+x /tmp/HackerOS-Updates/wallpaper-updates/unpack.sh
+        > cd /tmp/HackerOS-Updates/wallpaper-updates && ./unpack.sh
+
+        ? ok
+            ::green Aktualizacja tapet zakończona ✓
+        done
+
+        ? err
+            ::red Błąd podczas uruchamiania unpack.sh!
+            > exit 1
+        done
+
+    done
+
+    ? err
+        ~> Brak nowych wersji tapet. Obecna wersja: @LOCAL_VERSION
+    done
+done
+
+-- compare_and_update
+
+;; Sprzątanie plików tymczasowych
+> rm -f /tmp/hl_local_version.tmp /tmp/hl_remote_version.tmp
