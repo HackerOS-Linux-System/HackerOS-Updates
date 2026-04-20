@@ -1,0 +1,313 @@
+// curl
+// snap
+// flatpak
+// fwupdmgr
+
+;; --- Logowanie do pliku ---
+
+> mkdir -p /tmp
+> LOGFILE="/tmp/update_log_$(date +%Y%m%d_%H%M%S).txt"
+
+;; =============================================
+;; FUNKCJA: Nagłówek sekcji
+;; =============================================
+
+: print_header def
+    ::hr 60
+    ::bold @header_title
+    ::hr 60
+done
+
+;; =============================================
+;; FUNKCJA: Autentykacja sudo
+;; =============================================
+
+: authenticate_sudo def
+    ::yellow 🔐 Authenticating sudo credentials...
+    ^> -v
+
+    ? err
+        ::red ❌ Sudo authentication failed. Exiting.
+        > exit 1
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Aktualizacja APT
+;; =============================================
+
+: update_apt def
+    ::hr 60
+    ::bold APT Package Updates
+    ::hr 60
+
+    ::exists /usr/bin/apt
+
+    ? ok
+        ::cyan 🔄 Aktualizacja list pakietów...
+        ^> apt update -y
+
+        ? err
+            ::red ❌ APT update failed. Check log for details.
+        done
+
+        ? ok
+            ::cyan 🔄 Instalowanie aktualizacji pakietów...
+            ^> apt upgrade -y
+
+            ? err
+                ::red ❌ APT upgrade failed. Check log for details.
+            done
+
+            ? ok
+                ::cyan 🔄 Usuwanie nieużywanych pakietów...
+                ^> apt autoremove -y
+
+                ::cyan 🔄 Czyszczenie cache pakietów...
+                ^> apt autoclean -y
+
+                ::green ✔ APT updates completed successfully.
+            done
+        done
+    done
+
+    ? err
+        ::red ❌ APT not found at /usr/bin/apt. Skipping APT updates.
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Aktualizacja Snap
+;; =============================================
+
+: update_snap def
+    ::hr 60
+    ::bold Snap Package Updates
+    ::hr 60
+
+    > which snap > /dev/null 2>&1
+
+    ? ok
+        ::cyan 🔄 Odświeżanie pakietów Snap...
+        ^> snap refresh
+
+        ? ok
+            ::green ✔ Snap updates completed successfully.
+        done
+
+        ? err
+            ::red ❌ Snap refresh failed. Check log for details.
+        done
+    done
+
+    ? err
+        ::yellow ⚠ Snap not installed. Skipping Snap updates.
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Aktualizacja Flatpak
+;; =============================================
+
+: update_flatpak def
+    ::hr 60
+    ::bold Flatpak Package Updates
+    ::hr 60
+
+    > which flatpak > /dev/null 2>&1
+
+    ? ok
+        ::cyan 🔄 Aktualizacja pakietów Flatpak...
+        > flatpak update -y
+
+        ? ok
+            ::green ✔ Flatpak updates completed successfully.
+        done
+
+        ? err
+            ::red ❌ Flatpak update failed. Check log for details.
+        done
+    done
+
+    ? err
+        ::yellow ⚠ Flatpak not installed. Skipping Flatpak updates.
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Aktualizacja Firmware
+;; =============================================
+
+: update_firmware def
+    ::hr 60
+    ::bold Firmware Updates
+    ::hr 60
+
+    > which fwupdmgr > /dev/null 2>&1
+
+    ? ok
+        ::cyan 🔄 Odświeżanie metadanych firmware...
+        ^> fwupdmgr refresh
+
+        ::cyan 🔄 Stosowanie aktualizacji firmware...
+        ^> fwupdmgr update
+
+        ? ok
+            ::green ✔ Firmware updates completed successfully.
+        done
+
+        ? err
+            ::red ❌ Firmware update failed. Check log for details.
+        done
+    done
+
+    ? err
+        ::yellow ⚠ fwupdmgr not installed. Skipping firmware updates.
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Aktualizacja HackerOS
+;; =============================================
+
+: update_hackeros def
+    ::hr 60
+    ::bold HackerOS Updates
+    ::hr 60
+
+    ::exists /usr/share/HackerOS/Scripts/Bin/update-hackeros.hl
+
+    ? ok
+        ::cyan 🔄 Uruchamianie skryptu aktualizacji HackerOS...
+        > hl run /usr/share/HackerOS/Scripts/Bin/update-hackeros.hl
+
+        ? ok
+            ::green ✔ HackerOS updates completed successfully.
+        done
+
+        ? err
+            ::red ❌ HackerOS update failed. Check log for details.
+        done
+    done
+
+    ? err
+        ::red ❌ Skrypt update-hackeros.hl nie istnieje. Pomijam.
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Aktualizacja Tapet (Wallpapers)
+;; =============================================
+
+: update_wallpapers def
+    ::hr 60
+    ::bold Wallpaper Updates
+    ::hr 60
+
+    ::exists /usr/share/HackerOS/Scripts/Bin/update-wallpapers.hl
+
+    ? ok
+        ::cyan 🔄 Uruchamianie skryptu aktualizacji tapet...
+        > hl run /usr/share/HackerOS/Scripts/Bin/update-wallpapers.hl
+
+        ? ok
+            ::green ✔ Wallpaper updates completed successfully.
+        done
+
+        ? err
+            ::red ❌ Wallpaper update failed. Check log for details.
+        done
+    done
+
+    ? err
+        ::red ❌ Skrypt update-wallpapers.hl nie istnieje. Pomijam.
+    done
+done
+
+;; =============================================
+;; FUNKCJA: Cały proces aktualizacji
+;; =============================================
+
+: perform_updates def
+    ::hr 60
+    ::bold System Update Process
+    ::hr 60
+
+    ::cyan 🚀 Starting system updates...
+
+    -- update_apt
+    -- update_snap
+    -- update_flatpak
+    -- update_firmware
+    -- update_hackeros
+    -- update_wallpapers
+
+    ::nl
+    ::hr 60
+    ::green 🎉 Wszystkie aktualizacje zakończone!
+    ::hr 60
+done
+
+;; =============================================
+;; FUNKCJA: Menu po aktualizacji
+;; =============================================
+
+: show_menu def
+    ::hr 60
+    ::bold Update Options
+    ::hr 60
+
+    ::cyan Available actions:
+    ~>  e) Exit      — Zamknij terminal
+    ~>  r) Reboot    — Uruchom ponownie system
+    ~>  s) Shutdown  — Wyłącz system
+    ~>  t) Try again — Uruchom ponownie aktualizację
+
+    ~> Wybierz opcję [e/r/s/t]:
+    > read -n 1 choice && echo
+
+    > echo "$choice" | grep -qi "^e$"
+    ? ok
+        ::green Exiting update mode...
+        > exit 0
+    done
+
+    > echo "$choice" | grep -qi "^r$"
+    ? ok
+        ::yellow Initiating system reboot...
+        ^> reboot
+    done
+
+    > echo "$choice" | grep -qi "^s$"
+    ? ok
+        ::yellow Initiating system shutdown...
+        ^> shutdown -h now
+    done
+
+    > echo "$choice" | grep -qi "^t$"
+    ? ok
+        ::yellow Restarting update process...
+        -- authenticate_sudo
+        -- perform_updates
+        -- show_menu
+    done
+
+    ? err
+        ::red ❌ Nieprawidłowa opcja. Użyj: e, r, s lub t.
+        -- show_menu
+    done
+done
+
+;; =============================================
+;; MAIN — Uruchomienie
+;; =============================================
+
+::hr 60
+::bold System Update Script — HackerOS
+::hr 60
+
+::cyan Initializing update process...
+
+-- authenticate_sudo
+-- perform_updates
+-- show_menu
