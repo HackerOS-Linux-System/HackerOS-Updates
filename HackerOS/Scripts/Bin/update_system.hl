@@ -235,9 +235,10 @@ done
 
 ;; =============================================
 ;; FUNKCJA: Menu po aktualizacji
-;; Uwaga: echo jest zabronione w HL.
-;; Wybor uzytkownika zapisujemy do pliku tymczasowego
-;; i sprawdzamy przez grep (unika zakazanego echo | grep).
+;; Wybor uzytkownika przez read do pliku tmp,
+;; nastepnie grep sprawdza zawartosc -- echo
+;; jest zabronione w HL wiec nie mozna uzyc
+;; echo "$choice" | grep
 ;; =============================================
 
 : show_menu def
@@ -253,8 +254,8 @@ done
 
     ~> Wybierz opcje [e/r/s/t]:
 
-    ;; Wczytaj 1 znak i zapisz do pliku tmp (echo zabronione w HL)
-    > bash -c "read -n 1 choice && echo && printf '%s' \"$choice\" > /tmp/hl_menu_choice.tmp"
+    ;; read -n 1 i zapis do pliku tmp bez echo
+    > bash -c "read -n 1 choice && printf '%s' \"$choice\" > /tmp/hl_menu_choice.tmp && echo"
 
     ;; Opcja e -- exit
     > grep -qi "^e$" /tmp/hl_menu_choice.tmp
@@ -294,7 +295,7 @@ done
         -- show_menu
     done
 
-    ;; Nieznana opcja -- sprzatanie i ponow menu
+    ;; Nieznana opcja
     > rm -f /tmp/hl_menu_choice.tmp
     ::red Nieprawidlowa opcja. Uzyj: e, r, s lub t.
     -- show_menu
