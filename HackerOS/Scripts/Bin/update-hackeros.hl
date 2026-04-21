@@ -1,17 +1,15 @@
-/// HackerOS Update Checker
-/// Sprawdza wersje i uruchamia aktualizacje jesli potrzebna
-
 // curl
 // git
 
-% local_file  = /usr/share/HackerOS/Config-Files/release-info.json
-% version_tmp = /tmp/version.hacker
-% updates_dir = /tmp/HackerOS-Updates
+% LOCAL_FILE  = /usr/share/HackerOS/Config-Files/release-info.json
+% VER_TMP     = /tmp/hl_hackeros_remote.tmp
+% LOCAL_TMP   = /tmp/hl_hackeros_local.tmp
+% CHECK_TMP   = /tmp/hl_hackeros_check.tmp
+% UPDATES_DIR = /tmp/HackerOS-Updates
 
-;; ─── Sprawdz polaczenie z internetem ─────────────────────────────────────────
+;; --- Sprawdz polaczenie z internetem ---
 
 ~> Sprawdzanie polaczenia z internetem...
-
 > ping -c 1 -W 1 google.com
 
 ? ok
@@ -21,86 +19,153 @@ done
 ? err
     ::red Brak polaczenia z internetem
     ~> Przerywam aktualizacje
+    > exit 1
 done
 
-;; ─── Pobierz zdalny plik wersji ──────────────────────────────────────────────
+;; --- Sprawdz czy plik lokalny istnieje ---
 
-~> Pobieranie pliku wersji...
+::exists @LOCAL_FILE
 
-> curl -fsSL -o /tmp/version.hacker "https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
+? err
+    ::red Brak pliku release-info.json!
+    ~> Oczekiwana sciezka: @LOCAL_FILE
+    > exit 1
+done
+
+;; --- Odczyt wersji lokalnej ---
+
+~> Odczyt lokalnej wersji...
+> grep version @LOCAL_FILE | grep -o "[0-9][0-9.]*" | head -1 > @LOCAL_TMP
+
+? err
+    ::red Nie udalo sie odczytac lokalnej wersji.
+    > exit 1
+done
+
+> test -s @LOCAL_TMP
+
+? err
+    ::red Plik lokalnej wersji jest pusty.
+    > exit 1
+done
+
+;; --- Pobierz zdalny plik wersji ---
+
+~> Pobieranie pliku wersji z GitHuba...
+> curl -fsSL -o @VER_TMP "https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
 
 ? ok
     ::green Plik wersji pobrany
 done
 
 ? err
-    ::red Nie udalo sie pobrac pliku wersji
-    ~> Przerywam
+    ::red Nie udalo sie pobrac pliku wersji z GitHuba.
+    > exit 1
 done
 
-;; ─── Zapisz skrypt porownania wersji do pliku ────────────────────────────────
-;; Uzywamy python3 zeby uniknac problemow z apostrofami i $() w bash -c
+;; Oczyszcz zdalny plik z nawiasow kwadratowych
+> tr -d "[]" < @VER_TMP > @CHECK_TMP
+> mv @CHECK_TMP @VER_TMP
 
-> python3 -c "open('/tmp/hl_ver_check.sh','w').write('#!/bin/bash\nLOCAL_FILE=\"/usr/share/HackerOS/Config-Files/release-info.json\"\nVER_TMP=\"/tmp/version.hacker\"\nif [ ! -f \"$LOCAL_FILE\" ]; then exit 1; fi\nif [ ! -f \"$VER_TMP\" ]; then exit 1; fi\nLOCAL=$(grep version \"$LOCAL_FILE\" | grep -o \"[0-9][0-9.]*\" | head -1)\nREMOTE=$(cat \"$VER_TMP\" | tr -d \"[]\\n\")\nif [ -z \"$LOCAL\" ] || [ -z \"$REMOTE\" ]; then exit 1; fi\nNEWER=$(printf \"%s\n%s\" \"$LOCAL\" \"$REMOTE\" | sort -V | tail -n1)\nif [ \"$NEWER\" = \"$LOCAL\" ]; then exit 0; else exit 1; fi\n')"
-> chmod +x /tmp/hl_ver_check.sh
-
-;; ─── Porownaj wersje ──────────────────────────────────────────────────────────
-
-~> Porownuje wersje...
-
-> /tmp/hl_ver_check.sh
-
-? ok
-    ::green System jest aktualny
-    ~> Brak dostepnych aktualizacji
-    > rm -f /tmp/version.hacker /tmp/hl_ver_check.sh
-done
+> test -s @VER_TMP
 
 ? err
-    ~> Dostepna jest nowa wersja HackerOS
-    ~> Uruchamiam aktualizacje...
-    ::nl
+    ::red Zdalny plik wersji jest pusty.
+    > exit 1
+done
 
-    > rm -rf /tmp/HackerOS-Updates
+;; --- Wyswietl wersje ---
 
-    ~> Klonowanie repozytorium aktualizacji...
-    > git clone --depth=1 "https://github.com/HackerOS-Linux-System/HackerOS-Updates.git" /tmp/HackerOS-Updates
+~> Lokalna wersja:
+> cat @LOCAL_TMP
+
+~> Zdalna wersja:
+> cat @VER_TMP
+
+;; --- Porownanie wersji ---
+;; Polacz obie wersje, sort -V, tail -n1 zwraca wieksza
+;; Jesli wynik == zdalna => zdalna jest nowsza lub rowna
+
+> cat @LOCAL_TMP @VER_TMP | sort -V | tail -n1 > @CHECK_TMP
+
+;; Czy wynik diff(zdalna, check) == 0 => zdalna jest najwieksza
+> diff -q @VER_TMP @CHECK_TMP > /dev/null 2>&1
+
+? ok
+    ;; Zdalna >= lokalna -- sprawdz czy sa rozne
+    > diff -q @LOCAL_TMP @VER_TMP > /dev/null 2>&1
 
     ? ok
-        ::green Repozytorium sklonowane
-
-        ::exists /tmp/HackerOS-Updates/unpack.hl
-
-        ? ok
-            ~> Uruchamianie unpack.hl...
-            > hl run /tmp/HackerOS-Updates/unpack.hl
-            ? ok
-                ::green Aktualizacja zakonczona pomyslnie
-            done
-            ? err
-                ::red Blad podczas wykonywania unpack.hl
-            done
-        done
-
-        ::exists /tmp/HackerOS-Updates/unpack.sh
-
-        ? ok
-            > chmod 755 /tmp/HackerOS-Updates/unpack.sh
-            ~> Uruchamianie unpack.sh...
-            > /tmp/HackerOS-Updates/unpack.sh
-            ? ok
-                ::green Aktualizacja zakonczona pomyslnie
-            done
-            ? err
-                ::red Blad podczas wykonywania unpack.sh
-            done
-        done
+        ::green System jest aktualny
+        ~> Brak dostepnych aktualizacji HackerOS
+        > rm -f @LOCAL_TMP @VER_TMP @CHECK_TMP
     done
 
     ? err
-        ::red Nie udalo sie sklonowac repozytorium
-        ~> Sprawdz polaczenie z internetem
-    done
+        ~> Dostepna jest nowa wersja HackerOS!
+        ::nl
 
-    > rm -f /tmp/version.hacker /tmp/hl_ver_check.sh
+        > rm -rf @UPDATES_DIR
+
+        ~> Klonowanie repozytorium aktualizacji...
+        > git clone --depth=1 "https://github.com/HackerOS-Linux-System/HackerOS-Updates.git" @UPDATES_DIR
+
+        ? ok
+            ::green Repozytorium sklonowane
+
+            ;; Priorytet: unpack.hl
+            ::exists /tmp/HackerOS-Updates/unpack.hl
+
+            ? ok
+                ~> Uruchamianie unpack.hl...
+                > hl run /tmp/HackerOS-Updates/unpack.hl
+
+                ? ok
+                    ::green Aktualizacja zakonczona pomyslnie
+                done
+
+                ? err
+                    ::red Blad podczas wykonywania unpack.hl
+                done
+            done
+
+            ;; Fallback: unpack.sh tylko jesli nie ma unpack.hl
+            ::exists /tmp/HackerOS-Updates/unpack.hl
+
+            ? err
+                ::exists /tmp/HackerOS-Updates/unpack.sh
+
+                ? ok
+                    ^> chmod 755 /tmp/HackerOS-Updates/unpack.sh
+                    ~> Uruchamianie unpack.sh (fallback)...
+                    > /tmp/HackerOS-Updates/unpack.sh
+
+                    ? ok
+                        ::green Aktualizacja zakonczona pomyslnie
+                    done
+
+                    ? err
+                        ::red Blad podczas wykonywania unpack.sh
+                    done
+                done
+
+                ? err
+                    ::red Brak pliku unpack.hl i unpack.sh w repozytorium!
+                done
+            done
+        done
+
+        ? err
+            ::red Nie udalo sie sklonowac repozytorium
+            ~> Sprawdz polaczenie z internetem
+        done
+
+        > rm -f @LOCAL_TMP @VER_TMP @CHECK_TMP
+    done
+done
+
+? err
+    ::green System jest aktualny
+    ~> Lokalna wersja jest aktualna lub nowsza
+    > rm -f @LOCAL_TMP @VER_TMP @CHECK_TMP
 done
