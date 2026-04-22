@@ -1,0 +1,208 @@
+;;                                                                ,-.  
+;;          ,--,             ,-.----.                         ,--/ /|  
+;;        ,'_ /|       ,---, \    /  \                      ,--. :/ |  
+;;   .--. |  | :   ,-+-. /  ||   :    |                     :  : ' /   
+;; ,'_ /| :  . |  ,--.'|'   ||   | .\ :  ,--.--.     ,---.  |  '  /    
+;; |  ' | |  . . |   |  ,"' |.   : |: | /       \   /     \ '  |  :    
+;; |  | ' |  | | |   | /  | ||   |  \ :.--.  .-. | /    / ' |  |   \   
+;; :  | | :  ' ; |   | |  | ||   : .  | \__\/: . ..    ' /  '  : |. \  
+;; |  ; ' |  | ' |   | |  |/ :     |`-' ," .--.; |'   ; :__ |  | ' \ \ 
+;; :  | : ;  ; | |   | |--'  :   : :   /  /  ,.  |'   | '.'|'  : |--'  
+;; '  :  `--'   \|   |/      |   | :  ;  :   .'   \   :    :;  |,'     
+;; :  ,      .-./'---'       `---'.|  |  ,     .-./\   \  / '--'       
+;;  `--`----'                  `---`   `--`---'     `----'             
+;;    ,--,                                                             
+;; ,---.'|                                                             
+;; |   | :                                                             
+;; :   : |     ,--,  ,----.                                     ,--,   
+;; |   ' :   ,--.'| /   /  \-.         ,--,   ,---.    __  ,-.,--.'|   
+;; ;   ; '   |  |, |   :    :|       ,'_ /|  '   ,'\ ,' ,'/ /||  |,    
+;; '   | |__ `--'_ |   | .\  .  .--. |  | : /   /   |'  | |' |`--'_    
+;; |   | :.'|,' ,'|.   ; |:  |,'_ /| :  . |.   ; ,. :|  |   ,',' ,'|   
+;; '   :    ;'  | |'   .  \  ||  ' | |  . .'   | |: :'  :  /  '  | |   
+;; |   |  ./ |  | : \   `.   ||  | ' |  | |'   | .; :|  | '   |  | :   
+;; ;   : ;   '  : |__`--'""| |:  | : ;  ; ||   :    |;  : |   '  : |__ 
+;; |   ,/    |  | '.'| |   | |'  :  `--'   \\   \  / |  , ;   |  | '.'|
+;; '---'     ;  :    ; |   | ::  ,      .-./ `----'   ---'    ;  :    ;
+;;           |  ,   /  `---'.| `--`----'                      |  ,   / 
+;;  ,--,  ,--,---`-'     `---`                                 ---`-'  
+;;  |'. \/ .`|                                                         
+;;  '  \/  / ;                                                         
+;;   \  \.' /                                                          
+;;    \  ;  ;                                                          
+;;   / \  \  \                                                         
+# ./__;   ;  \                                                        
+# |   :/\  \ ;                                                        
+# `---'  `--`                                                                         
+
+// curl
+// lscpu
+
+% LOG_PREFIX    = [liquorix-installer]
+% REMOVE_SCRIPT = /usr/share/HackerOS/Scripts/Bin/remove-debian-kernel.sh
+
+;; =============================================
+;; FUNKCJE
+;; =============================================
+
+: log def
+    ~> @LOG_PREFIX @log_msg
+done
+
+: detect_cpu_variant def
+    > grep -m1 "flags" /proc/cpuinfo > /tmp/hl_liq_flags.tmp
+
+    > grep -q "avx2" /tmp/hl_liq_flags.tmp
+    ? ok
+        > grep -q "bmi1" /tmp/hl_liq_flags.tmp
+        ? ok
+            > bash -c "printf 'x64v3' > /tmp/hl_liq_variant.tmp"
+        done
+    done
+
+    ::exists /tmp/hl_liq_variant.tmp
+    ? err
+        > grep -q "sse4_2" /tmp/hl_liq_flags.tmp
+        ? ok
+            > bash -c "printf 'x64v2' > /tmp/hl_liq_variant.tmp"
+        done
+    done
+
+    ::exists /tmp/hl_liq_variant.tmp
+    ? err
+        > bash -c "printf 'x64v1' > /tmp/hl_liq_variant.tmp"
+    done
+
+    > rm -f /tmp/hl_liq_flags.tmp
+done
+
+: install_liquorix def
+    % log_msg = Instaluje jadro Liquorix...
+    -- log
+
+    ::which curl
+    ? err
+        % log_msg = curl nie znalezione - instaluje...
+        -- log
+        ^> apt-get update -y
+        ^> apt-get install -y curl
+    done
+
+    ;; Oficjalny skrypt instalacyjny Liquorix
+    > curl -s "https://liquorix.net/install-liquorix.sh" | sudo bash
+
+    ? ok
+        % log_msg = Jadro Liquorix zainstalowane pomyslnie
+        -- log
+    done
+
+    ? err
+        % log_msg = Blad instalacji Liquorix!
+        -- log
+        > exit 1
+    done
+done
+
+: check_nvidia def
+    % log_msg = Sprawdzam karte NVIDIA...
+    -- log
+
+    > lspci -nnk 2>/dev/null | grep -i "nvidia" > /dev/null 2>&1
+
+    ? ok
+        % log_msg = Wykryto NVIDIA -- instaluje sterowniki
+        -- log
+        ^> apt-get update -y
+        ^> apt-get install -y nvidia-driver nvidia-kernel-dkms nvidia-smi libnvidia-ml1 nvidia-settings
+
+        ? ok
+            % log_msg = Sterowniki NVIDIA zainstalowane
+            -- log
+        done
+
+        ? err
+            % log_msg = Blad instalacji sterownikow NVIDIA
+            -- log
+        done
+    done
+
+    ? err
+        % log_msg = Nie wykryto NVIDIA
+        -- log
+    done
+done
+
+: remove_debian_kernel def
+    ::exists @REMOVE_SCRIPT
+    ? ok
+        % log_msg = Uruchamiam skrypt usuwajacy debianowe jadra...
+        -- log
+        ^> bash @REMOVE_SCRIPT
+
+        ? ok
+            % log_msg = Stare jadra usuniete pomyslnie
+            -- log
+        done
+
+        ? err
+            % log_msg = Blad podczas usuwania jader (UWAGA: ignorowane)
+            -- log
+        done
+    done
+
+    ? err
+        % log_msg = UWAGA: remove-debian-kernel.sh nie istnieje lub nie ma +x
+        -- log
+    done
+done
+
+: save_config def
+    ^> mkdir -p /root/.config/hackeros
+    > bash -c "echo '[liquorix]' | sudo tee /root/.config/hackeros/kernel.hacker > /dev/null"
+
+    % log_msg = Konfiguracja zapisana: ~/.config/hackeros/kernel.hacker
+    -- log
+done
+
+;; =============================================
+;; MAIN
+;; =============================================
+
+::hr 60
+::bold Instalator jadra Liquorix -- HackerOS
+::hr 60
+
+% log_msg = Start
+-- log
+
+;; Wykryj CPU
+> grep -m1 "Model name" /proc/cpuinfo | cut -d: -f2 | sed "s/^ *//" > /tmp/hl_liq_model.tmp
+
+~> Wykryty CPU:
+> cat /tmp/hl_liq_model.tmp
+
+-- detect_cpu_variant
+
+~> Wariant CPU:
+> cat /tmp/hl_liq_variant.tmp
+
+;; Instalacja Liquorix
+-- install_liquorix
+
+;; Sterowniki NVIDIA
+-- check_nvidia
+
+;; USUWANIE DEBIANOWEGO JADRA -- NA SAMYM KONCU
+-- remove_debian_kernel
+
+;; Konfiguracja
+-- save_config
+
+;; Sprzatanie
+> rm -f /tmp/hl_liq_variant.tmp /tmp/hl_liq_model.tmp
+
+::nl
+::hr 60
+::green Instalacja jadra Liquorix zakonczona!
+~> Zrestartuj system aby uruchomic Liquorix.
+::hr 60
