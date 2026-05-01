@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/hl
 
 # Ustawienia
 ANIMATION_SOURCE="/usr/share/HackerOS/Animations/HackerOS.webm"
