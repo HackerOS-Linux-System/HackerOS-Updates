@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/hl
 
 # Lokalizacja skryptu do podmiany animacji
 ANIMATION_SCRIPT="/usr/share/HackerOS/Scripts/Steam/HackerOS-Steam-Animation.sh"
