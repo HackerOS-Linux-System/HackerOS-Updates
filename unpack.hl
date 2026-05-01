@@ -120,7 +120,7 @@ done
 ? ok
     ^>> mv @apps_dir/HackerOS-Game-Mode.AppImage.new @apps_dir/HackerOS-Game-Mode.AppImage
     ^>> chmod 755 @apps_dir/HackerOS-Game-Mode.AppImage
-    ::green HackerOS-Game-Mode v
+    ::green HackerOS-Game-Mode
 done
 ? err
     ^>> rm -f @apps_dir/HackerOS-Game-Mode.AppImage.new
@@ -256,7 +256,7 @@ done
 ~> [5/8] Aktualizacja narzedzi CLI...
 
 ~> Pobieranie hedit...
-^> curl -fLS -o /usr/bin/hedit.new "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.4/hedit"
+^> curl -fLS -o /usr/bin/hedit.new "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.5/hedit"
 ? ok
     ^> mv /usr/bin/hedit.new /usr/bin/hedit
     ^> chmod 755 /usr/bin/hedit
@@ -490,13 +490,13 @@ done
 
 ~> [7/8] Aktualizacja Hacker Lang...
 
-^> curl -fLS -o /usr/bin/hl.new "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.3/hl"
+^> curl -fLS -o /usr/bin/hl.new "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/v0.4/hl"
 
 ? ok
     ^> mv /usr/bin/hl.new /usr/bin/hl
     ^> chmod 755 /usr/bin/hl
     ^> chown root:root /usr/bin/hl
-    ::green Hacker Lang v0.3 v
+    ::green Hacker Lang v0.4
 done
 
 ? err
