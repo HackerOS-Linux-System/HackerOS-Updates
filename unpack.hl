@@ -11,7 +11,7 @@
 % games_dir      = /usr/share/HackerOS/Scripts/HackerOS-Games
 
 ;; ─── Ścieżki pobierania ───────────────────────────────────────────────────────
-% release_cli  = https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1
+% release_cli  = https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2
 % release_apps = https://github.com/HackerOS-Linux-System
 % hl_bin       = /usr/bin/hl
 
@@ -146,12 +146,12 @@ done
     ::yellow HackerOS-Welcome - pomijam
 done
 
-~> Pobieranie Hacker-Term v0.7...
-^>> curl -fLS -o @apps_dir/Hacker-Term.new "@release_apps/Hacker-Term/releases/download/v0.7/Hacker-Term"
+~> Pobieranie Hacker-Term v0.8...
+^>> curl -fLS -o @apps_dir/Hacker-Term.new "@release_apps/Hacker-Term/releases/download/v0.8/Hacker-Term"
 ? ok
     ^>> mv @apps_dir/Hacker-Term.new @apps_dir/Hacker-Term
     ^>> chmod 755 @apps_dir/Hacker-Term
-    ::green Hacker-Term v0.7
+    ::green Hacker-Term v0.8
 done
 ? err
     ^>> rm -f @apps_dir/Hacker-Term.new
