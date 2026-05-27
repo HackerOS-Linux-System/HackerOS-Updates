@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Hacker Launcher
+Comment=Launch games.
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/Hacker_Launcher
+Icon=/usr/share/HackerOS/ICONS/Hacker_Launcher.png
+Terminal=false
+Type=Application
+Categories=Game;
