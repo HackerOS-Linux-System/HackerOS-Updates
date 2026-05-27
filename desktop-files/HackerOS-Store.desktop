@@ -1,1 +1,8 @@
-
+[Desktop Entry]
+Name=HackerOS Store
+Comment=Download apps, launchers, pentest tools.
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-Store
+Icon=/usr/share/HackerOS/ICONS/Hacker-Unpack.png
+Terminal=false
+Type=Application
+Categories=Game;
