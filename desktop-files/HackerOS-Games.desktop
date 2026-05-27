@@ -1,1 +1,9 @@
-
+[Desktop Entry]
+Name=HackerOS Games
+Comment=Launch and Play in hackeros games.
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Games/HackerOS-Games
+Icon=/usr/share/HackerOS/ICONS/HackerOS-Games.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;Games;
+StartupNotify=false
