@@ -1,1 +1,20 @@
-
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=HackerOS Studio
+Name[pl]=HackerOS Studio
+GenericName=Edytor Wideo
+GenericName[pl]=Edytor Wideo
+Comment=Prosty i intuicyjny edytor wideo dla HackerOS
+Comment[pl]=Prosty i intuicyjny edytor wideo dla HackerOS
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-Studio %U
+Icon=hackeros-studio
+Terminal=false
+StartupNotify=true
+StartupWMClass=HackerOS-Studio
+Categories=AudioVideo;Video;AudioVideoEditing;GTK;
+MimeType=video/mp4;video/x-matroska;video/webm;video/x-msvideo;video/quicktime;audio/mpeg;audio/wav;audio/ogg;image/jpeg;image/png;image/gif;image/webp;
+Keywords=video;editor;edytor;wideo;film;montaż;hackeros;
+X-HackerOS-Package=hackeros-studio
+X-HackerOS-Version=1.0.0
+X-HackerOS-Category=multimedia
