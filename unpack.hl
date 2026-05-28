@@ -396,7 +396,7 @@ done
 ;; Pobieramy do /tmp z prefiksem hl- zeby uniknac kolizji
 ;; a potem przenosimy przez bash -c z $HOME
 
-> curl -fLS -o /tmp/hl-hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/hacker-shell"
+> curl -fLS -o /tmp/hl-hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-shell"
 ? ok
     > bash -c "mv /tmp/hl-hacker-shell $HOME/.hackeros/hacker/hacker-shell && chmod 755 $HOME/.hackeros/hacker/hacker-shell"
     ::green hacker-shell
@@ -406,7 +406,7 @@ done
     ::yellow hacker-shell - pomijam
 done
 
-> curl -fLS -o /tmp/hl-hacker-repair "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/hacker-repair"
+> curl -fLS -o /tmp/hl-hacker-repair "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-repair"
 ? ok
     > bash -c "mv /tmp/hl-hacker-repair $HOME/.hackeros/hacker/hacker-repair && chmod 755 $HOME/.hackeros/hacker/hacker-repair"
     ::green hacker-repair
@@ -416,7 +416,7 @@ done
     ::yellow hacker-repair - pomijam
 done
 
-> curl -fLS -o /tmp/hl-hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/hacker-help"
+> curl -fLS -o /tmp/hl-hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-help"
 ? ok
     > bash -c "mv /tmp/hl-hacker-help $HOME/.hackeros/hacker/hacker-help && chmod 755 $HOME/.hackeros/hacker/hacker-help"
     ::green hacker-help
@@ -426,7 +426,7 @@ done
     ::yellow hacker-help - pomijam
 done
 
-> curl -fLS -o /tmp/hl-hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/hacker-select"
+> curl -fLS -o /tmp/hl-hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-select"
 ? ok
     > bash -c "mv /tmp/hl-hacker-select $HOME/.hackeros/hacker/hacker-select && chmod 755 $HOME/.hackeros/hacker/hacker-select"
     ::green hacker-select
@@ -436,7 +436,7 @@ done
     ::yellow hacker-select - pomijam
 done
 
-> curl -fLS -o /tmp/hl-hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/hacker-docs"
+> curl -fLS -o /tmp/hl-hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-docs"
 ? ok
     > bash -c "mv /tmp/hl-hacker-docs $HOME/.hackeros/hacker/hacker-docs && chmod 755 $HOME/.hackeros/hacker/hacker-docs"
     ::green hacker-docs
@@ -446,7 +446,7 @@ done
     ::yellow hacker-docs - pomijam
 done
 
-> curl -fLS -o /tmp/hl-HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/HackerOS-Updater"
+> curl -fLS -o /tmp/hl-HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/HackerOS-Updater"
 ? ok
     > bash -c "mv /tmp/hl-HackerOS-Updater $HOME/.hackeros/hacker/HackerOS-Updater && chmod 755 $HOME/.hackeros/hacker/HackerOS-Updater"
     ::green HackerOS-Updater
@@ -456,7 +456,7 @@ done
     ::yellow HackerOS-Updater - pomijam
 done
 
-> curl -fLS -o /tmp/hl-update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/update-system"
+> curl -fLS -o /tmp/hl-update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/update-system"
 ? ok
     > bash -c "mv /tmp/hl-update-system $HOME/.hackeros/hacker/update-system && chmod 755 $HOME/.hackeros/hacker/update-system"
     ::green update-system
@@ -467,7 +467,7 @@ done
 done
 
 ;; apt-fronted zwraca 404 w tej wersji - cicha obsluga
-> curl -fLS -o /tmp/hl-apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/apt-fronted"
+> curl -fLS -o /tmp/hl-apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/apt-fronted"
 ? ok
     > bash -c "mv /tmp/hl-apt-fronted $HOME/.hackeros/hacker/apt-fronted && chmod 755 $HOME/.hackeros/hacker/apt-fronted"
     ::green apt-fronted
