@@ -1,153 +1,93 @@
+#!/usr/bin/hl
+
+using <gen 2>
+
 // curl
 // git
 // jq
 
-% LOCAL_JSON  = /usr/share/wallpapers/release-info.json
-% VER_URL     = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker
-% LOCAL_TMP   = /tmp/hl_wallpaper_local.tmp
-% REMOTE_TMP  = /tmp/hl_wallpaper_remote.tmp
-% CHECK_TMP   = /tmp/hl_wallpaper_check.tmp
-% TMP_DIR     = /tmp/HackerOS-Updates
+;; ── Konfiguracja ──────────────────────────────────────────────────────────────
+% LOCAL_HK        = /usr/share/wallpapers/release-info.hk
+% REMOTE_URL      = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker
+% TMP_DIR         = /tmp/HackerOS-Updates
+% WALLPAPER_DIR   = wallpaper-updates
+% UNPACK_SCRIPT   = unpack.hl
 
-;; --- Sprawdz czy plik lokalny istnieje ---
-
-::exists @LOCAL_JSON
-
+;; ── Sprawdz plik lokalny ─────────────────────────────────────────────────────
+::exists @LOCAL_HK
 ? err
-    ::red Brak pliku release-info.json!
-    ~> Oczekiwana sciezka: @LOCAL_JSON
+    ~> Brak pliku release-info.hk: @LOCAL_HK
     > exit 1
 done
 
-;; --- Odczyt wersji lokalnej ---
+;; ── Odczyt wersji lokalnej z .hk ─────────────────────────────────────────────
+;; Format release-info.hk:
+;;   [metadata]
+;;   -> version => "0.5 -> HackerOS Wallpapers 0.5"
+;; Wyodrebnij liczbe przed " ->"
 
-~> Odczyt lokalnej wersji tapet...
-> jq -r ".version" @LOCAL_JSON | sed "s/ .*//" > @LOCAL_TMP
+>> grep -E '^\s*->\s*version\s*=>' @LOCAL_HK | sed 's/.*=>[[:space:]]*//' | sed 's/["\x27]//g' | awk '{print $1}' |> @LOCAL_VERSION
 
-? err
-    ::red Nie udalo sie odczytac lokalnej wersji.
-    > exit 1
-done
+~> Lokalna wersja tapet: @LOCAL_VERSION
 
-> test -s @LOCAL_TMP
+;; ── Pobierz zdalna wersje ─────────────────────────────────────────────────────
+>> curl -fsSL @REMOTE_URL | tr -d '[]' | tr -d ' ' |> @REMOTE_VERSION
 
-? err
-    ::red Lokalny plik wersji jest pusty.
-    > exit 1
-done
+~> Zdalna wersja: @REMOTE_VERSION
 
-~> Lokalna wersja:
-> cat @LOCAL_TMP
-
-;; --- Pobranie wersji zdalnej ---
-
-~> Pobieranie zdalnej wersji...
-> curl -fsSL -o @REMOTE_TMP "@VER_URL"
-
-? err
-    ::red Nie udalo sie pobrac wersji z GitHuba.
-    > exit 1
-done
-
-;; Oczyszcz z nawiasow kwadratowych
-> tr -d "[]" < @REMOTE_TMP > @CHECK_TMP
-> mv @CHECK_TMP @REMOTE_TMP
-
-> test -s @REMOTE_TMP
-
-? err
-    ::red Zdalny plik wersji jest pusty lub serwer zwrocil blad.
-    > exit 1
-done
-
-~> Zdalna wersja:
-> cat @REMOTE_TMP
-
-;; --- Porownanie wersji ---
-;; sort -V obu wersji, tail -n1 zwraca wieksza
-;; Jesli wynik == zdalna => zdalna jest nowsza lub rowna
-
-> cat @LOCAL_TMP @REMOTE_TMP | sort -V | tail -n1 > @CHECK_TMP
-
-;; Czy zdalna == najwieksza?
-> diff -q @REMOTE_TMP @CHECK_TMP > /dev/null 2>&1
-
+> test -z "@REMOTE_VERSION"
 ? ok
-    ;; Zdalna >= lokalna -- sprawdz czy sa rozne
-    > diff -q @LOCAL_TMP @REMOTE_TMP > /dev/null 2>&1
+    ~> Nie udalo sie pobrac wersji z GitHuba.
+    > exit 1
+done
 
+;; ── Porownanie wersji ─────────────────────────────────────────────────────────
+>> printf "%s\n%s" @LOCAL_VERSION @REMOTE_VERSION | sort -V | head -n1 |> @_ver_lower
+
+> test "@_ver_lower" = "@LOCAL_VERSION"
+? ok
+    > test "@LOCAL_VERSION" = "@REMOTE_VERSION"
     ? ok
-        ;; Wersje identyczne
-        ::green Brak nowych wersji tapet. System jest aktualny.
-        > cat @LOCAL_TMP
-        > rm -f @LOCAL_TMP @REMOTE_TMP @CHECK_TMP
+        ~> Brak nowych wersji tapet. Obecna wersja: @LOCAL_VERSION
+        > exit 0
     done
 
+    ;; Jest aktualizacja
+    ~> Znaleziono nowsza wersje tapet: @REMOTE_VERSION
+    ~> Aktualna wersja: @LOCAL_VERSION
+
+    ;; Usun stary katalog
+    > rm -rf @TMP_DIR
+
+    ;; Klonuj repo
+    >> git clone https://github.com/HackerOS-Linux-System/HackerOS-Updates.git @TMP_DIR
     ? err
-        ;; Zdalna jest nowsza
-        ~> Znaleziono nowsza wersje tapet!
-        ::nl
+        ~> Nie udalo sie sklonowac repozytorium!
+        > exit 1
+    done
 
-        > rm -rf @TMP_DIR
+    ;; Sprawdz katalog wallpaper-updates
+    % WALLPAPER_PATH = @TMP_DIR/@WALLPAPER_DIR
+    ::isdir @WALLPAPER_PATH
+    ? err
+        ~> Brak katalogu @WALLPAPER_DIR w repozytorium!
+        > exit 1
+    done
 
-        ~> Klonowanie repozytorium aktualizacji...
-        > git clone --depth=1 https://github.com/HackerOS-Linux-System/HackerOS-Updates.git @TMP_DIR
-
-        ? ok
-            ::green Repozytorium sklonowane
-
-            ;; Priorytet: wallpaper-updates/unpack.hl
-            ::exists /tmp/HackerOS-Updates/wallpaper-updates/unpack.hl
-
-            ? ok
-                ~> Uruchamianie wallpaper-updates/unpack.hl...
-                > hl run /tmp/HackerOS-Updates/wallpaper-updates/unpack.hl
-
-                ? ok
-                    ::green Aktualizacja tapet zakonczona pomyslnie
-                done
-
-                ? err
-                    ::red Blad podczas wykonywania unpack.hl
-                done
-            done
-
-            ;; Fallback: unpack.sh tylko jesli nie ma unpack.hl
-            ::exists /tmp/HackerOS-Updates/wallpaper-updates/unpack.hl
-
-            ? err
-                ::exists /tmp/HackerOS-Updates/wallpaper-updates/unpack.sh
-
-                ? ok
-                    ^> chmod a+x /tmp/HackerOS-Updates/wallpaper-updates/unpack.sh
-                    ~> Uruchamianie wallpaper-updates/unpack.sh (fallback)...
-                    > /tmp/HackerOS-Updates/wallpaper-updates/unpack.sh
-
-                    ? ok
-                        ::green Aktualizacja tapet zakonczona pomyslnie
-                    done
-
-                    ? err
-                        ::red Blad podczas wykonywania unpack.sh
-                    done
-                done
-
-                ? err
-                    ::red Brak pliku unpack.hl i unpack.sh w wallpaper-updates!
-                done
-            done
-        done
-
-        ? err
-            ::red Nie udalo sie sklonowac repozytorium!
-            ~> Sprawdz polaczenie z internetem
-        done
-
-        > rm -f @LOCAL_TMP @REMOTE_TMP @CHECK_TMP
+    ;; Uruchom unpack.hl
+    % UNPACK_PATH = @WALLPAPER_PATH/@UNPACK_SCRIPT
+    ::exists @UNPACK_PATH
+    ? ok
+        ~> Uruchamianie: @UNPACK_PATH
+        >> hl run @UNPACK_PATH
+        ~> Aktualizacja tapet zakonczona.
+    done
+    ? err
+        ~> Brak @UNPACK_SCRIPT w @WALLPAPER_PATH!
+        > exit 1
     done
 done
 
 ? err
-    ::green Brak nowych wersji tapet. Lokalna wersja jest aktualna lub nowsza.
-    > rm -f @LOCAL_TMP @REMOTE_TMP @CHECK_TMP
+    ~> Brak nowych wersji tapet. Obecna wersja: @LOCAL_VERSION
 done
