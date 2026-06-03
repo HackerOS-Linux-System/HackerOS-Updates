@@ -1,171 +1,89 @@
+#!/usr/bin/hl
+
+using <gen 2>
+
 // curl
 // git
+// jq
 
-% LOCAL_FILE  = /usr/share/HackerOS/Config-Files/release-info.json
-% VER_TMP     = /tmp/hl_hackeros_remote.tmp
-% LOCAL_TMP   = /tmp/hl_hackeros_local.tmp
-% CHECK_TMP   = /tmp/hl_hackeros_check.tmp
-% UPDATES_DIR = /tmp/HackerOS-Updates
+% LOCAL_JSON   = /usr/share/HackerOS/Config-Files/release-info.json
+% REMOTE_URL   = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker
+% TMP_VERSION  = /tmp/version.hacker
+% TMP_REPO     = /tmp/HackerOS-Updates
 
-;; --- Sprawdz polaczenie z internetem ---
-
+;; ── Internet ──────────────────────────────────────────────────────────────────
 ~> Sprawdzanie polaczenia z internetem...
-> ping -c 1 -W 1 google.com
-
-? ok
-    ::green Internet dostepny
-done
-
+> ping -c 1 -W 2 google.com
 ? err
-    ::red Brak polaczenia z internetem
-    ~> Przerywam aktualizacje
+    ~> Brak polaczenia z internetem. Przerywam.
     > exit 1
 done
+~> Internet dostepny
 
-;; --- Sprawdz czy plik lokalny istnieje ---
-
-::exists @LOCAL_FILE
-
-? err
-    ::red Brak pliku release-info.json!
-    ~> Oczekiwana sciezka: @LOCAL_FILE
-    > exit 1
-done
-
-;; --- Odczyt wersji lokalnej ---
-
+;; ── Wersja lokalna ────────────────────────────────────────────────────────────
 ~> Odczyt lokalnej wersji...
-> grep version @LOCAL_FILE | grep -o "[0-9][0-9.]*" | head -1 > @LOCAL_TMP
-
+::exists @LOCAL_JSON
 ? err
-    ::red Nie udalo sie odczytac lokalnej wersji.
+    ~> Brak pliku: @LOCAL_JSON
     > exit 1
 done
 
-> test -s @LOCAL_TMP
-
-? err
-    ::red Plik lokalnej wersji jest pusty.
-    > exit 1
+::which jq
+? ok
+    >> jq -r '.version' @LOCAL_JSON | awk '{print $1}' |> @LOCAL_VERSION
 done
+? err
+    >> grep '"version"' @LOCAL_JSON | sed 's/.*": *"\([^ ]*\).*/\1/' |> @LOCAL_VERSION
+done
+~> Lokalna wersja: @LOCAL_VERSION
 
-;; --- Pobierz zdalny plik wersji ---
-
+;; ── Wersja zdalna ─────────────────────────────────────────────────────────────
 ~> Pobieranie pliku wersji z GitHuba...
-> curl -fsSL -o @VER_TMP "https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker"
-
-? ok
-    ::green Plik wersji pobrany
-done
-
+> curl -fsSL -o @TMP_VERSION @REMOTE_URL
 ? err
-    ::red Nie udalo sie pobrac pliku wersji z GitHuba.
+    ~> Nie udalo sie pobrac pliku wersji.
     > exit 1
 done
+~> Plik wersji pobrany
 
-;; Oczyszcz zdalny plik z nawiasow kwadratowych
-> tr -d "[]" < @VER_TMP > @CHECK_TMP
-> mv @CHECK_TMP @VER_TMP
+>> sed 's/^\[\(.*\)\]$/\1/' @TMP_VERSION | tr -d ' ' |> @REMOTE_VERSION
+~> Zdalna wersja: @REMOTE_VERSION
 
-> test -s @VER_TMP
+;; ── Porownanie ────────────────────────────────────────────────────────────────
+>> printf "%s\n%s" @LOCAL_VERSION @REMOTE_VERSION | sort -V | head -n1 |> @_lower
 
-? err
-    ::red Zdalny plik wersji jest pusty.
-    > exit 1
-done
-
-;; --- Wyswietl wersje ---
-
-~> Lokalna wersja:
-> cat @LOCAL_TMP
-
-~> Zdalna wersja:
-> cat @VER_TMP
-
-;; --- Porownanie wersji ---
-;; Polacz obie wersje, sort -V, tail -n1 zwraca wieksza
-;; Jesli wynik == zdalna => zdalna jest nowsza lub rowna
-
-> cat @LOCAL_TMP @VER_TMP | sort -V | tail -n1 > @CHECK_TMP
-
-;; Czy wynik diff(zdalna, check) == 0 => zdalna jest najwieksza
-> diff -q @VER_TMP @CHECK_TMP > /dev/null 2>&1
-
+> test "@_lower" = "@LOCAL_VERSION"
 ? ok
-    ;; Zdalna >= lokalna -- sprawdz czy sa rozne
-    > diff -q @LOCAL_TMP @VER_TMP > /dev/null 2>&1
-
+    > test "@LOCAL_VERSION" = "@REMOTE_VERSION"
     ? ok
-        ::green System jest aktualny
-        ~> Brak dostepnych aktualizacji HackerOS
-        > rm -f @LOCAL_TMP @VER_TMP @CHECK_TMP
+        ~> System jest aktualny. Wersja: @LOCAL_VERSION
+        > rm -f @TMP_VERSION
+        > exit 0
     done
 
+    ;; Jest nowsza wersja
+    ~> Znaleziono nowsza wersje: @REMOTE_VERSION (aktualna: @LOCAL_VERSION)
+    ~> Pobieranie aktualizacji...
+    > rm -rf @TMP_REPO
+    > git clone https://github.com/HackerOS-Linux-System/HackerOS-Updates.git @TMP_REPO
     ? err
-        ~> Dostepna jest nowa wersja HackerOS!
-        ::nl
+        ~> Blad klonowania repozytorium.
+        > rm -f @TMP_VERSION
+        > exit 1
+    done
 
-        > rm -rf @UPDATES_DIR
-
-        ~> Klonowanie repozytorium aktualizacji...
-        > git clone --depth=1 "https://github.com/HackerOS-Linux-System/HackerOS-Updates.git" @UPDATES_DIR
-
-        ? ok
-            ::green Repozytorium sklonowane
-
-            ;; Priorytet: unpack.hl
-            ::exists /tmp/HackerOS-Updates/unpack.hl
-
-            ? ok
-                ~> Uruchamianie unpack.hl...
-                > hl run /tmp/HackerOS-Updates/unpack.hl
-
-                ? ok
-                    ::green Aktualizacja zakonczona pomyslnie
-                done
-
-                ? err
-                    ::red Blad podczas wykonywania unpack.hl
-                done
-            done
-
-            ;; Fallback: unpack.sh tylko jesli nie ma unpack.hl
-            ::exists /tmp/HackerOS-Updates/unpack.hl
-
-            ? err
-                ::exists /tmp/HackerOS-Updates/unpack.sh
-
-                ? ok
-                    ^> chmod 755 /tmp/HackerOS-Updates/unpack.sh
-                    ~> Uruchamianie unpack.sh (fallback)...
-                    > /tmp/HackerOS-Updates/unpack.sh
-
-                    ? ok
-                        ::green Aktualizacja zakonczona pomyslnie
-                    done
-
-                    ? err
-                        ::red Blad podczas wykonywania unpack.sh
-                    done
-                done
-
-                ? err
-                    ::red Brak pliku unpack.hl i unpack.sh w repozytorium!
-                done
-            done
-        done
-
-        ? err
-            ::red Nie udalo sie sklonowac repozytorium
-            ~> Sprawdz polaczenie z internetem
-        done
-
-        > rm -f @LOCAL_TMP @VER_TMP @CHECK_TMP
+    % UNPACK = @TMP_REPO/unpack.hl
+    ::exists @UNPACK
+    ? ok
+        ~> Uruchamianie: @UNPACK
+        > hl run @UNPACK
+    done
+    ? err
+        ~> Brak unpack.hl w repozytorium!
+        > rm -f @TMP_VERSION
+        > exit 1
     done
 done
 
-? err
-    ::green System jest aktualny
-    ~> Lokalna wersja jest aktualna lub nowsza
-    > rm -f @LOCAL_TMP @VER_TMP @CHECK_TMP
-done
+> rm -f @TMP_VERSION
+~> Gotowe.
