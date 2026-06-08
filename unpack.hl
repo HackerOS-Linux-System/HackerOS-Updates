@@ -290,12 +290,12 @@ done
 done
 
 ~> Pobieranie hpm...
-^> curl -fLS -o /usr/bin/hpm.new "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.7/hpm"
+^> curl -fLS -o /usr/bin/hpm.new "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.8/hpm"
 ? ok
     ^> mv /usr/bin/hpm.new /usr/bin/hpm
     ^> chmod 755 /usr/bin/hpm
     ^> chown root:root /usr/bin/hpm
-    ::green hpm v
+    ::green hpm v0.8
 done
 ? err
     ^> rm -f /usr/bin/hpm.new
@@ -308,7 +308,7 @@ done
     ^> mv /usr/bin/hackeros-steam.new /usr/bin/hackeros-steam
     ^> chmod 755 /usr/bin/hackeros-steam
     ^> chown root:root /usr/bin/hackeros-steam
-    ::green hackeros-steam v
+    ::green hackeros-steam v0.4
 done
 ? err
     ^> rm -f /usr/bin/hackeros-steam.new
