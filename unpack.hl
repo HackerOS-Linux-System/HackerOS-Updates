@@ -303,7 +303,7 @@ done
 done
 
 ~> Pobieranie hackeros-steam...
-^> curl -fLS -o /usr/bin/hackeros-steam.new "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.3/hackeros-steam"
+^> curl -fLS -o /usr/bin/hackeros-steam.new "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/hackeros-steam"
 ? ok
     ^> mv /usr/bin/hackeros-steam.new /usr/bin/hackeros-steam
     ^> chmod 755 /usr/bin/hackeros-steam
