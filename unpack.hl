@@ -159,7 +159,7 @@ done
 done
 
 ~> Pobieranie HackerOS-Store...
-^>> curl -fLS -o @apps_dir/HackerOS-Store.new "@release_apps/HackerOS-Store/releases/download/v0.5/HackerOS-Store"
+^>> curl -fLS -o @apps_dir/HackerOS-Store.new "@release_apps/HackerOS-Store/releases/download/v0.6/HackerOS-Store"
 ? ok
     ^>> mv @apps_dir/HackerOS-Store.new @apps_dir/HackerOS-Store
     ^>> chmod 755 @apps_dir/HackerOS-Store
