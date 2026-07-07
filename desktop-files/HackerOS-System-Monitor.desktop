@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=HackerOS System Monitor
+Comment=System monitor for HackerOS.
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-System-Monitor
+Icon=/usr/share/HackerOS/ICONS/HackerOS-System-Monitor.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;
+StartupNotify=false
