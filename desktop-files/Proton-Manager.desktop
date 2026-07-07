@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Proton Manager
+Comment=Manager for protons and prefixes.
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/Proton-Manager
+Icon=/usr/share/HackerOS/ICONS/Proton-Manager.png
+Terminal=false
+Type=Application
+Categories=Network;Game;
+MimeType=Game;
