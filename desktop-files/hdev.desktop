@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=hdev
+Comment=HackerOS Code and Text editor.
+Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/hdev
+Icon=/usr/share/HackerOS/ICONS/hdev.png
+Terminal=false
+Type=Application
+Categories=Utility;Application;
+StartupNotify=false
