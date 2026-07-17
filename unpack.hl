@@ -182,7 +182,7 @@ done
 ^>> mkdir -p @games_dir
 
 ~> Pobieranie HackerOS-Games...
-^>> curl -fLS -o @games_dir/HackerOS-Games.AppImage.new "@release_apps/HackerOS-Games/releases/download/v0.7/HackerOS-Games"
+^>> curl -fLS -o @games_dir/HackerOS-Games.AppImage.new "@release_apps/HackerOS-Games/releases/download/v0.8/HackerOS-Games"
 ? ok
     ^>> mv @games_dir/HackerOS-Games.new @games_dir/HackerOS-Games
     ^>> chmod 755 @games_dir/HackerOS-Games
@@ -194,7 +194,7 @@ done
 done
 
 ~> Pobieranie the-racer...
-^>> curl -fLS -o @games_dir/the-racer.new "@release_apps/HackerOS-Games/releases/download/v0.7/the-racer"
+^>> curl -fLS -o @games_dir/the-racer.new "@release_apps/HackerOS-Games/releases/download/v0.8/the-racer"
 ? ok
     ^>> mv @games_dir/the-racer.new @games_dir/the-racer
     ^>> chmod 755 @games_dir/the-racer
@@ -206,7 +206,7 @@ done
 done
 
 ~> Pobieranie starblaster...
-^>> curl -fLS -o @games_dir/starblaster.new "@release_apps/HackerOS-Games/releases/download/v0.7/starblaster"
+^>> curl -fLS -o @games_dir/starblaster.new "@release_apps/HackerOS-Games/releases/download/v0.8/starblaster"
 ? ok
     ^>> mv @games_dir/starblaster.new @games_dir/starblaster
     ^>> chmod 755 @games_dir/starblaster
@@ -218,7 +218,7 @@ done
 done
 
 ~> Pobieranie bit-jump...
-^>> curl -fLS -o @games_dir/bit-jump.love.new "@release_apps/HackerOS-Games/releases/download/v0.7/bit-jump.love"
+^>> curl -fLS -o @games_dir/bit-jump.love.new "@release_apps/HackerOS-Games/releases/download/v0.8/bit-jump.love"
 ? ok
     ^>> mv @games_dir/bit-jump.love.new @games_dir/bit-jump.love
     ^>> chmod 755 @games_dir/bit-jump.love
@@ -229,15 +229,27 @@ done
     ::yellow bit-jump - pomijam
 done
 
-~> Pobieranie bark-squadron...
-^>> curl -fLS -o @games_dir/bark-squadron.AppImage.new "@release_apps/HackerOS-Games/releases/download/v0.7/bark-squadron.AppImage"
+~> Pobieranie cosmonaut...
+^>> curl -fLS -o @games_dir/cosmonaut.love.new "@release_apps/HackerOS-Games/releases/download/v0.8/cosmonaut.love"
 ? ok
-    ^>> mv @games_dir/bark-squadron.AppImage.new @games_dir/bark-squadron.AppImage
-    ^>> chmod 755 @games_dir/bark-squadron.AppImage
+    ^>> mv @games_dir/cosmonaut.love.new @games_dir/cosmonaut.love
+    ^>> chmod 755 @games_dir/cosmonaut.love
+    ::green cosmonaut
+done
+? err
+    ^>> rm -f @games_dir/cosmonaut.love.new
+    ::yellow cosmonaut - pomijam
+done
+
+~> Pobieranie bark-squadron...
+^>> curl -fLS -o @games_dir/bark-squadron.AppImage.new "@release_apps/HackerOS-Games/releases/download/v0.8/bark-squadron"
+? ok
+    ^>> mv @games_dir/bark-squadron.new @games_dir/bark-squadron
+    ^>> chmod 755 @games_dir/bark-squadron
     ::green bark-squadron v
 done
 ? err
-    ^>> rm -f @games_dir/bark-squadron.AppImage.new
+    ^>> rm -f @games_dir/bark-squadron.new
     ::yellow bark-squadron - pomijam
 done
 
