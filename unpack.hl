@@ -302,12 +302,12 @@ done
 done
 
 ~> Pobieranie hpm...
-^> curl -fLS -o /usr/bin/hpm.new "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.8/hpm"
+^> curl -fLS -o /usr/bin/hpm.new "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.9/hpm"
 ? ok
     ^> mv /usr/bin/hpm.new /usr/bin/hpm
     ^> chmod 755 /usr/bin/hpm
     ^> chown root:root /usr/bin/hpm
-    ::green hpm v0.8
+    ::green hpm v0.9
 done
 ? err
     ^> rm -f /usr/bin/hpm.new
