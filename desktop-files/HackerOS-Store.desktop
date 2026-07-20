@@ -2,7 +2,7 @@
 Name=HackerOS Store
 Comment=Download apps, launchers, pentest tools.
 Exec=/usr/share/HackerOS/Scripts/HackerOS-Apps/HackerOS-Store
-Icon=/usr/share/HackerOS/ICONS/Hacker-Unpack.png
+Icon=/usr/share/HackerOS/ICONS/HackerOS-Store.png
 Terminal=false
 Type=Application
 Categories=Game;
