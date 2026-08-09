@@ -1,1 +1,223 @@
+#!/usr/bin/hl
+/// kernel-update.hl — aktualizacja jądra HackerOS (gen 2)
+///
+/// 1. Sprawdza, czy aktualnie działające jądro to jądro HackerOS (jeśli nie —
+///    błąd i koniec, nic nie ruszamy).
+/// 2. Rozpoznaje wariant zainstalowanego jądra: classic / gaming / cybersecurity
+///    — na podstawie tego, który pakiet hackeros-kernel* jest zainstalowany.
+/// 3. Sprawdza najnowsze wydanie w github.com/HackerOS-Linux-System/HackerOS-Kernel.
+/// 4. Jeśli jest nowsza wersja: pobiera .deb (jądro + headers) dla WYKRYTEGO
+///    wariantu, z obsługą retry + wznawiania pobierania, weryfikuje pobrane
+///    pliki, po czym podmienia jądro atomowo pojedynczą transakcją apt
+///    (apt install ./stare-i-nowe.deb naraz — bez ręcznego apt remove + apt
+///    install w dwóch krokach, więc nie ma okna bez zainstalowanego jądra).
+///
+/// Użycie: hl run kernel-update.hl
 
+using <gen 2>
+
+// apt
+// dpkg
+// curl
+
+% kernel_repo_api = https://api.github.com/repos/HackerOS-Linux-System/HackerOS-Kernel/releases
+% work_dir        = /tmp/hl_kernel_update
+
+::nl
+::hr 52
+::bold   HackerOS — aktualizacja jądra
+::hr 52
+::nl
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; 1. Czy to w ogóle jądro HackerOS?
+;; ════════════════════════════════════════════════════════════════════════════
+~> [1/6] Sprawdzanie zainstalowanego jądra...
+
+> uname -r |> @running_kernel
+~> Uruchomione jądro (uname -r): @running_kernel
+
+;; Rozpoznanie po zainstalowanym pakiecie dpkg, nie po samym `uname -r` —
+;; nazwa pakietu jest wiarygodniejsza niż parsowanie stringa wersji jądra.
+>> bash -c "dpkg -l 2>/dev/null | awk '{print \$2}' | grep -E '^hackeros-kernel(-gaming|-cybersecurity)?\$' | head -n1" |> @kernel_pkg
+
+> test "@kernel_pkg" = ""
+? ok
+    ::red BLAD: nie znaleziono zainstalowanego pakietu hackeros-kernel*.
+    ~> To nie jest jądro HackerOS (albo nie zostało zainstalowane przez apt/dpkg) — przerywam.
+    > exit 1
+done
+
+::green Wykryto pakiet: @kernel_pkg
+
+;; Wariant jądra na podstawie nazwy pakietu.
+% kernel_variant = classic
+% asset_suffix   =
+
+> test "@kernel_pkg" = "hackeros-kernel-gaming"
+? ok
+    % kernel_variant = gaming
+    % asset_suffix   = -gaming
+done
+
+> test "@kernel_pkg" = "hackeros-kernel-cybersecurity"
+? ok
+    % kernel_variant = cybersecurity
+    % asset_suffix   = -cybersecurity
+done
+
+::green Wariant: @kernel_variant
+
+;; Aktualnie zainstalowana wersja pakietu jądra (z dpkg, nie z GitHuba).
+>> bash -c "dpkg-query -W -f='\${Version}' '@kernel_pkg' 2>/dev/null" |> @installed_version
+~> Zainstalowana wersja pakietu: @installed_version
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; 2. Najnowsze wydanie HackerOS-Kernel na GitHubie
+;; ════════════════════════════════════════════════════════════════════════════
+~> [2/6] Sprawdzanie najnowszej wersji na GitHubie...
+
+^>> mkdir -p @work_dir
+
+> curl -fsSL --retry 5 --retry-delay 2 --retry-connrefused -o @work_dir/releases.json @kernel_repo_api
+? err
+    ::red Nie udalo sie pobrac listy wydan z @kernel_repo_api
+    > exit 1
+done
+
+;; Najnowszy tag_name (pierwszy w liście — GitHub zwraca od najnowszego).
+>> bash -c "grep -m1 -o '\"tag_name\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' @work_dir/releases.json | sed -E 's/.*\"([^\"]*)\"\$/\\1/'" |> @latest_tag
+
+> test "@latest_tag" = ""
+? ok
+    ::red Nie udalo sie odczytac najnowszego wydania z odpowiedzi GitHuba.
+    > rm -rf @work_dir
+    > exit 1
+done
+
+::green Najnowsze wydanie HackerOS-Kernel: @latest_tag
+
+;; Znajdź w tym wydaniu nazwy assetów pasujące do naszego wariantu, żeby
+;; wyciągnąć DOKŁADNĄ wersję jądra Linux wpisaną w nazwę pliku — nigdy nie
+;; zgadujemy jej na sztywno.
+>> bash -c "
+    grep -o '\"name\"[[:space:]]*:[[:space:]]*\"hackeros-kernel@{asset_suffix}_[0-9][^\"]*\\.deb\"' @work_dir/releases.json \
+        | sed -E 's/.*\"(hackeros-kernel[^\"]*)\"\$/\\1/' | head -n1
+" |> @asset_kernel_name
+
+>> bash -c "
+    grep -o '\"name\"[[:space:]]*:[[:space:]]*\"hackeros-kernel-headers@{asset_suffix}_[0-9][^\"]*\\.deb\"' @work_dir/releases.json \
+        | sed -E 's/.*\"(hackeros-kernel-headers[^\"]*)\"\$/\\1/' | head -n1
+" |> @asset_headers_name
+
+> test "@asset_kernel_name" = ""
+? ok
+    ::red Nie znaleziono pakietu jadra dla wariantu "@kernel_variant" w wydaniu @latest_tag.
+    > rm -rf @work_dir
+    > exit 1
+done
+
+::green Znaleziono pakiety: @asset_kernel_name , @asset_headers_name
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; 3. Czy jest nowsza wersja niz zainstalowana?
+;; ════════════════════════════════════════════════════════════════════════════
+~> [3/6] Porownanie wersji...
+
+;; Numer wersji jadra Linux wyciagniety z nazwy pliku, np.
+;; hackeros-kernel-cybersecurity_7.1.deb -> 7.1
+>> bash -c "printf '%s' '@asset_kernel_name' | sed -E 's/^hackeros-kernel[a-z-]*_//; s/\\.deb\$//'" |> @remote_kver
+
+~> Zainstalowana wersja jadra (pakiet): @installed_version
+~> Dostepna wersja jadra (release @latest_tag): @remote_kver
+
+> test "@installed_version" = "@remote_kver"
+? ok
+    ::green System ma juz najnowsza wersje jadra HackerOS (@remote_kver). Nic do zrobienia.
+    > rm -rf @work_dir
+    > exit 0
+done
+
+::yellow Dostepna nowsza wersja jadra: @remote_kver (zainstalowana: @installed_version)
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; 4. Pobieranie .deb (jadro + headers), z retry + wznawianiem
+;; ════════════════════════════════════════════════════════════════════════════
+~> [4/6] Pobieranie pakietow .deb...
+
+% url_kernel  = https://github.com/HackerOS-Linux-System/HackerOS-Kernel/releases/download/@latest_tag/@asset_kernel_name
+% url_headers = https://github.com/HackerOS-Linux-System/HackerOS-Kernel/releases/download/@latest_tag/@asset_headers_name
+
+~> Pobieranie: @asset_kernel_name
+> curl -fLS --retry 8 --retry-delay 3 --retry-connrefused -C - -o @work_dir/@asset_kernel_name @url_kernel
+? err
+    ::red Blad pobierania jadra: @url_kernel
+    > rm -rf @work_dir
+    > exit 1
+done
+
+~> Pobieranie: @asset_headers_name
+> curl -fLS --retry 8 --retry-delay 3 --retry-connrefused -C - -o @work_dir/@asset_headers_name @url_headers
+? err
+    ::red Blad pobierania headers: @url_headers
+    > rm -rf @work_dir
+    > exit 1
+done
+
+;; Weryfikacja, ze pobrane pliki to naprawde poprawne archiwa .deb (a nie
+;; np. urwana strona HTML po nieudanym pobraniu, ktora curl mimo wszystko
+;; zapisal na dysk).
+>> bash -c "dpkg-deb -I '@work_dir/@asset_kernel_name' >/dev/null 2>&1 && echo OK || echo ZLE" |> @check_kernel_deb
+>> bash -c "dpkg-deb -I '@work_dir/@asset_headers_name' >/dev/null 2>&1 && echo OK || echo ZLE" |> @check_headers_deb
+
+> test "@check_kernel_deb" = "OK"
+? err
+    ::red Pobrany plik jadra jest uszkodzony/niepoprawny: @asset_kernel_name
+    > rm -rf @work_dir
+    > exit 1
+done
+
+> test "@check_headers_deb" = "OK"
+? err
+    ::red Pobrany plik headers jest uszkodzony/niepoprawny: @asset_headers_name
+    > rm -rf @work_dir
+    > exit 1
+done
+
+::green Pobrane pakiety sa poprawne.
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; 5. Atomowa podmiana jadra przez apt
+;; ════════════════════════════════════════════════════════════════════════════
+;; Celowo NIE robimy "apt remove stare-jadro" a potem "apt install nowe.deb"
+;; w dwoch osobnych krokach — to zostawia okno, w ktorym system nie ma
+;; zadnego zainstalowanego jadra HackerOS. Zamiast tego dajemy apt oba .deb
+;; naraz: to jedna transakcja dpkg, ktora podmienia (upgrade) istniejacy
+;; pakiet w miejscu — albo sie w calosci powiedzie, albo dpkg wycofa zmiany.
+~> [5/6] Instalacja nowego jadra (atomowa transakcja apt)...
+
+> apt-get install -y @work_dir/@asset_kernel_name @work_dir/@asset_headers_name
+? ok
+    ::green Jadro HackerOS zaktualizowane do wersji @remote_kver (@kernel_variant).
+done
+? err
+    ::red BLAD: instalacja nowego jadra nie powiodla sie.
+    ~> Poprzednia wersja jadra (@installed_version) powinna pozostac nietknieta —
+    ~> apt/dpkg wycofuje nieudana transakcje automatycznie.
+    > rm -rf @work_dir
+    > exit 1
+done
+
+;; ════════════════════════════════════════════════════════════════════════════
+;; 6. Sprzatanie
+;; ════════════════════════════════════════════════════════════════════════════
+~> [6/6] Sprzatanie plikow tymczasowych...
+> rm -rf @work_dir
+
+::nl
+::hr 52
+::bold   Aktualizacja jadra zakonczona: @remote_kver (@kernel_variant)
+::hr 52
+::nl
+
+~> Uwaga: nowe jadro zadziala po restarcie systemu.
