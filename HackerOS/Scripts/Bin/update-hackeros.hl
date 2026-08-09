@@ -20,7 +20,89 @@ using <gen 2>
 done
 ~> Internet dostepny
 
-;; ── Wersja lokalna ────────────────────────────────────────────────────────────
+;; ── Komenda "pin" (przypnij konkretna wersje HackerOS) ───────────────────────
+;; Uzycie: hl run update-hackeros.hl pin 4.9   (lub: pin "HackerOS V4.9", pin v4.9)
+;; Lista dostepnych wersji brana jest z wydan (releases) repozytorium
+;; HackerOS-Updates na GitHubie. Reszta skryptu (bez argumentu "pin") dziala
+;; dokladnie tak jak wczesniej - ponizszy blok tylko dodaje nowa sciezke.
+% PIN_RELEASES_API = https://api.github.com/repos/HackerOS-Linux-System/HackerOS-Updates/releases
+
+> test "@arg0" = "pin"
+? ok
+    % PIN_REQUESTED = @arg1
+    ~> Przypinanie wersji HackerOS: @PIN_REQUESTED
+
+    > test "@argc" = "1"
+    ? ok
+        ::red Podaj wersje: hl run update-hackeros.hl pin <wersja>  (np. pin 4.9)
+        > exit 1
+    done
+
+    ~> Pobieranie listy dostepnych wersji z GitHuba...
+    > curl -fsSL -o /tmp/hl_pin_releases.json @PIN_RELEASES_API
+    ? err
+        ::red Nie udalo sie pobrac listy wydan z @PIN_RELEASES_API
+        > exit 1
+    done
+
+    ;; Normalizacja: "HackerOS V4.9", "v4.9", "V4.9", "4.9" -> "4.9",
+    ;; porownanie odbywa sie bez rozroznienia wielkosci liter.
+    >> bash -c "
+        req=\$(printf '%s' '@PIN_REQUESTED' | sed -E 's/^[Hh]acker[Oo][Ss][[:space:]]*//; s/^[Vv]//' | tr -d ' ')
+        found=NIE
+        matched_tag=''
+        tags=\$(grep -o '\"tag_name\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' /tmp/hl_pin_releases.json | sed -E 's/.*\"([^\"]*)\"\$/\\1/')
+        for t in \$tags; do
+            norm_t=\$(printf '%s' \"\$t\" | sed -E 's/^[Hh]acker[Oo][Ss][[:space:]]*//; s/^[Vv]//' | tr -d ' ')
+            if [ \"\$norm_t\" = \"\$req\" ]; then
+                found=TAK
+                matched_tag=\"\$t\"
+                break
+            fi
+        done
+        printf '%s|%s' \"\$found\" \"\$matched_tag\"
+    " |> @_pin_lookup
+
+    >> bash -c "printf '%s' '@_pin_lookup' | cut -d'|' -f1" |> @PIN_FOUND
+    >> bash -c "printf '%s' '@_pin_lookup' | cut -d'|' -f2" |> @PIN_TAG
+
+    > test "@PIN_FOUND" = "TAK"
+    ? err
+        ::red BLAD: wersja HackerOS "@PIN_REQUESTED" nie istnieje.
+        ~> Dostepne wersje sa tutaj: https://github.com/HackerOS-Linux-System/HackerOS-Updates/releases
+        > rm -f /tmp/hl_pin_releases.json
+        > exit 1
+    done
+
+    ::green Znaleziono wydanie: @PIN_TAG
+    ~> Pobieranie przypietej wersji (@PIN_TAG)...
+
+    > rm -rf @TMP_REPO
+    > git clone --branch @PIN_TAG --depth 1 https://github.com/HackerOS-Linux-System/HackerOS-Updates.git @TMP_REPO
+    ? err
+        ::red Blad klonowania repozytorium dla wydania @PIN_TAG.
+        > rm -f /tmp/hl_pin_releases.json
+        > exit 1
+    done
+
+    % UNPACK_PIN = @TMP_REPO/unpack.hl
+    ::exists @UNPACK_PIN
+    ? ok
+        ~> Uruchamianie: @UNPACK_PIN (przypieta wersja @PIN_TAG)
+        > hl run @UNPACK_PIN
+    done
+    ? err
+        ::red Brak unpack.hl w przypietym wydaniu @PIN_TAG!
+        > rm -f /tmp/hl_pin_releases.json
+        > exit 1
+    done
+
+    > rm -f /tmp/hl_pin_releases.json
+    ::green Zainstalowano przypieta wersje: @PIN_TAG
+    > exit 0
+done
+
+
 ~> Odczyt lokalnej wersji...
 ::exists @LOCAL_JSON
 ? err
