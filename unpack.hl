@@ -135,7 +135,7 @@ done
 done
 
 ~> Pobieranie HackerOS-Welcome...
-^>> curl -fLS -o @apps_dir/HackerOS-Welcome.new "@release_apps/HackerOS-Welcome/releases/download/v0.5/HackerOS-Welcome"
+^>> curl -fLS -o @apps_dir/HackerOS-Welcome.new "@release_apps/HackerOS-Welcome/releases/download/v0.7/HackerOS-Welcome"
 ? ok
     ^>> mv @apps_dir/HackerOS-Welcome.new @apps_dir/HackerOS-Welcome
     ^>> chmod 755 @apps_dir/HackerOS-Welcome
