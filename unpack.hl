@@ -289,7 +289,7 @@ done
 done
 
 ~> Pobieranie hacker...
-^> curl -fLS -o /usr/bin/hacker.new "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.1/hacker"
+^> curl -fLS -o /usr/bin/hacker.new "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker"
 ? ok
     ^> mv /usr/bin/hacker.new /usr/bin/hacker
     ^> chmod 755 /usr/bin/hacker
@@ -327,34 +327,18 @@ done
     ::yellow hackeros-steam - pomijam
 done
 
-~> Pobieranie hbuild...
-^> curl -fLS -o /usr/bin/hbuild.new "https://github.com/HackerOS-Linux-System/hbuild/releases/download/v0.3/hbuild"
-? ok
-    ^> mv /usr/bin/hbuild.new /usr/bin/hbuild
-    ^> chmod 755 /usr/bin/hbuild
-    ^> chown root:root /usr/bin/hbuild
-    ::green hbuild v
-done
 ? err
     ^> rm -f /usr/bin/hbuild.new
     ::yellow hbuild - pomijam
 done
 
-~> Pobieranie a...
-^> curl -fLS -o /usr/bin/a.new "https://github.com/HackerOS-Linux-System/a/releases/download/v0.2/a"
-? ok
-    ^> mv /usr/bin/a.new /usr/bin/a
-    ^> chmod 755 /usr/bin/a
-    ^> chown root:root /usr/bin/a
-    ::green a v
-done
 ? err
     ^> rm -f /usr/bin/a.new
     ::yellow a - pomijam
 done
 
 ~> Pobieranie getit...
-^> curl -fLS -o /usr/bin/getit.new "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.4/getit"
+^> curl -fLS -o /usr/bin/getit.new "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.5/getit"
 ? ok
     ^> mv /usr/bin/getit.new /usr/bin/getit
     ^> chmod 755 /usr/bin/getit
