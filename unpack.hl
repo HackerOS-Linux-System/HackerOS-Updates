@@ -1,506 +1,536 @@
+using <gen 2>
 // curl
+// awk
 
-;; ─── Ścieżki systemowe ───────────────────────────────────────────────────────
-% hackeros_share = /usr/share/HackerOS
-% hackeros_old   = /usr/share/HackerOS_old
-% hackeros_new   = /tmp/HackerOS_New
-% hackeros_src   = /tmp/HackerOS-Updates/HackerOS
-% scripts_bin    = /usr/share/HackerOS/Scripts/Bin
-% scripts_steam  = /usr/share/HackerOS/Scripts/Steam
-% apps_dir       = /usr/share/HackerOS/Scripts/HackerOS-Apps
-% games_dir      = /usr/share/HackerOS/Scripts/HackerOS-Games
+;; ── Stale ────────────────────────────────────────────────────────────────────
+% MANIFEST_URL = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS/main/packages/manifest.hk
+% GH = https://github.com/HackerOS-Linux-System
+% SHARE = /usr/share/HackerOS
+% NEW_DIR = /usr/share/.HackerOS_new
+% OLD_DIR = /usr/share/.HackerOS_old
+% LIBS_DIR = /usr/lib/HackerOS/Hacker-Lang/main-libs
+% STATE_FILE = /var/lib/hackeros-updates/installed.hk
+% APPS_DIR = /usr/share/HackerOS/Scripts/HackerOS-Apps
+% GAMES_DIR = /usr/share/HackerOS/Scripts/HackerOS-Games
+% STEAM_BIN = /usr/share/HackerOS/Scripts/Steam/bin
+% UPD_OK = 0
+% UPD_SAME = 0
+% UPD_SKIP = 0
+% UPD_FAIL = 0
+% FAILED_LIST =
+% T_VERIFY =
+% T_AS =
 
-;; ─── Ścieżki pobierania ───────────────────────────────────────────────────────
-% release_cli  = https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2
-% release_apps = https://github.com/HackerOS-Linux-System
-% hl_bin       = /usr/bin/hl
+;; ── Licznik / raport ─────────────────────────────────────────────────────────
+: c_ok def
+    $( @UPD_OK + 1 ) -> @UPD_OK
+done
+: c_same def
+    $( @UPD_SAME + 1 ) -> @UPD_SAME
+done
+: c_skip def
+    $( @UPD_SKIP + 1 ) -> @UPD_SKIP
+done
+: c_fail def
+    $( @UPD_FAIL + 1 ) -> @UPD_FAIL
+    % FAILED_LIST = @FAILED_LIST @T_NAME
+done
 
-;; ─── Nagłówek ─────────────────────────────────────────────────────────────────
-::nl
-::hr 52
-::bold   HackerOS System Update
-::hr 52
-::nl
+;; ── Sprzatanie i zakonczenie ─────────────────────────────────────────────────
+: cleanup def
+    > rm -rf @WORK
+done
 
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 1. ATOMOWA PODMIANA STRUKTURY (Zlota Kopia)
-;; ════════════════════════════════════════════════════════════════════════════════
+;; ── Instalacja jednego pliku ─────────────────────────────────────────────────
+;; Wejscie: T_KEY (klucz w manifest.hk), T_REPO, T_ASSET, T_DIR, T_SUDO (yes/no),
+;;          T_MODE (required/optional), T_AS (opcjonalna nazwa docelowa),
+;;          T_VERIFY (hl = sprawdz binarke po instalacji, rollback przy bledzie)
 
-~> [1/8] Weryfikacja paczki aktualizacji...
+: tool_kind def
+    >> printf '%s' '@T_ASSET' | grep -q '[.]love$' && echo zip || echo bin |> @T_KIND
+done
 
-::exists @hackeros_src
-
-? ok
-    ~> Paczka dostepna - podmieniam strukture...
-
-    ^>> cp -r @hackeros_src @hackeros_new
-
-    ? ok
-        ^>> mv @hackeros_share @hackeros_old
-        ^>> mv @hackeros_new @hackeros_share
-        ^> rm -rf /usr/share/HackerOS_old
-        ::green Struktura zaktualizowana atomowo
+: stage_version def
+    % _hk_file = @MANIFEST
+    % _hk_section = tools
+    % _hk_key = @T_KEY
+    -- hk_get
+    ? switch @_hk_found
+    | true
+        % T_VER = @_hk_result
+        >> printf '%s' '@T_VER' | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$' && echo ok || echo bad |> @T_VOK
+        ? switch @T_VOK
+        | ok
+            % T_RES = go
+        | *
+            ::red @T_NAME - niepoprawna wersja w manifest.hk: [@T_VER] - pomijam
+            % T_RES = fail
+        done
+    | *
+        ::yellow @T_NAME - brak wpisu "@T_KEY" w manifest.hk [tools] - pomijam
+        % T_RES = skip
     done
+done
 
-    ? err
-        ^> rm -rf /tmp/HackerOS_New
-        ::red BLAD: Podmiana nie powiodla sie - stara wersja zachowana
+: stage_present def
+    ;; optional: aktualizuj tylko jesli juz zainstalowane
+    ? switch @T_MODE
+    | optional
+        >> test -e "@T_DEST" && echo yes || echo no |> @T_PRESENT
+        ? switch @T_PRESENT
+        | yes
+            % T_RES = go
+        | *
+            % T_RES = silent
+        done
+    | *
+        % T_RES = go
     done
 done
 
-? err
-    ::yellow Brak paczki w @hackeros_src - pomijam podmiane struktury
-done
-
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 2. UPRAWNIENIA SKRYPTOW SYSTEMOWYCH
-;; ════════════════════════════════════════════════════════════════════════════════
-
-~> [2/8] Ustawianie uprawnien skryptow...
-
-::exists @scripts_bin
-
-? ok
-    ^>> chmod 755 @scripts_bin/update-hackeros.sh
-    ^>> chmod 755 @scripts_bin/update-wallpapers.sh
-    ^>> chown -R root:root @scripts_bin
-    ::green Scripts/Bin v
-done
-
-::exists @scripts_steam
-
-? ok
-    ^>> chmod 755 @scripts_steam/HackerOS-Steam.sh
-    ^>> chmod 755 @scripts_steam/HackerOS-Steam-Animation.sh
-    ^>> mkdir -p @scripts_steam/bin
-
-    ~> Pobieranie HackerOS-Steam GUI...
-    ^>> curl -fLS -o @scripts_steam/bin/gui.new "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/gui"
-    ? ok
-        ^>> mv @scripts_steam/bin/gui.new @scripts_steam/bin/gui
-        ^>> chmod 755 @scripts_steam/bin/gui
-        ::green Steam GUI v
+: stage_uptodate def
+    ? switch @FORCE
+    | yes
+        % T_RES = go
+    | *
+        % _hk_file = @STATE_FILE
+        % _hk_section = installed
+        % _hk_key = @T_DEST
+        -- hk_get
+        >> test "@_hk_result" = "@T_VER" -a -s "@T_DEST" && echo same || echo diff |> @T_SAME
+        ? switch @T_SAME
+        | same
+            % T_RES = same
+        | *
+            % T_RES = go
+        done
     done
-    ? err
-        ^>> rm -f @scripts_steam/bin/gui.new
-        ::yellow Steam GUI - pomijam (404)
+done
+
+: stage_download def
+    % T_URL = @GH/@T_REPO/releases/download/@T_VER/@T_ASSET
+    % T_TMP = @WORK/dl.@T_ASSET
+    > rm -f @T_TMP
+    >> curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 900 -o "@T_TMP" "@T_URL" && echo ok || echo fail |> @T_DL
+    ? switch @T_DL
+    | ok
+        % T_RES = go
+    | *
+        ::red @T_NAME @T_VER - blad pobierania: @T_URL
+        % T_RES = fail
     done
+done
 
-    ~> Pobieranie HackerOS-Steam TUI...
-    ^>> curl -fLS -o @scripts_steam/bin/tui.new "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/tui"
-    ? ok
-        ^>> mv @scripts_steam/bin/tui.new @scripts_steam/bin/tui
-        ^>> chmod 755 @scripts_steam/bin/tui
-        ::green Steam TUI v
+: stage_validate def
+    >> test -s "@T_TMP" && echo ok || echo empty |> @T_SIZE
+    ? switch @T_SIZE
+    | ok
+        >> od -An -tx1 -N4 "@T_TMP" | tr -d '[:space:]' |> @T_MAGIC
+        ? switch @T_KIND
+        | zip
+            >> printf '%s' '@T_MAGIC' | grep -q '^504b0304' && echo ok || echo bad |> @T_VAL
+        | *
+            >> printf '%s' '@T_MAGIC' | grep -Eq '^(7f454c46|2321)' && echo ok || echo bad |> @T_VAL
+        done
+        ? switch @T_VAL
+        | ok
+            % T_RES = go
+        | *
+            ::red @T_NAME - pobrany plik ma zly format (nie ELF/skrypt/zip) - nie instaluje
+            % T_RES = fail
+        done
+    | *
+        ::red @T_NAME - pobrany plik jest pusty - nie instaluje
+        % T_RES = fail
     done
-    ? err
-        ^>> rm -f @scripts_steam/bin/tui.new
-        ::yellow Steam TUI - pomijam (404)
+done
+
+: stage_install def
+    % T_NEWF = @T_DEST.new
+    ? switch @T_SUDO
+    | yes
+        ^> install -D -m 755 -o root -g root "@T_TMP" "@T_NEWF" && mv -f "@T_NEWF" "@T_DEST" && echo ok || (rm -f "@T_NEWF"; echo fail) |> @T_IN
+    | *
+        >> install -D -m 755 "@T_TMP" "@T_NEWF" && mv -f "@T_NEWF" "@T_DEST" && echo ok || (rm -f "@T_NEWF"; echo fail) |> @T_IN
     done
-
-    ^>> chown -R root:root @scripts_steam
-    ::green Scripts/Steam v
+    ? switch @T_IN
+    | ok
+        % T_RES = go
+    | *
+        ::red @T_NAME - instalacja do @T_DEST nie powiodla sie
+        % T_RES = fail
+    done
 done
 
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 3. APLIKACJE HACKEROS
-;; ════════════════════════════════════════════════════════════════════════════════
-
-~> [3/8] Aktualizacja aplikacji HackerOS...
-
-^>> mkdir -p @apps_dir
-
-~> Pobieranie HackerOS-Game-Mode...
-^>> curl -fLS -o @apps_dir/HackerOS-Game-Mode.AppImage.new "@release_apps/HackerOS-Game-Mode/releases/download/v0.2/HackerOS-Game-Mode.AppImage"
-? ok
-    ^>> mv @apps_dir/HackerOS-Game-Mode.AppImage.new @apps_dir/HackerOS-Game-Mode.AppImage
-    ^>> chmod 755 @apps_dir/HackerOS-Game-Mode.AppImage
-    ::green HackerOS-Game-Mode
-done
-? err
-    ^>> rm -f @apps_dir/HackerOS-Game-Mode.AppImage.new
-    ::yellow HackerOS-Game-Mode - pomijam
-done
-
-~> Pobieranie Hacker_Launcher...
-^>> curl -fLS -o @apps_dir/Hacker_Launcher.new "@release_apps/Hacker-Launcher/releases/download/v1.0/Hacker_Launcher"
-? ok
-    ^>> mv @apps_dir/Hacker_Launcher.new @apps_dir/Hacker_Launcher
-    ^>> chmod 755 @apps_dir/Hacker_Launcher
-    ::green Hacker_Launcher
-done
-? err
-    ^>> rm -f @apps_dir/Hacker_Launcher.new
-    ::yellow Hacker_Launcher - pomijam
+: stage_verify def
+    ;; po instalacji hl: sprawdz czy nowa binarka daje sie uruchomic (kody 126/127 =
+    ;; nie startuje, 132/134/139 = crash), inaczej rollback do poprzedniej wersji.
+    ;; Kod 1 (np. blokada "tylko HackerOS") oznacza, ze binarka dziala.
+    ? switch @T_VERIFY
+    | hl
+        >> "@T_DEST" version > /dev/null 2>&1; r=$?; case $r in 126|127|132|134|135|139) echo bad;; *) echo ok;; esac |> @T_HLV
+        ? switch @T_HLV
+        | ok
+            % T_RES = go
+        | *
+            ? switch @T_HAVEBAK
+            | yes
+                ::red hl - nowa binarka sie nie uruchamia, przywracam poprzednia wersje
+                ^> install -m 755 -o root -g root "@WORK/hl.bak" "@T_DEST" && echo ok || echo fail |> @T_RB
+            | *
+                ::red hl - nowa binarka sie nie uruchamia (brak kopii poprzedniej wersji)
+            done
+            % T_RES = fail
+        done
+    | *
+        % T_RES = go
+    done
 done
 
-~> Pobieranie HackerOS-Welcome...
-^>> curl -fLS -o @apps_dir/HackerOS-Welcome.new "@release_apps/HackerOS-Welcome/releases/download/v0.7/HackerOS-Welcome"
-? ok
-    ^>> mv @apps_dir/HackerOS-Welcome.new @apps_dir/HackerOS-Welcome
-    ^>> chmod 755 @apps_dir/HackerOS-Welcome
-    ::green HackerOS-Welcome
-done
-? err
-    ^>> rm -f @apps_dir/HackerOS-Welcome.new
-    ::yellow HackerOS-Welcome - pomijam
+: stage_backup def
+    % T_HAVEBAK = no
+    ? switch @T_VERIFY
+    | hl
+        > rm -f @WORK/hl.bak
+        >> test -f "@T_DEST" && cp -p "@T_DEST" "@WORK/hl.bak" && echo yes || echo no |> @T_HAVEBAK
+    done
 done
 
-~> Pobieranie Hacker-Term v0.8...
-^>> curl -fLS -o @apps_dir/Hacker-Term.new "@release_apps/Hacker-Term/releases/download/v0.8/Hacker-Term"
-? ok
-    ^>> mv @apps_dir/Hacker-Term.new @apps_dir/Hacker-Term
-    ^>> chmod 755 @apps_dir/Hacker-Term
-    ::green Hacker-Term v0.8
-done
-? err
-    ^>> rm -f @apps_dir/Hacker-Term.new
-    ::yellow Hacker-Term - pomijam
+: stage_record def
+    >> printf '%s\n' '-> "@T_DEST" => @T_VER' >> "@STATE_NEW"
 done
 
-~> Pobieranie HackerOS-Store...
-^>> curl -fLS -o @apps_dir/HackerOS-Store.new "@release_apps/HackerOS-Store/releases/download/v0.6/HackerOS-Store"
-? ok
-    ^>> mv @apps_dir/HackerOS-Store.new @apps_dir/HackerOS-Store
-    ^>> chmod 755 @apps_dir/HackerOS-Store
-    ::green HackerOS-Store v
-done
-? err
-    ^>> rm -f @apps_dir/HackerOS-Store.new
-    ::yellow HackerOS-Store - pomijam
-done
-
-^>> chown -R root:root @apps_dir
-::green Aplikacje zaktualizowane
-
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 4. GRY HACKEROS
-;; ════════════════════════════════════════════════════════════════════════════════
-
-~> [4/8] Aktualizacja gier HackerOS...
-
-^>> mkdir -p @games_dir
-
-~> Pobieranie HackerOS-Games...
-^>> curl -fLS -o @games_dir/HackerOS-Games.AppImage.new "@release_apps/HackerOS-Games/releases/download/v0.8/HackerOS-Games"
-? ok
-    ^>> mv @games_dir/HackerOS-Games.new @games_dir/HackerOS-Games
-    ^>> chmod 755 @games_dir/HackerOS-Games
-    ::green HackerOS-Games
-done
-? err
-    ^>> rm -f @games_dir/HackerOS-Games.new
-    ::yellow HackerOS-Games - pomijam
-done
-
-~> Pobieranie the-racer...
-^>> curl -fLS -o @games_dir/the-racer.new "@release_apps/HackerOS-Games/releases/download/v0.8/the-racer"
-? ok
-    ^>> mv @games_dir/the-racer.new @games_dir/the-racer
-    ^>> chmod 755 @games_dir/the-racer
-    ::green the-racer
-done
-? err
-    ^>> rm -f @games_dir/the-racer.new
-    ::yellow the-racer - pomijam
-done
-
-~> Pobieranie starblaster...
-^>> curl -fLS -o @games_dir/starblaster.new "@release_apps/HackerOS-Games/releases/download/v0.8/starblaster"
-? ok
-    ^>> mv @games_dir/starblaster.new @games_dir/starblaster
-    ^>> chmod 755 @games_dir/starblaster
-    ::green starblaster
-done
-? err
-    ^>> rm -f @games_dir/starblaster.new
-    ::yellow starblaster - pomijam
+: install_tool def
+    % T_RES = go
+    % T_NAME = @T_ASSET
+    -- stage_version
+    ? switch @T_RES
+    | go
+        -- stage_present
+    done
+    ? switch @T_RES
+    | go
+        -- stage_uptodate
+    done
+    ? switch @T_RES
+    | go
+        -- stage_download
+    done
+    ? switch @T_RES
+    | go
+        -- stage_validate
+    done
+    ? switch @T_RES
+    | go
+        -- stage_backup
+        -- stage_install
+    done
+    ? switch @T_RES
+    | go
+        -- stage_verify
+    done
+    ? switch @T_RES
+    | go
+        ::green @T_NAME @T_VER - zaktualizowano
+        -- stage_record
+        -- c_ok
+    | same
+        ::cyan @T_NAME @T_VER - aktualne
+        -- stage_record
+        -- c_same
+    | skip
+        -- c_skip
+    | silent
+        -- c_skip
+    | *
+        -- c_fail
+    done
 done
 
-~> Pobieranie bit-jump...
-^>> curl -fLS -o @games_dir/bit-jump.love.new "@release_apps/HackerOS-Games/releases/download/v0.8/bit-jump.love"
-? ok
-    ^>> mv @games_dir/bit-jump.love.new @games_dir/bit-jump.love
-    ^>> chmod 755 @games_dir/bit-jump.love
-    ::green bit-jump
-done
-? err
-    ^>> rm -f @games_dir/bit-jump.love.new
-    ::yellow bit-jump - pomijam
-done
-
-~> Pobieranie cosmonaut...
-^>> curl -fLS -o @games_dir/cosmonaut.love.new "@release_apps/HackerOS-Games/releases/download/v0.8/cosmonaut.love"
-? ok
-    ^>> mv @games_dir/cosmonaut.love.new @games_dir/cosmonaut.love
-    ^>> chmod 755 @games_dir/cosmonaut.love
-    ::green cosmonaut
-done
-? err
-    ^>> rm -f @games_dir/cosmonaut.love.new
-    ::yellow cosmonaut - pomijam
+;; jeden plik: dest = T_DIR/T_ASSET (lub T_DIR/T_AS)
+: tool_asset def
+    -- tool_kind
+    >> test -n "@T_AS" && echo as || echo plain |> @T_ASM
+    ? switch @T_ASM
+    | as
+        % T_DEST = @T_DIR/@T_AS
+    | *
+        % T_DEST = @T_DIR/@T_ASSET
+    done
+    -- install_tool
 done
 
-~> Pobieranie bark-squadron...
-^>> curl -fLS -o @games_dir/bark-squadron.AppImage.new "@release_apps/HackerOS-Games/releases/download/v0.8/bark-squadron"
-? ok
-    ^>> mv @games_dir/bark-squadron.new @games_dir/bark-squadron
-    ^>> chmod 755 @games_dir/bark-squadron
-    ::green bark-squadron v
-done
-? err
-    ^>> rm -f @games_dir/bark-squadron.new
-    ::yellow bark-squadron - pomijam
-done
-
-^>> chown -R root:root @games_dir
-::green Gry zaktualizowane
-
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 5. NARZEDZIA CLI /usr/bin/
-;; ════════════════════════════════════════════════════════════════════════════════
-
-~> [5/8] Aktualizacja narzedzi CLI...
-
-~> Pobieranie hedit...
-^> curl -fLS -o /usr/bin/hedit.new "https://github.com/HackerOS-Linux-System/hedit/releases/download/v0.5/hedit"
-? ok
-    ^> mv /usr/bin/hedit.new /usr/bin/hedit
-    ^> chmod 755 /usr/bin/hedit
-    ^> chown root:root /usr/bin/hedit
-    ::green hedit
-done
-? err
-    ^> rm -f /usr/bin/hedit.new
-    ::yellow hedit - pomijam
+;; ── KROK 0: kontrola srodowiska, odzysk po przerwanej aktualizacji ──────────
+::bold === HackerOS Updates - unpack.hl ===
+>> test "@arg0" = "force" && echo yes || echo no |> @FORCE
+>> bash -c 'if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != root ]; then getent passwd "$SUDO_USER" | cut -d: -f6; else printf %s "$HOME"; fi' |> @USER_HOME
+>> mktemp -d /tmp/hackeros-update.XXXXXX |> @WORK
+% STATE_NEW = @WORK/installed.hk
+> printf '[installed]\n' > @STATE_NEW
+>> test -n "@HOS_MANIFEST_URL" && echo yes || echo no |> @OVR
+? switch @OVR
+| yes
+    % MANIFEST_URL = @HOS_MANIFEST_URL
+    ::yellow Uzyto HOS_MANIFEST_URL: @MANIFEST_URL
 done
 
-~> Pobieranie ngt...
-^> curl -fLS -o /usr/bin/ngt.new "https://github.com/HackerOS-Linux-System/ngt/releases/download/v0.4/ngt"
-? ok
-    ^> mv /usr/bin/ngt.new /usr/bin/ngt
-    ^> chmod 755 /usr/bin/ngt
-    ^> chown root:root /usr/bin/ngt
-    ::green ngt
+;; katalog z repo aktualizacji (tam gdzie lezy ten skrypt, domyslnie /tmp/HackerOS-Updates)
+>> dirname "$(readlink -f '@HL_SCRIPT')" |> @UPD_DIR
+>> test -d "@UPD_DIR/HackerOS" && echo yes || echo no |> @UPD_OK_DIR
+? switch @UPD_OK_DIR
+| yes
+    ;; ok
+| *
+    % UPD_DIR = /tmp/HackerOS-Updates
 done
-? err
-    ^> rm -f /usr/bin/ngt.new
-    ::yellow ngt - pomijam
+::cyan Repo aktualizacji: @UPD_DIR  |  uzytkownik: @USER_HOME
+
+;; odzysk po przerwanej podmianie /usr/share/HackerOS
+^> bash -c 'if [ ! -d @SHARE ] && [ -d @OLD_DIR ]; then mv @OLD_DIR @SHARE; fi; rm -rf @NEW_DIR' && echo ok || echo fail |> @REC
+
+;; ── KROK 1: biblioteka main/hk-parser + manifest.hk ──────────────────────────
+::bold [1/9] Biblioteka hk-parser i manifest.hk
+>> test -f "@UPD_DIR/main-libs/hk-parser.hl" && echo yes || echo no |> @HAVE_LIB
+? switch @HAVE_LIB
+| yes
+    >> cmp -s "@UPD_DIR/main-libs/hk-parser.hl" "@LIBS_DIR/hk-parser.hl" && echo same || echo diff |> @LIB_SAME
+    ? switch @LIB_SAME
+    | same
+        ::cyan hk-parser.hl aktualny
+    | *
+        ^> install -D -m 644 -o root -g root "@UPD_DIR/main-libs/hk-parser.hl" "@LIBS_DIR/hk-parser.hl" && echo ok || echo fail |> @LIB_IN
+        ? switch @LIB_IN
+        | ok
+            ::green hk-parser.hl zaktualizowany
+        | *
+            ::red Nie mozna zainstalowac hk-parser.hl w @LIBS_DIR
+            -- cleanup
+            > exit 1
+        done
+    done
+| *
+    ::red Brak @UPD_DIR/main-libs/hk-parser.hl - niekompletne repo aktualizacji
+    -- cleanup
+    > exit 1
 done
 
-~> Pobieranie hacker...
-^> curl -fLS -o /usr/bin/hacker.new "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker"
-? ok
-    ^> mv /usr/bin/hacker.new /usr/bin/hacker
-    ^> chmod 755 /usr/bin/hacker
-    ^> chown root:root /usr/bin/hacker
-    ::green hacker
-done
-? err
-    ^> rm -f /usr/bin/hacker.new
-    ::yellow hacker - pomijam
+# <main/hk-parser>
+
+% MANIFEST = @WORK/manifest.hk
+::cyan Pobieranie manifestu: @MANIFEST_URL
+>> curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 60 -o "@MANIFEST" "@MANIFEST_URL" && echo ok || echo fail |> @MF
+? switch @MF
+| ok
+    ;; ok
+| *
+    ::red Nie mozna pobrac manifest.hk - przerywam, system NIE zostal zmieniony
+    -- cleanup
+    > exit 1
 done
 
-~> Pobieranie hpm...
-^> curl -fLS -o /usr/bin/hpm.new "https://github.com/HackerOS-Linux-System/HackerOS-Package-Manager/releases/download/v0.9/hpm"
-? ok
-    ^> mv /usr/bin/hpm.new /usr/bin/hpm
-    ^> chmod 755 /usr/bin/hpm
-    ^> chown root:root /usr/bin/hpm
-    ::green hpm v0.9
+% _hk_file = @MANIFEST
+-- hk_is_valid
+? switch @_hk_found
+| true
+    ;; ok
+| *
+    ::red manifest.hk ma niepoprawny format - przerywam, system NIE zostal zmieniony
+    -- cleanup
+    > exit 1
 done
-? err
-    ^> rm -f /usr/bin/hpm.new
-    ::yellow hpm - pomijam
-done
-
-~> Pobieranie hackeros-steam...
-^> curl -fLS -o /usr/bin/hackeros-steam.new "https://github.com/HackerOS-Linux-System/HackerOS-Steam/releases/download/v0.4/hackeros-steam"
-? ok
-    ^> mv /usr/bin/hackeros-steam.new /usr/bin/hackeros-steam
-    ^> chmod 755 /usr/bin/hackeros-steam
-    ^> chown root:root /usr/bin/hackeros-steam
-    ::green hackeros-steam v0.4
-done
-? err
-    ^> rm -f /usr/bin/hackeros-steam.new
-    ::yellow hackeros-steam - pomijam
+% _hk_section = tools
+-- hk_load_section
+? switch @_hk_found
+| true
+    ::green Manifest OK - narzedzi w [tools]: @HK_tools_COUNT
+| *
+    ::red manifest.hk nie zawiera sekcji [tools] - przerywam, system NIE zostal zmieniony
+    -- cleanup
+    > exit 1
 done
 
-? err
-    ^> rm -f /usr/bin/hbuild.new
-    ::yellow hbuild - pomijam
+;; ── KROK 2: struktura /usr/share/HackerOS (podmiana z rollbackiem) ───────────
+::bold [2/9] Struktura /usr/share/HackerOS
+>> test -f "@UPD_DIR/HackerOS/Config-Files/release-info.json" && echo ok || echo bad |> @SRC_OK
+? switch @SRC_OK
+| ok
+    ;; ok
+| *
+    ::red Brak @UPD_DIR/HackerOS/Config-Files/release-info.json - przerywam
+    -- cleanup
+    > exit 1
+done
+^> bash -c 'set -e; rm -rf @NEW_DIR @OLD_DIR; cp -a @UPD_DIR/HackerOS @NEW_DIR; keep() { if [ -d @SHARE/$1 ]; then mkdir -p @NEW_DIR/$1; cp -au @SHARE/$1/. @NEW_DIR/$1/; fi; }; keep Scripts/HackerOS-Apps; keep Scripts/HackerOS-Games; keep Scripts/Steam/bin; chown -R root:root @NEW_DIR; if [ -d @SHARE ]; then mv @SHARE @OLD_DIR; fi; if mv @NEW_DIR @SHARE; then rm -rf @OLD_DIR; else if [ -d @OLD_DIR ]; then mv @OLD_DIR @SHARE; fi; exit 1; fi; echo ok' || (rm -rf @NEW_DIR; echo fail) |> @SWAP
+? switch @SWAP
+| ok
+    ::green Struktura zaktualizowana (pobrane aplikacje i gry zachowane)
+| *
+    ::red Podmiana struktury nie powiodla sie - system zostal przywrocony
+    -- cleanup
+    > exit 1
+done
+^> find @SHARE -type f -name "*.hl" -exec chmod 755 {} + && find @SHARE -type f -name "*.sh" -exec chmod 755 {} + && echo ok || echo fail |> @CHM
+
+;; ── KROK 3: aplikacje (HackerOS-Apps) ────────────────────────────────────────
+::bold [3/9] Aplikacje
+% T_SUDO = yes
+% T_MODE = required
+% T_DIR = @APPS_DIR
+% T_KEY = HackerOS Store
+% T_REPO = HackerOS-Store
+% T_ASSET = HackerOS-Store
+-- tool_asset
+% T_KEY = Hacker Launcher
+% T_REPO = Hacker_Launcher
+% T_ASSET = Hacker_Launcher
+-- tool_asset
+% T_KEY = Proton Manager
+% T_REPO = Proton-Manager
+% T_ASSET = proton-manager
+-- tool_asset
+% T_KEY = Hacker Term
+% T_REPO = Hacker-Term
+% T_ASSET = Hacker-Term
+-- tool_asset
+% T_KEY = HackerOS Welcome
+% T_REPO = HackerOS-Welcome
+% T_ASSET = HackerOS-Welcome
+-- tool_asset
+
+;; ── KROK 4: gry ──────────────────────────────────────────────────────────────
+::bold [4/9] Gry
+% T_DIR = @GAMES_DIR
+% T_KEY = HackerOS Games
+% T_REPO = HackerOS-Games
+@ a in HackerOS-Games the-racer starblaster bit-jump.love cosmonaut.love bark-squadron
+    % T_ASSET = @a
+    -- tool_asset
 done
 
-? err
-    ^> rm -f /usr/bin/a.new
-    ::yellow a - pomijam
+;; ── KROK 5: Steam ────────────────────────────────────────────────────────────
+::bold [5/9] HackerOS Steam
+% T_DIR = @STEAM_BIN
+% T_KEY = HackerOS Steam
+% T_REPO = HackerOS-Steam
+@ a in gui tui
+    % T_ASSET = @a
+    -- tool_asset
 done
 
-~> Pobieranie getit...
-^> curl -fLS -o /usr/bin/getit.new "https://github.com/HackerOS-Linux-System/ghdir/releases/download/v0.5/getit"
-? ok
-    ^> mv /usr/bin/getit.new /usr/bin/getit
-    ^> chmod 755 /usr/bin/getit
-    ^> chown root:root /usr/bin/getit
-    ::green getit v
-done
-? err
-    ^> rm -f /usr/bin/getit.new
-    ::yellow getit - pomijam
-done
+;; ── KROK 6: narzedzia CLI w /usr/bin ─────────────────────────────────────────
+::bold [6/9] Narzedzia /usr/bin
+% T_DIR = /usr/bin
+% T_KEY = hacker
+% T_REPO = Hacker-CLI-Tool
+% T_ASSET = hacker
+-- tool_asset
+% T_KEY = hnm
+% T_REPO = HackerOS-Nix-Manager
+% T_ASSET = hnm
+-- tool_asset
+% T_KEY = hpm
+% T_REPO = HackerOS-Package-Manager
+% T_ASSET = hpm
+-- tool_asset
+% T_KEY = chker
+% T_REPO = chker
+% T_ASSET = chker
+-- tool_asset
+% T_KEY = getit
+% T_REPO = getit
+% T_ASSET = getit
+-- tool_asset
+% T_KEY = HackerOS Steam
+% T_REPO = HackerOS-Steam
+% T_ASSET = hackeros-steam
+-- tool_asset
+% T_KEY = hsh
+% T_REPO = hsh
+% T_ASSET = hsh
+-- tool_asset
+% T_KEY = ngt
+% T_REPO = ngt
+% T_ASSET = ngt
+-- tool_asset
+% T_KEY = hedit
+% T_REPO = hedit
+% T_ASSET = hedit
+-- tool_asset
 
-~> Pobieranie chker...
-^> curl -fLS -o /usr/bin/chker.new "https://github.com/HackerOS-Linux-System/chker/releases/download/v0.1/chker"
-? ok
-    ^> mv /usr/bin/chker.new /usr/bin/chker
-    ^> chmod 755 /usr/bin/chker
-    ^> chown root:root /usr/bin/chker
-    ::green chker v
+;; ── KROK 7: edycje opcjonalne (tylko jesli juz zainstalowane) ────────────────
+::bold [7/9] Pakiety opcjonalne (aktualizowane tylko jesli zainstalowane)
+% T_MODE = optional
+% T_KEY = gaming-cli
+% T_REPO = gaming-cli
+@ a in gamescope-manager gaming gaming-cli
+    % T_ASSET = @a
+    -- tool_asset
 done
-? err
-    ^> rm -f /usr/bin/chker.new
-    ::yellow chker - pomijam
+% T_KEY = Hacker Mode
+% T_REPO = Hacker-Mode
+% T_ASSET = Hacker-Mode
+-- tool_asset
+% T_KEY = hammer
+% T_REPO = hammer
+% T_ASSET = hammer
+-- tool_asset
+% T_KEY = HWDE
+% T_REPO = HWDE
+% T_ASSET = hwde
+-- tool_asset
+% T_KEY = HackerScript
+% T_REPO = HackerScript
+% T_ASSET = hackerc
+-- tool_asset
+% T_KEY = H#
+% T_REPO = H-Sharp
+% T_ASSET = hsharp
+% T_AS = h#
+-- tool_asset
+% T_AS =
+% T_KEY = bit
+% T_REPO = bit
+% T_ASSET = bit
+-- tool_asset
+% T_KEY = HackerOS Builder
+% T_REPO = HackerOS-Builder
+% T_ASSET = hackeros-builder
+-- tool_asset
+% T_MODE = required
+
+;; ── KROK 8: konfiguracja uzytkownika (~/.hackeros/hacker) ────────────────────
+::bold [8/9] Konfiguracja uzytkownika
+% T_SUDO = no
+% T_DIR = @USER_HOME/.hackeros/hacker
+% T_KEY = hacker
+% T_REPO = Hacker-CLI-Tool
+@ a in hacker-shell hacker-repair hacker-help hacker-select hacker-docs HackerOS-Updater update-system apt-frontend
+    % T_ASSET = @a
+    -- tool_asset
 done
+>> bash -c 'if [ "$(id -u)" = 0 ] && [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != root ]; then chown -R "$SUDO_USER": "@USER_HOME/.hackeros"; fi' && echo ok || echo fail |> @CHO
+% T_SUDO = yes
 
-~> Pobieranie hsh...
-^> curl -fLS -o /usr/bin/hsh.new "https://github.com/HackerOS-Linux-System/hsh/releases/download/v0.4/hsh"
-? ok
-    ^> mv /usr/bin/hsh.new /usr/bin/hsh
-    ^> chmod 755 /usr/bin/hsh
-    ^> chown root:root /usr/bin/hsh
-    ::green hsh v
+;; ── KROK 9: Hacker Lang (na koncu - podmienia interpreter) ───────────────────
+::bold [9/9] Hacker Lang
+% T_DIR = /usr/bin
+% T_KEY = Hacker Lang
+% T_REPO = Hacker-Lang
+% T_ASSET = hl
+% T_VERIFY = hl
+-- tool_asset
+% T_VERIFY =
+
+;; ── Stan zainstalowanych wersji + podsumowanie ───────────────────────────────
+^> install -D -m 644 -o root -g root "@STATE_NEW" "@STATE_FILE" && echo ok || echo fail |> @ST
+-- cleanup
+::bold === Podsumowanie ===
+~> Zaktualizowano: @UPD_OK | Aktualne: @UPD_SAME | Pominiete: @UPD_SKIP | Bledy: @UPD_FAIL
+? switch @UPD_FAIL
+| 0
+    ::green HackerOS zaktualizowany pomyslnie.
+| *
+    ::red Nie udalo sie zaktualizowac: @FAILED_LIST
+    ::yellow Uruchom aktualizacje ponownie, nieudane pliki zostana pobrane jeszcze raz.
+    > exit 1
 done
-? err
-    ^> rm -f /usr/bin/hsh.new
-    ::yellow hsh - pomijam
-done
-
-::green Narzedzia CLI zaktualizowane
-
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 6. KONFIGURACJA UZYTKOWNIKA
-;; UWAGA: HL executor nie rozwiazuje $HOME ani ~ w zmiennych
-;; Uzywamy bash -c aby powloka rozwiazala $HOME poprawnie
-;; ════════════════════════════════════════════════════════════════════════════════
-
-~> [6/8] Aktualizacja konfiguracji uzytkownika...
-
-;; Tworzymy katalog przez bash (jedyna metoda zeby $HOME bylo rozwiazane)
-> bash -c "mkdir -p $HOME/.hackeros/hacker"
-
-;; Pobieramy do /tmp z prefiksem hl- zeby uniknac kolizji
-;; a potem przenosimy przez bash -c z $HOME
-
-> curl -fLS -o /tmp/hl-hacker-shell "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-shell"
-? ok
-    > bash -c "mv /tmp/hl-hacker-shell $HOME/.hackeros/hacker/hacker-shell && chmod 755 $HOME/.hackeros/hacker/hacker-shell"
-    ::green hacker-shell
-done
-? err
-    > rm -f /tmp/hl-hacker-shell
-    ::yellow hacker-shell - pomijam
-done
-
-> curl -fLS -o /tmp/hl-hacker-repair "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-repair"
-? ok
-    > bash -c "mv /tmp/hl-hacker-repair $HOME/.hackeros/hacker/hacker-repair && chmod 755 $HOME/.hackeros/hacker/hacker-repair"
-    ::green hacker-repair
-done
-? err
-    > rm -f /tmp/hl-hacker-repair
-    ::yellow hacker-repair - pomijam
-done
-
-> curl -fLS -o /tmp/hl-hacker-help "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-help"
-? ok
-    > bash -c "mv /tmp/hl-hacker-help $HOME/.hackeros/hacker/hacker-help && chmod 755 $HOME/.hackeros/hacker/hacker-help"
-    ::green hacker-help
-done
-? err
-    > rm -f /tmp/hl-hacker-help
-    ::yellow hacker-help - pomijam
-done
-
-> curl -fLS -o /tmp/hl-hacker-select "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-select"
-? ok
-    > bash -c "mv /tmp/hl-hacker-select $HOME/.hackeros/hacker/hacker-select && chmod 755 $HOME/.hackeros/hacker/hacker-select"
-    ::green hacker-select
-done
-? err
-    > rm -f /tmp/hl-hacker-select
-    ::yellow hacker-select - pomijam
-done
-
-> curl -fLS -o /tmp/hl-hacker-docs "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/hacker-docs"
-? ok
-    > bash -c "mv /tmp/hl-hacker-docs $HOME/.hackeros/hacker/hacker-docs && chmod 755 $HOME/.hackeros/hacker/hacker-docs"
-    ::green hacker-docs
-done
-? err
-    > rm -f /tmp/hl-hacker-docs
-    ::yellow hacker-docs - pomijam
-done
-
-> curl -fLS -o /tmp/hl-HackerOS-Updater "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/HackerOS-Updater"
-? ok
-    > bash -c "mv /tmp/hl-HackerOS-Updater $HOME/.hackeros/hacker/HackerOS-Updater && chmod 755 $HOME/.hackeros/hacker/HackerOS-Updater"
-    ::green HackerOS-Updater
-done
-? err
-    > rm -f /tmp/hl-HackerOS-Updater
-    ::yellow HackerOS-Updater - pomijam
-done
-
-> curl -fLS -o /tmp/hl-update-system "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/update-system"
-? ok
-    > bash -c "mv /tmp/hl-update-system $HOME/.hackeros/hacker/update-system && chmod 755 $HOME/.hackeros/hacker/update-system"
-    ::green update-system
-done
-? err
-    > rm -f /tmp/hl-update-system
-    ::yellow update-system - pomijam
-done
-
-;; apt-fronted zwraca 404 w tej wersji - cicha obsluga
-> curl -fLS -o /tmp/hl-apt-fronted "https://github.com/HackerOS-Linux-System/Hacker-CLI-Tool/releases/download/v2.4.2/apt-fronted"
-? ok
-    > bash -c "mv /tmp/hl-apt-fronted $HOME/.hackeros/hacker/apt-fronted && chmod 755 $HOME/.hackeros/hacker/apt-fronted"
-    ::green apt-fronted
-done
-? err
-    > rm -f /tmp/hl-apt-fronted
-    ::yellow apt-fronted - pomijam
-done
-
-::green Konfiguracja uzytkownika zaktualizowana v
-
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 7. HACKER LANG (hl)
-;; ════════════════════════════════════════════════════════════════════════════════
-
-~> [7/8] Aktualizacja Hacker Lang...
-
-^> curl -fLS -o /usr/bin/hl.new "https://github.com/HackerOS-Linux-System/Hacker-Lang/releases/download/gen-1/hl"
-
-? ok
-    ^> mv /usr/bin/hl.new /usr/bin/hl
-    ^> chmod 755 /usr/bin/hl
-    ^> chown root:root /usr/bin/hl
-    ::green Hacker Lang gen 1
-done
-
-? err
-    ^> rm -f /usr/bin/hl.new
-    ::red BLAD: Hacker Lang - stara wersja zachowana
-done
-
-;; ════════════════════════════════════════════════════════════════════════════════
-;; 8. PODSUMOWANIE
-;; ════════════════════════════════════════════════════════════════════════════════
-
-::nl
-::hr 52
-::bold   [8/8] Aktualizacja HackerOS zakonczona!
-::hr 52
-::nl
