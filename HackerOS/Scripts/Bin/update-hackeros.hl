@@ -4,168 +4,691 @@ using <gen 2>
 
 // curl
 // git
-// jq
+// flock
 
-% LOCAL_JSON   = /usr/share/HackerOS/Config-Files/release-info.json
-% REMOTE_URL   = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main/version.hacker
-% TMP_VERSION  = /tmp/version.hacker
-% TMP_REPO     = /tmp/HackerOS-Updates
+# <main/hk-parser>
+# <main/hk-attest>
 
-;; ── Internet ──────────────────────────────────────────────────────────────────
-~> Sprawdzanie polaczenia z internetem...
-> ping -c 1 -W 2 google.com
-? err
-    ~> Brak polaczenia z internetem. Przerywam.
-    > exit 1
-done
-~> Internet dostepny
-
-;; ── Komenda "pin" (przypnij konkretna wersje HackerOS) ───────────────────────
-;; Uzycie: hl run update-hackeros.hl pin 4.9   (lub: pin "HackerOS V4.9", pin v4.9)
-;; Lista dostepnych wersji brana jest z wydan (releases) repozytorium
-;; HackerOS-Updates na GitHubie. Reszta skryptu (bez argumentu "pin") dziala
-;; dokladnie tak jak wczesniej - ponizszy blok tylko dodaje nowa sciezke.
+;; ── Stale (adresy mozna podmienic zmiennymi srodowiskowymi - testy) ─────────
+% LOCAL_JSON = /usr/share/HackerOS/Config-Files/release-info.json
+% RAW = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS-Updates/main
+% REPO_URL = https://github.com/HackerOS-Linux-System/HackerOS-Updates.git
 % PIN_RELEASES_API = https://api.github.com/repos/HackerOS-Linux-System/HackerOS-Updates/releases
+% TMP_REPO = /tmp/HackerOS-Updates
+% TMP_LITE = /tmp/HackerOS-Updates-lite
+% SHARE = /usr/share/HackerOS
+% STATE_DIR = /var/lib/hackeros-updates
+% STATE_FILE = /var/lib/hackeros-updates/state.hk
+% SUMS_FILE = /var/lib/hackeros-updates/sha256sums
+% LAST_RUN = /var/lib/hackeros-updates/last-run.hk
+% PREV_DIR = /var/lib/hackeros-updates/prev
+% PKG_RAW =
+% PKG_GIT =
+% PKG_TAG =
+% PKG_COMMIT =
+% PKG_ATTESTED = no
+% RC = 0
 
-> test "@arg0" = "pin"
-? ok
-    % PIN_REQUESTED = @arg1
-    ~> Przypinanie wersji HackerOS: @PIN_REQUESTED
-
-    > test "@argc" = "1"
-    ? ok
-        ::red Podaj wersje: hl run update-hackeros.hl pin <wersja>  (np. pin 4.9)
-        > exit 1
-    done
-
-    ~> Pobieranie listy dostepnych wersji z GitHuba...
-    > curl -fsSL -o /tmp/hl_pin_releases.json @PIN_RELEASES_API
-    ? err
-        ::red Nie udalo sie pobrac listy wydan z @PIN_RELEASES_API
-        > exit 1
-    done
-
-    ;; Normalizacja: "HackerOS V4.9", "v4.9", "V4.9", "4.9" -> "4.9",
-    ;; porownanie odbywa sie bez rozroznienia wielkosci liter.
-    >> bash -c "
-        req=\$(printf '%s' '@PIN_REQUESTED' | sed -E 's/^[Hh]acker[Oo][Ss][[:space:]]*//; s/^[Vv]//' | tr -d ' ')
-        found=NIE
-        matched_tag=''
-        tags=\$(grep -o '\"tag_name\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' /tmp/hl_pin_releases.json | sed -E 's/.*\"([^\"]*)\"\$/\\1/')
-        for t in \$tags; do
-            norm_t=\$(printf '%s' \"\$t\" | sed -E 's/^[Hh]acker[Oo][Ss][[:space:]]*//; s/^[Vv]//' | tr -d ' ')
-            if [ \"\$norm_t\" = \"\$req\" ]; then
-                found=TAK
-                matched_tag=\"\$t\"
-                break
-            fi
-        done
-        printf '%s|%s' \"\$found\" \"\$matched_tag\"
-    " |> @_pin_lookup
-
-    >> bash -c "printf '%s' '@_pin_lookup' | cut -d'|' -f1" |> @PIN_FOUND
-    >> bash -c "printf '%s' '@_pin_lookup' | cut -d'|' -f2" |> @PIN_TAG
-
-    > test "@PIN_FOUND" = "TAK"
-    ? err
-        ::red BLAD: wersja HackerOS "@PIN_REQUESTED" nie istnieje.
-        ~> Dostepne wersje sa tutaj: https://github.com/HackerOS-Linux-System/HackerOS-Updates/releases
-        > rm -f /tmp/hl_pin_releases.json
-        > exit 1
-    done
-
-    ::green Znaleziono wydanie: @PIN_TAG
-    ~> Pobieranie przypietej wersji (@PIN_TAG)...
-
-    > rm -rf @TMP_REPO
-    > git clone --branch @PIN_TAG --depth 1 https://github.com/HackerOS-Linux-System/HackerOS-Updates.git @TMP_REPO
-    ? err
-        ::red Blad klonowania repozytorium dla wydania @PIN_TAG.
-        > rm -f /tmp/hl_pin_releases.json
-        > exit 1
-    done
-
-    % UNPACK_PIN = @TMP_REPO/unpack.hl
-    ::exists @UNPACK_PIN
-    ? ok
-        ~> Uruchamianie: @UNPACK_PIN (przypieta wersja @PIN_TAG)
-        > hl run @UNPACK_PIN
-    done
-    ? err
-        ::red Brak unpack.hl w przypietym wydaniu @PIN_TAG!
-        > rm -f /tmp/hl_pin_releases.json
-        > exit 1
-    done
-
-    > rm -f /tmp/hl_pin_releases.json
-    ::green Zainstalowano przypieta wersje: @PIN_TAG
-    > exit 0
+>> test -n "@HOS_UPDATES_RAW" && echo yes || echo no |> @OV1
+? switch @OV1
+| yes
+    % RAW = @HOS_UPDATES_RAW
+done
+>> test -n "@HOS_PIN_API" && echo yes || echo no |> @OV3
+? switch @OV3
+| yes
+    % PIN_RELEASES_API = @HOS_PIN_API
+done
+>> test -n "@HOS_UPDATES_REPO" && echo yes || echo no |> @OV2
+? switch @OV2
+| yes
+    % REPO_URL = @HOS_UPDATES_REPO
 done
 
-
-~> Odczyt lokalnej wersji...
-::exists @LOCAL_JSON
-? err
-    ~> Brak pliku: @LOCAL_JSON
-    > exit 1
+;; ── Argumenty ────────────────────────────────────────────────────────────────
+>> printf '%s\n' "@arg0" "@arg1" "@arg2" "@arg3" | grep -qx -e '--auto' && echo yes || echo no |> @AUTO
+>> printf '%s\n' "@arg0" "@arg1" "@arg2" "@arg3" | grep -qx -e '--force' -e 'force' && echo yes || echo no |> @FORCE
+>> printf '%s\n' "@arg0" "@arg1" "@arg2" "@arg3" | grep -qx -e '--no-attest' && echo yes || echo no |> @NOATT
+? switch @NOATT
+| yes
+    % HOS_ATTEST = off
 done
+>> bash -c 'readlink -f /proc/$PPID/exe' |> @HLBIN
+>> printf '%s\n' "@arg0" "@arg1" "@arg2" "@arg3" | grep -v -e '^--' -e '^force$' -e '^$' | sed -n 1p |> @CMD0
+>> printf '%s\n' "@arg0" "@arg1" "@arg2" "@arg3" | grep -v -e '^--' -e '^force$' -e '^$' | sed -n 2p |> @SUB1
+>> printf '%s\n' "@arg0" "@arg1" "@arg2" "@arg3" | grep -v -e '^--' -e '^force$' -e '^$' | sed -n 3p |> @SUB2
+>> case "@CMD0" in ""|update) echo update;; check|status|verify|rollback|auto|pin|help) echo "@CMD0";; *) echo help;; esac |> @CMD
+>> test "@HOS_LOCK_HELD" = "1" && echo yes || echo no |> @LH
 
-::which jq
-? ok
-    >> jq -r '.version' @LOCAL_JSON | awk '{print $1}' |> @LOCAL_VERSION
-done
-? err
-    >> grep '"version"' @LOCAL_JSON | sed 's/.*": *"\([^ ]*\).*/\1/' |> @LOCAL_VERSION
-done
-~> Lokalna wersja: @LOCAL_VERSION
-
-;; ── Wersja zdalna ─────────────────────────────────────────────────────────────
-~> Pobieranie pliku wersji z GitHuba...
-> curl -fsSL -o @TMP_VERSION @REMOTE_URL
-? err
-    ~> Nie udalo sie pobrac pliku wersji.
-    > exit 1
-done
-~> Plik wersji pobrany
-
->> sed 's/^\[\(.*\)\]$/\1/' @TMP_VERSION | tr -d ' ' |> @REMOTE_VERSION
-~> Zdalna wersja: @REMOTE_VERSION
-
-;; ── Porownanie ────────────────────────────────────────────────────────────────
->> printf "%s\n%s" @LOCAL_VERSION @REMOTE_VERSION | sort -V | head -n1 |> @_lower
-
-> test "@_lower" = "@LOCAL_VERSION"
-? ok
-    > test "@LOCAL_VERSION" = "@REMOTE_VERSION"
-    ? ok
-        ~> System jest aktualny. Wersja: @LOCAL_VERSION
-        > rm -f @TMP_VERSION
+;; ── Wspolne ──────────────────────────────────────────────────────────────────
+: do_exit def
+    ? switch @RC
+    | 0
         > exit 0
-    done
-
-    ;; Jest nowsza wersja
-    ~> Znaleziono nowsza wersje: @REMOTE_VERSION (aktualna: @LOCAL_VERSION)
-    ~> Pobieranie aktualizacji...
-    > rm -rf @TMP_REPO
-    > git clone https://github.com/HackerOS-Linux-System/HackerOS-Updates.git @TMP_REPO
-    ? err
-        ~> Blad klonowania repozytorium.
-        > rm -f @TMP_VERSION
+    | 1
         > exit 1
-    done
-
-    % UNPACK = @TMP_REPO/unpack.hl
-    ::exists @UNPACK
-    ? ok
-        ~> Uruchamianie: @UNPACK
-        > hl run @UNPACK
-    done
-    ? err
-        ~> Brak unpack.hl w repozytorium!
-        > rm -f @TMP_VERSION
+    | 2
+        > exit 2
+    | 10
+        > exit 10
+    | 75
+        ::yellow Inna aktualizacja HackerOS jest juz w toku - sprobuj pozniej.
+        > exit 75
+    | *
         > exit 1
     done
 done
 
-> rm -f @TMP_VERSION
-~> Gotowe.
+: cleanup def
+    > rm -rf @TMP_LITE
+done
+
+;; ponowne uruchomienie tego skryptu pod flock (aktualizacje/rollback nie moga sie nakladac)
+: relock def
+    >> test -w /run/lock && echo /run/lock/hackeros-unpack.lock || echo /tmp/hackeros-unpack.lock |> @LOCK_FILE
+    >> mktemp /tmp/hackeros-rc.XXXXXX |> @RCF
+    >> readlink -f "@HL_SCRIPT" |> @SELF
+    >> bash -c 'HB=$(readlink -f /proc/$PPID/exe); flock -n -E 75 "@LOCK_FILE" env HOS_LOCK_HELD=1 "$HB" run "@SELF" -- "@arg0" "@arg1" "@arg2" "@arg3"; echo $? > "@RCF"'
+    >> cat "@RCF" |> @RC
+    > rm -f @RCF
+    -- do_exit
+done
+
+;; paczka aktualizacji z poswiadczonego wydania HackerOS-Updates (albo tryb awaryjny/testowy)
+: pkg_attest def
+    % PKG_ATTESTED = no
+    % PKG_TAG =
+    % PKG_COMMIT =
+    % PKG_RAW = @RAW
+    % PKG_GIT = @REPO_URL
+    >> test -n "@HOS_UPDATES_RAW" -o -n "@HOS_UPDATES_REPO" && echo yes || echo no |> @PKG_OVR
+    ? switch @PKG_OVR
+    | yes
+        ::yellow Uzyto HOS_UPDATES_RAW/REPO (bez weryfikacji attestation)
+    | *
+        % _att_repo = HackerOS-Updates
+        % _att_tag =
+        -- att_resolve
+        ? switch @_att_pass
+        | true
+            ? switch @_att_ok
+            | true
+                % PKG_ATTESTED = yes
+                % PKG_TAG = @_att_tag
+                % PKG_COMMIT = @_att_commit
+                % PKG_RAW = @_att_raw/@ATT_ORG/HackerOS-Updates/@_att_commit
+                % PKG_GIT = @_att_gitbase/@ATT_ORG/HackerOS-Updates.git
+                ::green Paczka aktualizacji z poswiadczonego wydania @_att_tag (podpis GitHuba zweryfikowany)
+            | *
+                ::yellow UWAGA: @_att_msg - uzywam galezi main (HOS_ATTEST=@_att_mode)
+            done
+        | *
+            ::red Weryfikacja wydania HackerOS-Updates nie powiodla sie: @_att_msg
+            ::yellow System NIE zostal zmieniony. Awaryjnie (bez weryfikacji): --no-attest
+            % RC = 2
+            -- do_exit
+        done
+    done
+done
+
+: net_check def
+    >> test -n "@HOS_UPDATES_RAW" && echo ok || (curl -fsI --max-time 10 -o /dev/null https://raw.githubusercontent.com && echo ok || echo fail) |> @NET
+    ? switch @NET
+    | ok
+        ;; ok
+    | *
+        ::red Brak polaczenia z GitHubem. Przerywam - system nie zostal zmieniony.
+        % RC = 2
+        -- do_exit
+    done
+done
+
+;; wersje: lokalna (release-info.json), zdalna (version.hacker), czy nowsze, czy wycofane
+: read_versions def
+    -- pkg_attest
+    >> sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^ "]*\).*/\1/p' "@LOCAL_JSON" 2>/dev/null || true |> @LOCAL_VER
+    >> mktemp /tmp/hackeros-ver.XXXXXX |> @VERF
+    >> curl -fsSL --retry 2 --connect-timeout 15 --max-time 30 -o "@VERF" "@PKG_RAW/version.hacker" && echo ok || echo fail |> @VF
+    ? switch @VF
+    | ok
+        >> sed 's/^\[\(.*\)\]$/\1/' "@VERF" | tr -d ' []\r' | head -n1 |> @REMOTE_VER
+    | *
+        ::red Nie udalo sie pobrac pliku wersji (@RAW/version.hacker).
+        > rm -f @VERF
+        % RC = 2
+        -- do_exit
+    done
+    > rm -f @VERF
+    >> test -n "@LOCAL_VER" && test "$(printf '%s\n%s\n' '@LOCAL_VER' '@REMOTE_VER' | sort -V | tail -n1)" = "@REMOTE_VER" && test "@LOCAL_VER" != "@REMOTE_VER" && echo yes || echo no |> @NEWER
+    >> test -z "@LOCAL_VER" && echo yes || echo no |> @NOLOCAL
+    ? switch @NOLOCAL
+    | yes
+        % NEWER = yes
+    done
+    % _hk_file = @STATE_FILE
+    % _hk_section = system
+    % _hk_key = rejected_release
+    -- hk_get
+    >> test -n "@_hk_result" -a "@_hk_result" = "@REMOTE_VER" && echo yes || echo no |> @REL_HELD
+    ? switch @REL_HELD
+    | yes
+        % NEWER = no
+    done
+    ~> Wydanie HackerOS: lokalne [@LOCAL_VER], zdalne [@REMOTE_VER]
+done
+
+;; pelny klon (nowe wydanie / pin / force) albo lekki zestaw (unpack.hl + hk-parser)
+: prepare_full def
+    ~> Pobieranie aktualizacji (pelne repozytorium)...
+    > rm -rf @TMP_REPO
+    ? switch @PKG_ATTESTED
+    | yes
+        >> git clone --quiet --branch "@PKG_TAG" --depth 1 "@PKG_GIT" "@TMP_REPO" && test "$(git -C "@TMP_REPO" rev-parse HEAD)" = "@PKG_COMMIT" && echo ok || echo fail |> @CL
+    | *
+        >> git clone --quiet --depth 1 "@PKG_GIT" "@TMP_REPO" && echo ok || echo fail |> @CL
+    done
+    ? switch @CL
+    | ok
+        % UNPACK = @TMP_REPO/unpack.hl
+    | *
+        ::red Blad klonowania repozytorium (lub commit niezgodny z poswiadczeniem). System nie zostal zmieniony.
+        % RC = 2
+        -- do_exit
+    done
+done
+
+: prepare_lite def
+    ~> Pobieranie skryptu aktualizacji (bez calego repozytorium)...
+    > rm -rf @TMP_LITE
+    > mkdir -p @TMP_LITE/main-libs
+    >> curl -fsSL --retry 2 --connect-timeout 15 --max-time 60 -o "@TMP_LITE/unpack.hl" "@PKG_RAW/unpack.hl" && curl -fsSL --retry 2 --connect-timeout 15 --max-time 60 -o "@TMP_LITE/main-libs/hk-parser.hl" "@PKG_RAW/main-libs/hk-parser.hl" && curl -fsSL --retry 2 --connect-timeout 15 --max-time 60 -o "@TMP_LITE/main-libs/hk-attest.hl" "@PKG_RAW/main-libs/hk-attest.hl" && echo ok || echo fail |> @LT
+    ? switch @LT
+    | ok
+        % UNPACK = @TMP_LITE/unpack.hl
+    | *
+        ::red Nie udalo sie pobrac unpack.hl. System nie zostal zmieniony.
+        % RC = 2
+        -- do_exit
+    done
+done
+
+;; uruchom unpack.hl; kod wyjscia trafia do RC (flagi przez srodowisko)
+: run_unpack def
+    >> mktemp /tmp/hackeros-rc.XXXXXX |> @RCF
+    >> bash -c 'HB=$(readlink -f /proc/$PPID/exe); if [ "@AUTO" = yes ]; then export HOS_NO_USER=1; fi; if [ "@FORCE" = yes ]; then export HOS_FORCE=1; fi; if [ "@CHECKMODE" = yes ]; then export HOS_CHECK_ONLY=1; fi; if [ "@NOATT" = yes ]; then export HOS_ATTEST=off; fi; export HOS_PKG_TAG="@PKG_TAG" HOS_PKG_COMMIT="@PKG_COMMIT"; export HOS_LOCK_HELD=1; "$HB" run "@UNPACK"; echo $? > "@RCF"'
+    >> cat "@RCF" |> @RC
+    > rm -f @RCF
+done
+
+: show_result def
+    ? switch @RC
+    | 0
+        ::green Aktualizacja zakonczona pomyslnie.
+    | 1
+        ::red Aktualizacja zakonczona Z BLEDAMI - czesc plikow nie zostala zaktualizowana.
+        ::yellow Uruchom ponownie (pobierze tylko brakujace). Po awarii nowej wersji: update-hackeros.hl -- rollback list
+    | 2
+        ::red Aktualizacja przerwana PRZED zmianami - system nie zostal zmieniony.
+    | 10
+        ::yellow Sa dostepne aktualizacje. Uruchom: hacker update
+    | 75
+        ;; komunikat w do_exit
+    | *
+        ::red Aktualizacja zakonczona nieoczekiwanym kodem @RC
+    done
+done
+
+;; ── update ───────────────────────────────────────────────────────────────────
+: cmd_update def
+    -- net_check
+    -- read_versions
+    % CHECKMODE = no
+    >> test "@NEWER" = yes -o "@FORCE" = yes && echo full || echo lite |> @MODE
+    ? switch @MODE
+    | full
+        ? switch @NEWER
+        | yes
+            ::cyan Nowe wydanie HackerOS: @REMOTE_VER (obecne: @LOCAL_VER) - aktualizuje system i narzedzia
+        | *
+            ::cyan Wymuszona pelna aktualizacja
+        done
+        -- prepare_full
+    | *
+        ::cyan Wydanie systemu aktualne - sprawdzam tylko narzedzia z manifest.hk
+        -- prepare_lite
+    done
+    -- run_unpack
+    -- show_result
+    -- cleanup
+    -- do_exit
+done
+
+;; ── check ────────────────────────────────────────────────────────────────────
+: cmd_check def
+    -- net_check
+    -- read_versions
+    % CHECKMODE = yes
+    -- prepare_lite
+    -- run_unpack
+    -- cleanup
+    >> test "@NEWER" = yes -a "@RC" = "0" && echo yes || echo no |> @NEWER2
+    ? switch @NEWER2
+    | yes
+        ::yellow Nowe wydanie HackerOS: @REMOTE_VER (obecne: @LOCAL_VER)
+        % RC = 10
+    done
+    -- show_result
+    -- do_exit
+done
+
+;; ── status ───────────────────────────────────────────────────────────────────
+: cmd_status def
+    >> sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^ "]*\).*/\1/p' "@LOCAL_JSON" 2>/dev/null || true |> @LV
+    ::bold === Status HackerOS Updates ===
+    ~> Wydanie systemu: @LV
+    % _hk_file = @STATE_FILE
+    % _hk_section = system
+    % _hk_key = manifest_release
+    -- hk_get
+    % ST_MREL = @_hk_result
+    % _hk_key = attest
+    -- hk_get
+    % ST_ATT = @_hk_result
+    % _hk_key = updates_release
+    -- hk_get
+    % ST_UREL = @_hk_result
+    >> test -n "@ST_MREL" && echo yes || echo no |> @HASM
+    ? switch @HASM
+    | yes
+        ~> Manifest z wydania HackerOS: @ST_MREL (poswiadczenie: @ST_ATT), paczka aktualizacji: @ST_UREL
+    | *
+        ~> Manifest: brak informacji o poswiadczonym wydaniu (jeszcze nie uruchomiono unpack.hl v4)
+    done
+    % _hk_file = @LAST_RUN
+    % _hk_section = last-run
+    % _hk_key = time
+    -- hk_get
+    % LR_TIME = @_hk_result
+    % _hk_key = exit
+    -- hk_get
+    % LR_EXIT = @_hk_result
+    % _hk_key = updated
+    -- hk_get
+    % LR_UPD = @_hk_result
+    % _hk_key = failed_tools
+    -- hk_get
+    % LR_FAIL = @_hk_result
+    >> test -n "@LR_TIME" && echo yes || echo no |> @HASLR
+    ? switch @HASLR
+    | yes
+        ~> Ostatnia aktualizacja: @LR_TIME (kod @LR_EXIT, zaktualizowano: @LR_UPD)
+        >> test -n "@LR_FAIL" && echo yes || echo no |> @HASF
+        ? switch @HASF
+        | yes
+            ::red Bledy w ostatnim przebiegu: @LR_FAIL
+        done
+    | *
+        ~> Ostatnia aktualizacja: brak danych (jeszcze nie uruchomiono unpack.hl v3)
+    done
+    % _hk_file = @STATE_FILE
+    % _hk_section = rejected
+    -- hk_list
+    >> test -n "@_hk_result" && echo yes || echo no |> @HASREJ
+    ? switch @HASREJ
+    | yes
+        ::yellow Wycofane recznie (wstrzymane do nowszej wersji w manifescie):
+        ~> @_hk_result
+    done
+    >> test -d "/usr/share/.HackerOS_old" && echo tak || echo nie |> @HASOLD
+    ~> Kopia poprzedniego systemu (/usr/share/.HackerOS_old): @HASOLD
+    >> find @PREV_DIR -name '*.1' -type f 2>/dev/null | wc -l |> @NPREV
+    ~> Poprzednie wersje narzedzi do przywrocenia: @NPREV (rollback list)
+    >> (systemctl is-enabled hackeros-update.timer 2>/dev/null || true) | head -n1 |> @AUTOST
+    >> test -n "@AUTOST" && echo yes || echo no |> @HAS_AST
+    ? switch @HAS_AST
+    | no
+        % AUTOST = brak/wylaczone
+    done
+    ~> Automatyczne aktualizacje (timer): @AUTOST
+    % RC = 0
+    -- do_exit
+done
+
+;; ── verify ───────────────────────────────────────────────────────────────────
+: cmd_verify def
+    >> test -f "@SUMS_FILE" && echo yes || echo no |> @HASSUM
+    ? switch @HASSUM
+    | yes
+        ~> Sprawdzanie sum kontrolnych zainstalowanych plikow...
+        ^> sha256sum -c --quiet @SUMS_FILE 2>&1 && echo ok || echo fail |> @VR
+        ? switch @VR
+        | ok
+            ::green Wszystkie pliki zgodne z zainstalowanymi wersjami.
+            % RC = 0
+        | *
+            ::red Wykryto zmienione/uszkodzone pliki (lista wyzej). Napraw: hacker update --force
+            % RC = 1
+        done
+    | *
+        ::yellow Brak pliku sum (@SUMS_FILE) - uruchom najpierw aktualizacje.
+        % RC = 2
+    done
+    -- do_exit
+done
+
+;; ── rollback ─────────────────────────────────────────────────────────────────
+: rb_list def
+    ::bold === Dostepne wycofania ===
+    >> test -d "/usr/share/.HackerOS_old" && echo tak || echo nie |> @HO
+    ~> System (rollback system): @HO
+    >> bash -c 'find "@PREV_DIR" -name "*.1" -type f 2>/dev/null | while read -r f; do d="${f#@PREV_DIR}"; d="${d%.1}"; v=$(cat "$f.ver" 2>/dev/null); echo "  $d  ->  ${v:-nieznana}"; done' |> @PL
+    ~> @PL
+done
+
+: rb_system def
+    >> test -d "/usr/share/.HackerOS_old" && echo yes || echo no |> @HB
+    ? switch @HB
+    | yes
+        % _hk_file = @STATE_FILE
+        % _hk_section = system
+        % _hk_key = tree
+        -- hk_get
+        % CUR_TREE = @_hk_result
+        % _hk_key = release
+        -- hk_get
+        % CUR_REL = @_hk_result
+        ^> "@HLBIN" run "@SHARE/Scripts/Bin/hos-tree.hl" -- restore "@SHARE" |> @RS
+        ? switch @RS
+        | ok
+            >> sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^ "]*\).*/\1/p' "@LOCAL_JSON" |> @NEWREL
+            >> mktemp /tmp/hackeros-state.XXXXXX |> @STMP
+            >> cp "@STATE_FILE" "@STMP" 2>/dev/null; true
+            % _hk_file = @STMP
+            % _hk_section = system
+            % _hk_key = rejected_tree
+            % _hk_value = @CUR_TREE
+            -- hk_set
+            % _hk_key = rejected_release
+            % _hk_value = @CUR_REL
+            -- hk_set
+            % _hk_key = release
+            % _hk_value = @NEWREL
+            -- hk_set
+            % _hk_key = tree
+            % _hk_value = restored
+            -- hk_set
+            ^> install -D -m 644 -o root -g root "@STMP" "@STATE_FILE" && echo ok || echo fail |> @SS
+            > rm -f @STMP
+            ::green System przywrocony do wydania @NEWREL. Wydanie @CUR_REL nie zostanie zainstalowane ponownie, dopoki nie wyjdzie nowsze.
+            ~> Cofniecie cofniecia: rollback system (zamienia drzewa z powrotem)
+            % RC = 0
+        | *
+            ::red Rollback systemu nie powiodl sie (@RS)
+            % RC = 1
+        done
+    | *
+        ::red Brak kopii poprzedniego systemu (/usr/share/.HackerOS_old) - nie ma do czego wracac.
+        % RC = 1
+    done
+done
+
+: rb_tool def
+    ;; SUB1 = nazwa pliku albo pelna sciezka
+    % _hk_file = @STATE_FILE
+    % _hk_section = installed
+    -- hk_list
+    >> printf '%s\n' "@_hk_result" | awk -v n="@SUB1" 'index(n,"/")==1 {if ($0==n) print; next} {s="/" n; if (length($0)>=length(s) && substr($0,length($0)-length(s)+1)==s) print}' |> @CAND
+    >> printf '%s\n' "@CAND" | grep -c . |> @NCAND
+    ? switch @NCAND
+    | 1
+        % DEST = @CAND
+        % PREV = @PREV_DIR@DEST
+        >> test -f "@PREV.1" && echo yes || echo no |> @HP
+        ? switch @HP
+        | yes
+            >> cat "@PREV.1.ver" 2>/dev/null || true |> @PVER
+            % _hk_file = @STATE_FILE
+            % _hk_section = installed
+            % _hk_key = @DEST
+            -- hk_get
+            % CURVER = @_hk_result
+            ^> bash -c 'set -e; D="@DEST"; P="@PREV"; install -m 755 -o root -g root "$P.1" "$D.new"; mv -f "$D.new" "$D"; if [ -f "$P.2" ]; then mv -f "$P.2" "$P.1"; if [ -f "$P.2.ver" ]; then mv -f "$P.2.ver" "$P.1.ver"; fi; else rm -f "$P.1" "$P.1.ver"; fi; echo ok' |> @RT
+            ? switch @RT
+            | ok
+                >> stat -c %s "@DEST" |> @NSIZE
+                >> sha256sum "@DEST" | cut -d' ' -f1 |> @NSHA
+                >> mktemp /tmp/hackeros-state.XXXXXX |> @STMP
+                >> cp "@STATE_FILE" "@STMP"
+                % _hk_file = @STMP
+                % _hk_key = @DEST
+                % _hk_section = rejected
+                % _hk_value = @CURVER
+                -- hk_set
+                % _hk_section = size
+                % _hk_value = @NSIZE
+                -- hk_set
+                % _hk_section = installed
+                % _hk_value = @PVER
+                -- hk_set
+                ^> install -D -m 644 -o root -g root "@STMP" "@STATE_FILE" && echo ok || echo fail |> @SS
+                > rm -f @STMP
+                >> mktemp /tmp/hackeros-sums.XXXXXX |> @SUMF
+                >> bash -c 'grep -v -F -- "  @DEST" "@SUMS_FILE" > "@SUMF" 2>/dev/null; printf "%s  %s\n" "@NSHA" "@DEST" >> "@SUMF"; true'
+                ^> install -D -m 644 -o root -g root "@SUMF" "@SUMS_FILE" && echo ok || echo fail |> @SS2
+                > rm -f @SUMF
+                ::green Przywrocono @DEST do wersji @PVER (wycofano @CURVER). Wersja @CURVER nie zostanie zainstalowana ponownie, dopoki w manifescie nie bedzie nowszej.
+                % RC = 0
+            | *
+                ::red Nie udalo sie przywrocic @DEST
+                % RC = 1
+            done
+        | *
+            ::red Brak poprzedniej wersji dla @DEST (@PREV.1).
+            % RC = 1
+        done
+    | 0
+        ::red Nie znaleziono zainstalowanego narzedzia: @SUB1 (zobacz: rollback list)
+        % RC = 1
+    | *
+        ::red Nazwa @SUB1 jest niejednoznaczna, podaj pelna sciezke:
+        ~> @CAND
+        % RC = 1
+    done
+done
+
+: cmd_rollback def
+    ? switch @SUB1
+    | list
+        -- rb_list
+        % RC = 0
+    | system
+        -- rb_system
+    | *
+        >> test -n "@SUB1" && echo yes || echo no |> @HASARG
+        ? switch @HASARG
+        | yes
+            -- rb_tool
+        | *
+            ::yellow Uzycie: rollback list / rollback system / rollback NAZWA
+            % RC = 1
+        done
+    done
+    -- do_exit
+done
+
+;; ── auto (systemd timer z losowym opoznieniem) ───────────────────────────────
+: cmd_auto def
+    >> command -v systemctl > /dev/null 2>&1 && echo yes || echo no |> @HASSD
+    ? switch @HASSD
+    | yes
+        ;; ok
+    | *
+        ::red systemctl niedostepny - automatyczne aktualizacje wymagaja systemd.
+        % RC = 1
+        -- do_exit
+    done
+    ? switch @SUB1
+    | on
+        >> test -f /etc/systemd/system/hackeros-update.service -a -f /etc/systemd/system/hackeros-update.timer && echo yes || echo no |> @HASU
+        ? switch @HASU
+        | yes
+            ^> systemctl daemon-reload && systemctl enable --now hackeros-update.timer && echo ok || echo fail |> @AR
+            ? switch @AR
+            | ok
+                ::green Automatyczne aktualizacje WLACZONE (codziennie, z losowym opoznieniem do 3 h).
+                % RC = 0
+            | *
+                ::red Nie udalo sie wlaczyc timera.
+                % RC = 1
+            done
+        | *
+            ::red Jednostki systemd nie sa jeszcze zainstalowane - uruchom najpierw: hacker update (unpack.hl je utworzy).
+            % RC = 1
+        done
+    | off
+        ^> systemctl disable --now hackeros-update.timer && echo ok || echo fail |> @AR
+        ? switch @AR
+        | ok
+            ::green Automatyczne aktualizacje WYLACZONE.
+            % RC = 0
+        | *
+            ::red Nie udalo sie wylaczyc timera (moze nie byl wlaczony).
+            % RC = 1
+        done
+    | status
+        >> (systemctl is-enabled hackeros-update.timer 2>/dev/null || true) | head -n1 |> @AS
+        ~> Timer: @AS
+        > systemctl list-timers hackeros-update.timer --no-pager
+        % RC = 0
+    | *
+        ::yellow Uzycie: auto on / auto off / auto status
+        % RC = 1
+    done
+    -- do_exit
+done
+
+;; ── pin (przypiecie konkretnego wydania) ─────────────────────────────────────
+: cmd_pin def
+    >> test -n "@SUB1" && echo yes || echo no |> @HASV
+    ? switch @HASV
+    | yes
+        ;; ok
+    | *
+        ::red Podaj wersje: update-hackeros.hl pin WERSJA  (np. pin 4.9)
+        % RC = 1
+        -- do_exit
+    done
+    -- net_check
+    ~> Pobieranie listy dostepnych wersji z GitHuba...
+    >> curl -fsSL --max-time 30 -o /tmp/hl_pin_releases.json "@PIN_RELEASES_API" && echo ok || echo fail |> @PL
+    ? switch @PL
+    | ok
+        ;; ok
+    | *
+        ::red Nie udalo sie pobrac listy wydan z @PIN_RELEASES_API
+        % RC = 2
+        -- do_exit
+    done
+    ;; Normalizacja: "HackerOS V4.9", "v4.9", "V4.9", "4.9" -> "4.9" (bez rozroznienia wielkosci liter)
+    >> bash -c 'req=$(printf "%s" "$1" | sed -E "s/^[Hh]acker[Oo][Ss][[:space:]]*//; s/^[Vv]//" | tr -d " "); for t in $(grep -o "\"tag_name\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" /tmp/hl_pin_releases.json | sed -E "s/.*\"([^\"]*)\"\$/\1/"); do n=$(printf "%s" "$t" | sed -E "s/^[Hh]acker[Oo][Ss][[:space:]]*//; s/^[Vv]//" | tr -d " "); if [ "$n" = "$req" ]; then printf "%s" "$t"; break; fi; done' _ "@SUB1" |> @PIN_TAG
+    > rm -f /tmp/hl_pin_releases.json
+    >> test -n "@PIN_TAG" && echo yes || echo no |> @FOUND
+    ? switch @FOUND
+    | yes
+        ::green Znaleziono wydanie: @PIN_TAG
+    | *
+        ::red BLAD: wersja HackerOS "@SUB1" nie istnieje.
+        ~> Dostepne wersje: https://github.com/HackerOS-Linux-System/HackerOS-Updates/releases
+        % RC = 1
+        -- do_exit
+    done
+    ;; weryfikacja poswiadczenia dla przypietego tagu
+    % _att_repo = HackerOS-Updates
+    % _att_tag = @PIN_TAG
+    -- att_resolve
+    % PKG_GIT = @REPO_URL
+    ? switch @_att_pass
+    | true
+        ? switch @_att_ok
+        | true
+            ::green Wydanie @PIN_TAG poswiadczone (podpis GitHuba zweryfikowany)
+            % PKG_GIT = @_att_gitbase/@ATT_ORG/HackerOS-Updates.git
+            % PKG_TAG = @PIN_TAG
+            % PKG_COMMIT = @_att_commit
+        | *
+            ::yellow UWAGA: @_att_msg
+        done
+    | *
+        ::red Wydanie @PIN_TAG nie przeszlo weryfikacji: @_att_msg
+        ::yellow Starsze wydania (sprzed immutable releases) nie maja poswiadczen. Awaryjnie: --no-attest
+        % RC = 2
+        -- do_exit
+    done
+    > rm -rf @TMP_REPO
+    >> git clone --quiet --branch "@PIN_TAG" --depth 1 "@PKG_GIT" "@TMP_REPO" && echo ok || echo fail |> @CL
+    ? switch @CL
+    | ok
+        % UNPACK = @TMP_REPO/unpack.hl
+    | *
+        ::red Blad klonowania repozytorium dla wydania @PIN_TAG.
+        % RC = 2
+        -- do_exit
+    done
+    % CHECKMODE = no
+    % FORCE = yes
+    -- run_unpack
+    -- show_result
+    ? switch @RC
+    | 0
+        ::green Zainstalowano przypieta wersje: @PIN_TAG
+    done
+    -- do_exit
+done
+
+: cmd_help def
+    ~> Uzycie: update-hackeros.hl [-- polecenie]
+    ~>   (brak)            aktualizacja systemu i narzedzi (tylko tego, co sie zmienilo)
+    ~>   check             sprawdz dostepne aktualizacje, nic nie zmieniaj (kod 10 = sa)
+    ~>   status            wydanie, ostatni przebieg, wycofane wersje
+    ~>   verify            sprawdz sumy kontrolne zainstalowanych plikow
+    ~>   rollback list     pokaz mozliwe wycofania
+    ~>   rollback system   wroc do poprzedniego wydania systemu
+    ~>   rollback NAZWA    wroc do poprzedniej wersji narzedzia (np. hedit)
+    ~>   auto on/off/status  automatyczne aktualizacje w tle (systemd timer)
+    ~>   pin WERSJA        przypnij wydanie HackerOS
+    ~>   opcje: --force, --auto, --no-attest (awaryjnie: bez weryfikacji poswiadczen)
+    % RC = 0
+    -- do_exit
+done
+
+;; ═════════════════════════ START ═════════════════════════════════════════════
+;; status/check/verify/help tylko czytaja - bez blokady; reszta pod flock
+>> case "@CMD" in update|rollback|auto|pin) echo lock;; *) echo nolock;; esac |> @NEEDLOCK
+? switch @NEEDLOCK
+| lock
+    ? switch @LH
+    | yes
+        ;; juz pod blokada
+    | *
+        -- relock
+    done
+done
+
+? switch @CMD
+| update
+    -- cmd_update
+| check
+    -- cmd_check
+| status
+    -- cmd_status
+| verify
+    -- cmd_verify
+| rollback
+    -- cmd_rollback
+| auto
+    -- cmd_auto
+| pin
+    -- cmd_pin
+| *
+    -- cmd_help
+done
