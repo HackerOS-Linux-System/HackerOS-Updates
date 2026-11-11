@@ -1,15 +1,20 @@
+#/usr/bin/hl
 using <gen 2>
+
 // curl
 // awk
+// flock
 
 ;; ── Stale ────────────────────────────────────────────────────────────────────
 % MANIFEST_URL = https://raw.githubusercontent.com/HackerOS-Linux-System/HackerOS/main/packages/manifest.hk
 % GH = https://github.com/HackerOS-Linux-System
 % SHARE = /usr/share/HackerOS
-% NEW_DIR = /usr/share/.HackerOS_new
-% OLD_DIR = /usr/share/.HackerOS_old
 % LIBS_DIR = /usr/lib/HackerOS/Hacker-Lang/main-libs
-% STATE_FILE = /var/lib/hackeros-updates/installed.hk
+% STATE_DIR = /var/lib/hackeros-updates
+% STATE_FILE = /var/lib/hackeros-updates/state.hk
+% SUMS_FILE = /var/lib/hackeros-updates/sha256sums
+% LAST_RUN = /var/lib/hackeros-updates/last-run.hk
+% PREV_DIR = /var/lib/hackeros-updates/prev
 % APPS_DIR = /usr/share/HackerOS/Scripts/HackerOS-Apps
 % GAMES_DIR = /usr/share/HackerOS/Scripts/HackerOS-Games
 % STEAM_BIN = /usr/share/HackerOS/Scripts/Steam/bin
@@ -17,11 +22,19 @@ using <gen 2>
 % UPD_SAME = 0
 % UPD_SKIP = 0
 % UPD_FAIL = 0
+% UPD_HELD = 0
+% ATTEST_LEVEL = none
+% MANIFEST_REL =
+% MANIFEST_COMMIT =
+% UPD_PEND = 0
 % FAILED_LIST =
 % T_VERIFY =
 % T_AS =
+% T_KEEP = 2
+% TREE_ACT = none
+% RC = 0
 
-;; ── Licznik / raport ─────────────────────────────────────────────────────────
+;; ── Liczniki ─────────────────────────────────────────────────────────────────
 : c_ok def
     $( @UPD_OK + 1 ) -> @UPD_OK
 done
@@ -31,20 +44,63 @@ done
 : c_skip def
     $( @UPD_SKIP + 1 ) -> @UPD_SKIP
 done
+: c_held def
+    $( @UPD_HELD + 1 ) -> @UPD_HELD
+done
+: c_pend def
+    $( @UPD_PEND + 1 ) -> @UPD_PEND
+done
 : c_fail def
     $( @UPD_FAIL + 1 ) -> @UPD_FAIL
     % FAILED_LIST = @FAILED_LIST @T_NAME
 done
 
-;; ── Sprzatanie i zakonczenie ─────────────────────────────────────────────────
+;; ── Zakonczenie ──────────────────────────────────────────────────────────────
 : cleanup def
     > rm -rf @WORK
+done
+
+;; kod wyjscia z RC (HL nie interpoluje zmiennych w "exit")
+: do_exit def
+    ? switch @RC
+    | 0
+        > exit 0
+    | 1
+        > exit 1
+    | 2
+        > exit 2
+    | 10
+        > exit 10
+    | 75
+        ::yellow Inna aktualizacja HackerOS jest juz w toku - sprobuj pozniej.
+        > exit 75
+    | *
+        > exit 1
+    done
+done
+
+;; przerwanie PRZED zmianami w systemie
+: abort def
+    % RC = 2
+    -- cleanup
+    -- do_exit
+done
+
+;; ── Blokada: ponowne uruchomienie pod flock ──────────────────────────────────
+: relock def
+    >> test -w /run/lock && echo /run/lock/hackeros-unpack.lock || echo /tmp/hackeros-unpack.lock |> @LOCK_FILE
+    >> mktemp /tmp/hackeros-rc.XXXXXX |> @RCF
+    >> readlink -f "@HL_SCRIPT" |> @SELF
+    >> bash -c 'HB=$(readlink -f /proc/$PPID/exe); flock -n -E 75 "@LOCK_FILE" env HOS_LOCK_HELD=1 "$HB" run "@SELF" -- "@arg0"; echo $? > "@RCF"'
+    >> cat "@RCF" |> @RC
+    > rm -f @RCF
+    -- do_exit
 done
 
 ;; ── Instalacja jednego pliku ─────────────────────────────────────────────────
 ;; Wejscie: T_KEY (klucz w manifest.hk), T_REPO, T_ASSET, T_DIR, T_SUDO (yes/no),
 ;;          T_MODE (required/optional), T_AS (opcjonalna nazwa docelowa),
-;;          T_VERIFY (hl = sprawdz binarke po instalacji, rollback przy bledzie)
+;;          T_KEEP (ile poprzednich wersji trzymac w prev/), T_VERIFY (hl)
 
 : tool_kind def
     >> printf '%s' '@T_ASSET' | grep -q '[.]love$' && echo zip || echo bin |> @T_KIND
@@ -88,22 +144,46 @@ done
     done
 done
 
-: stage_uptodate def
+;; Decyzja: czy w ogole trzeba cos robic? (stan + rozmiar + wycofane wersje)
+: stage_state def
+    % _hk_file = @STATE_FILE
+    % _hk_section = installed
+    % _hk_key = @T_DEST
+    -- hk_get
+    % T_OLDVER = @_hk_result
+    % _hk_section = size
+    -- hk_get
+    % T_OLDSIZE = @_hk_result
+    % _hk_section = rejected
+    -- hk_get
+    % T_REJ = @_hk_result
     ? switch @FORCE
     | yes
         % T_RES = go
     | *
-        % _hk_file = @STATE_FILE
-        % _hk_section = installed
-        % _hk_key = @T_DEST
-        -- hk_get
-        >> test "@_hk_result" = "@T_VER" -a -s "@T_DEST" && echo same || echo diff |> @T_SAME
-        ? switch @T_SAME
-        | same
-            % T_RES = same
+        >> test -n "@T_REJ" -a "@T_REJ" = "@T_VER" && echo yes || echo no |> @T_ISREJ
+        ? switch @T_ISREJ
+        | yes
+            % T_RES = held
         | *
-            % T_RES = go
+            >> test -n "@T_OLDVER" -a "@T_OLDVER" = "@T_VER" -a "$(stat -c %s '@T_DEST' 2>/dev/null)" = "@T_OLDSIZE" && echo same || echo diff |> @T_SAME
+            ? switch @T_SAME
+            | same
+                % T_RES = same
+            | *
+                % T_RES = go
+            done
         done
+    done
+done
+
+: stage_check def
+    ;; tryb check: tylko raportuj
+    ? switch @CHECK
+    | yes
+        >> test -n "@T_OLDVER" && echo @T_OLDVER || echo brak-w-stanie |> @T_SHOWOLD
+        ::yellow   @T_NAME: @T_SHOWOLD -> @T_VER (do aktualizacji)
+        % T_RES = pending
     done
 done
 
@@ -142,6 +222,24 @@ done
     | *
         ::red @T_NAME - pobrany plik jest pusty - nie instaluje
         % T_RES = fail
+    done
+done
+
+;; poprzednie wersje: <prev>/<sciezka>.1 (ostatnia), .2 (starsza) + .ver z numerem wersji
+: stage_rotate def
+    ? switch @T_SUDO
+    | yes
+        % T_PREV = @PREV_DIR@T_DEST
+        ^> bash -c 'D="@T_DEST"; P="@T_PREV"; if [ -f "$D" ]; then mkdir -p "$(dirname "$P")"; if [ @T_KEEP -ge 2 ] && [ -f "$P.1" ]; then mv -f "$P.1" "$P.2"; if [ -f "$P.1.ver" ]; then mv -f "$P.1.ver" "$P.2.ver"; fi; fi; rm -f "$P.1"; ln -f "$D" "$P.1" 2>/dev/null || cp -p "$D" "$P.1"; printf %s "@T_OLDVER" > "$P.1.ver"; fi; echo ok' |> @T_ROT
+    done
+done
+
+: stage_backup def
+    % T_HAVEBAK = no
+    ? switch @T_VERIFY
+    | hl
+        > rm -f @WORK/hl.bak
+        >> test -f "@T_DEST" && cp -p "@T_DEST" "@WORK/hl.bak" && echo yes || echo no |> @T_HAVEBAK
     done
 done
 
@@ -187,17 +285,28 @@ done
     done
 done
 
-: stage_backup def
-    % T_HAVEBAK = no
-    ? switch @T_VERIFY
-    | hl
-        > rm -f @WORK/hl.bak
-        >> test -f "@T_DEST" && cp -p "@T_DEST" "@WORK/hl.bak" && echo yes || echo no |> @T_HAVEBAK
+;; zapis nowego stanu po udanej instalacji
+: stage_record_new def
+    >> stat -c %s "@T_DEST" |> @T_SIZE2
+    >> sha256sum "@T_TMP" | cut -d' ' -f1 |> @T_SHA
+    >> printf '%s\n' '-> "@T_DEST" => @T_VER' >> "@WORK/st_installed"
+    >> printf '%s\n' '-> "@T_DEST" => @T_SIZE2' >> "@WORK/st_size"
+    >> printf '%s  %s\n' '@T_SHA' '@T_DEST' >> "@WORK/sums"
+done
+
+;; zachowanie dotychczasowego stanu (aktualne / wstrzymane / blad)
+: stage_record_keep def
+    >> test -n "@T_OLDVER" -a -e "@T_DEST" && echo yes || echo no |> @T_HASOLD
+    ? switch @T_HASOLD
+    | yes
+        >> printf '%s\n' '-> "@T_DEST" => @T_OLDVER' >> "@WORK/st_installed"
+        >> printf '%s\n' '-> "@T_DEST" => @T_OLDSIZE' >> "@WORK/st_size"
+        >> grep -F -- "  @T_DEST" "@SUMS_FILE" >> "@WORK/sums" 2>/dev/null; true
     done
 done
 
-: stage_record def
-    >> printf '%s\n' '-> "@T_DEST" => @T_VER' >> "@STATE_NEW"
+: stage_record_rejected def
+    >> printf '%s\n' '-> "@T_DEST" => @T_REJ' >> "@WORK/st_rejected"
 done
 
 : install_tool def
@@ -210,7 +319,11 @@ done
     done
     ? switch @T_RES
     | go
-        -- stage_uptodate
+        -- stage_state
+    done
+    ? switch @T_RES
+    | go
+        -- stage_check
     done
     ? switch @T_RES
     | go
@@ -223,6 +336,7 @@ done
     ? switch @T_RES
     | go
         -- stage_backup
+        -- stage_rotate
         -- stage_install
     done
     ? switch @T_RES
@@ -232,17 +346,31 @@ done
     ? switch @T_RES
     | go
         ::green @T_NAME @T_VER - zaktualizowano
-        -- stage_record
+        -- stage_record_new
         -- c_ok
     | same
-        ::cyan @T_NAME @T_VER - aktualne
-        -- stage_record
+        ? switch @CHECK
+        | yes
+            ;; w trybie check nie wypisujemy aktualnych
+        | *
+            ::cyan @T_NAME @T_VER - aktualne
+        done
+        -- stage_record_keep
         -- c_same
+    | held
+        ::yellow @T_NAME - wersja @T_VER zostala wycofana recznie - wstrzymano do nowszej wersji w manifescie
+        -- stage_record_keep
+        -- stage_record_rejected
+        -- c_held
+    | pending
+        -- stage_record_keep
+        -- c_pend
     | skip
         -- c_skip
     | silent
         -- c_skip
     | *
+        -- stage_record_keep
         -- c_fail
     done
 done
@@ -260,63 +388,287 @@ done
     -- install_tool
 done
 
-;; ── KROK 0: kontrola srodowiska, odzysk po przerwanej aktualizacji ──────────
+;; ── Stan systemu (drzewo + wydanie) ──────────────────────────────────────────
+: read_sys def
+    % _hk_file = @STATE_FILE
+    % _hk_section = system
+    % _hk_key = tree
+    -- hk_get
+    % OLD_TREE = @_hk_result
+    % _hk_key = release
+    -- hk_get
+    % OLD_REL = @_hk_result
+    % _hk_key = rejected_tree
+    -- hk_get
+    % OLD_RTREE = @_hk_result
+    % _hk_key = rejected_release
+    -- hk_get
+    % OLD_RREL = @_hk_result
+done
+
+: tree_step def
+    >> test -f "@UPD_DIR/HackerOS/Config-Files/release-info.json" && echo ok || echo bad |> @SRC_OK
+    ? switch @SRC_OK
+    | ok
+        ;; ok
+    | *
+        ::red Brak @UPD_DIR/HackerOS/Config-Files/release-info.json - przerywam
+        -- abort
+    done
+    >> "@HLBIN" run "@UPD_DIR/HackerOS/Scripts/Bin/hos-tree.hl" -- hash "@UPD_DIR/HackerOS" |> @TREE_HASH
+    >> sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^ "]*\).*/\1/p' "@UPD_DIR/HackerOS/Config-Files/release-info.json" |> @REPO_REL
+    >> test -d "@SHARE" && echo yes || echo no |> @SHARE_OK
+    ? switch @FORCE
+    | yes
+        % TREE_ACT = swap
+    | *
+        >> test -n "@OLD_RTREE" -a "@OLD_RTREE" = "@TREE_HASH" && echo yes || echo no |> @T_RJ
+        >> test -n "@OLD_TREE" -a "@OLD_TREE" = "@TREE_HASH" -a "@SHARE_OK" = "yes" && echo yes || echo no |> @T_SM
+        ? switch @T_RJ
+        | yes
+            % TREE_ACT = held
+        | *
+            ? switch @T_SM
+            | yes
+                % TREE_ACT = same
+            | *
+                % TREE_ACT = swap
+            done
+        done
+    done
+    ? switch @TREE_ACT
+    | swap
+        ? switch @CHECK
+        | yes
+            ::yellow   struktura systemu: do aktualizacji (wydanie @REPO_REL)
+            $( @UPD_PEND + 1 ) -> @UPD_PEND
+        | *
+            ^> "@HLBIN" run "@UPD_DIR/HackerOS/Scripts/Bin/hos-tree.hl" -- install "@UPD_DIR/HackerOS" "@SHARE" |> @SWAP
+            ? switch @SWAP
+            | ok
+                ::green Struktura zaktualizowana (aplikacje i gry zachowane, poprzednia wersja: /usr/share/.HackerOS_old)
+                ^> find @SHARE -type f -name "*.hl" -exec chmod 755 {} + && find @SHARE -type f -name "*.sh" -exec chmod 755 {} + && echo ok || echo fail |> @CHM
+                % SYS_TREE = @TREE_HASH
+                % SYS_REL = @REPO_REL
+                % SYS_RTREE =
+                % SYS_RREL =
+            | *
+                ::red Podmiana struktury nie powiodla sie - system zostal przywrocony
+                -- abort
+            done
+        done
+    | same
+        ::cyan Struktura systemu aktualna (bez zmian w repo)
+        % SYS_TREE = @OLD_TREE
+        % SYS_REL = @OLD_REL
+    | held
+        ::yellow Struktura systemu: ta wersja zostala wycofana recznie - wstrzymano
+        % SYS_TREE = @OLD_TREE
+        % SYS_REL = @OLD_REL
+        % SYS_RTREE = @OLD_RTREE
+        % SYS_RREL = @OLD_RREL
+    done
+done
+
+;; ── Zapis stanu i raportu ────────────────────────────────────────────────────
+: write_state def
+    >> printf '[installed]\n' > "@WORK/state.hk"
+    >> cat "@WORK/st_installed" >> "@WORK/state.hk"
+    >> printf '\n[size]\n' >> "@WORK/state.hk"
+    >> cat "@WORK/st_size" >> "@WORK/state.hk"
+    >> printf '\n[rejected]\n' >> "@WORK/state.hk"
+    >> cat "@WORK/st_rejected" >> "@WORK/state.hk"
+    >> printf '\n[system]\n-> "tree" => %s\n-> "release" => %s\n-> "manifest" => %s\n-> "updated" => %s\n-> "manifest_release" => %s\n-> "manifest_commit" => %s\n-> "attest" => %s\n-> "updates_release" => %s\n-> "updates_commit" => %s\n' '@SYS_TREE' '@SYS_REL' '@MANIFEST_SHA' '@NOW' '@MANIFEST_REL' '@MANIFEST_COMMIT' '@ATTEST_LEVEL' '@HOS_PKG_TAG' '@HOS_PKG_COMMIT' >> "@WORK/state.hk"
+    >> test -n "@SYS_RTREE" && printf '%s\n' '-> "rejected_tree" => @SYS_RTREE' >> "@WORK/state.hk" ; true
+    >> test -n "@SYS_RREL" && printf '%s\n' '-> "rejected_release" => @SYS_RREL' >> "@WORK/state.hk" ; true
+    ^> install -D -m 644 -o root -g root "@WORK/state.hk" "@STATE_FILE" && echo ok || echo fail |> @ST1
+    ^> install -D -m 644 -o root -g root "@WORK/sums" "@SUMS_FILE" && echo ok || echo fail |> @ST2
+done
+
+: write_lastrun def
+    >> printf '[last-run]\n-> "time" => %s\n-> "exit" => %s\n-> "updated" => %s\n-> "same" => %s\n-> "held" => %s\n-> "skipped" => %s\n-> "failed" => %s\n-> "failed_tools" => "%s"\n-> "tree" => %s\n' '@NOW' '@RC' '@UPD_OK' '@UPD_SAME' '@UPD_HELD' '@UPD_SKIP' '@UPD_FAIL' '@FAILED_LIST' '@TREE_ACT' > "@WORK/last-run.hk"
+    ^> install -D -m 644 -o root -g root "@WORK/last-run.hk" "@LAST_RUN" && echo ok || echo fail |> @LR
+done
+
+;; ── Biblioteki z repo aktualizacji (hk-parser, hk-attest) ─────────────────────
+: lib_step def
+    >> test -f "@UPD_DIR/main-libs/@L_NAME.hl" && echo yes || echo no |> @HAVE_LIB
+    ? switch @HAVE_LIB
+    | yes
+        ;; ok
+    | *
+        ::red Brak @UPD_DIR/main-libs/@L_NAME.hl - niekompletne repo aktualizacji
+        -- abort
+    done
+    >> cmp -s "@UPD_DIR/main-libs/@L_NAME.hl" "@LIBS_DIR/@L_NAME.hl" && echo same || echo diff |> @LIB_SAME
+    ? switch @LIB_SAME
+    | same
+        ::cyan @L_NAME.hl aktualny
+    | *
+        ? switch @CHECK
+        | yes
+            ;; check: biblioteka z repo zostanie zaladowana bez instalowania
+        | *
+            ^> install -D -m 644 -o root -g root "@UPD_DIR/main-libs/@L_NAME.hl" "@LIBS_DIR/@L_NAME.hl" && echo ok || echo fail |> @LIB_IN
+            ? switch @LIB_IN
+            | ok
+                ::green @L_NAME.hl zaktualizowany
+            | *
+                ::red Nie mozna zainstalowac @L_NAME.hl w @LIBS_DIR
+                -- abort
+            done
+        done
+    done
+done
+
+;; ── Manifest z NAJNOWSZEGO poswiadczonego wydania repozytorium HackerOS ──────
+: manifest_attest def
+    % _att_repo = HackerOS
+    % _att_tag =
+    -- att_resolve
+    ? switch @_att_pass
+    | true
+        ? switch @_att_ok
+        | true
+            % MANIFEST_URL = @_att_raw/@ATT_ORG/HackerOS/@_att_commit/packages/manifest.hk
+            % MANIFEST_REL = @_att_tag
+            % MANIFEST_COMMIT = @_att_commit
+            % ATTEST_LEVEL = @_att_level
+            ::green Manifest z poswiadczonego wydania HackerOS @_att_tag (podpis GitHuba zweryfikowany)
+        | *
+            ::yellow UWAGA: @_att_msg - uzywam manifestu z galezi main (HOS_ATTEST=@_att_mode)
+        done
+    | *
+        ::red Weryfikacja wydania HackerOS nie powiodla sie: @_att_msg
+        ::yellow System NIE zostal zmieniony. Awaryjnie (bez weryfikacji): HOS_ATTEST=warn
+        -- abort
+    done
+done
+
+;; ── Przejecie stanu z poprzedniej wersji skryptu (installed.hk) ──────────────
+: migrate_state def
+    >> test ! -f "@STATE_FILE" -a -f "@STATE_DIR/installed.hk" && echo yes || echo no |> @MIG
+    ? switch @MIG
+    | yes
+        % _hk_file = @STATE_DIR/installed.hk
+        % _hk_section = installed
+        -- hk_list
+        % MIG_KEYS = @_hk_result
+        >> printf '[installed]\n' > "@WORK/seed.hk"
+        > touch @WORK/seed.size
+        @ k in @MIG_KEYS
+            >> test -f "@k" && echo yes || echo no |> @MK_EX
+            ? switch @MK_EX
+            | yes
+                % _hk_file = @STATE_DIR/installed.hk
+                % _hk_section = installed
+                % _hk_key = @k
+                -- hk_get
+                >> printf '%s\n' '-> "@k" => @_hk_result' >> "@WORK/seed.hk"
+                >> stat -c %s "@k" |> @MK_SZ
+                >> printf '%s\n' '-> "@k" => @MK_SZ' >> "@WORK/seed.size"
+            done
+        done
+        >> printf '\n[size]\n' >> "@WORK/seed.hk"
+        >> cat "@WORK/seed.size" >> "@WORK/seed.hk"
+        ^> install -D -m 644 -o root -g root "@WORK/seed.hk" "@STATE_FILE" && echo ok || echo fail |> @MIGR
+        ::cyan Przejeto stan poprzedniej wersji (installed.hk) - bez ponownego pobierania
+    done
+done
+
+;; ── Jednostki systemd tworzy ten skrypt (nie sa plikami w repo) ──────────────
+: units_step def
+    >> test -d /etc/systemd/system -a -z "@HOS_NO_UNITS" && echo yes || echo no |> @UN_OK
+    ? switch @UN_OK
+    | yes
+        >> printf '%s\n' '[Unit]' 'Description=HackerOS automatic update (tools and system files that changed)' 'After=network-online.target' 'Wants=network-online.target' 'ConditionACPower=true' '' '[Service]' 'Type=oneshot' 'ExecStart=/usr/bin/hl run /usr/share/HackerOS/Scripts/Bin/update-hackeros.hl -- --auto' 'SuccessExitStatus=75' 'Nice=10' 'IOSchedulingClass=idle' 'TimeoutStartSec=2h' > "@WORK/hackeros-update.service"
+        >> printf '%s\n' '[Unit]' 'Description=HackerOS automatic update - daily, randomized' '' '[Timer]' 'OnCalendar=*-*-* 03:30:00' 'RandomizedDelaySec=3h' 'AccuracySec=10min' 'Persistent=true' '' '[Install]' 'WantedBy=timers.target' > "@WORK/hackeros-update.timer"
+        >> cmp -s "@WORK/hackeros-update.service" /etc/systemd/system/hackeros-update.service && cmp -s "@WORK/hackeros-update.timer" /etc/systemd/system/hackeros-update.timer && echo same || echo diff |> @UN_SAME
+        ? switch @UN_SAME
+        | diff
+            ^> install -m 644 -o root -g root "@WORK/hackeros-update.service" /etc/systemd/system/hackeros-update.service && install -m 644 -o root -g root "@WORK/hackeros-update.timer" /etc/systemd/system/hackeros-update.timer && echo ok || echo fail |> @UN_IN
+            ? switch @UN_IN
+            | ok
+                >> test -d /run/systemd/system && echo yes || echo no |> @UN_SD
+                ? switch @UN_SD
+                | yes
+                    ^> systemctl daemon-reload && echo ok || echo fail |> @UN_RL
+                done
+                ::green Jednostki systemd zainstalowane (timer jest WYLACZONY) - wlacz: hacker update auto on
+            | *
+                ::yellow Nie udalo sie zainstalowac jednostek systemd (automatyczne aktualizacje niedostepne)
+            done
+        done
+    done
+done
+
+;; ═════════════════════════ START ═════════════════════════════════════════════
+>> test "@arg0" = "force" -o -n "@HOS_FORCE" && echo yes || echo no |> @FORCE
+>> test -n "@HOS_CHECK_ONLY" && echo yes || echo no |> @CHECK
+>> test -n "@HOS_NO_USER" && echo yes || echo no |> @NOUSER
+>> test "@HOS_LOCK_HELD" = "1" && echo yes || echo no |> @LH
+
+;; blokada przeciw rownoleglym aktualizacjom (check-only niczego nie zmienia)
+? switch @CHECK
+| yes
+    ;; bez blokady
+| *
+    ? switch @LH
+    | yes
+        ;; juz pod blokada
+    | *
+        -- relock
+    done
+done
+
 ::bold === HackerOS Updates - unpack.hl ===
->> test "@arg0" = "force" && echo yes || echo no |> @FORCE
+? switch @CHECK
+| yes
+    ::yellow Tryb sprawdzania (check) - nic nie zostanie zmienione
+done
 >> bash -c 'if [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != root ]; then getent passwd "$SUDO_USER" | cut -d: -f6; else printf %s "$HOME"; fi' |> @USER_HOME
 >> mktemp -d /tmp/hackeros-update.XXXXXX |> @WORK
-% STATE_NEW = @WORK/installed.hk
-> printf '[installed]\n' > @STATE_NEW
+>> date -u +%Y-%m-%dT%H:%M:%SZ |> @NOW
+> touch @WORK/st_installed @WORK/st_size @WORK/st_rejected @WORK/sums
 >> test -n "@HOS_MANIFEST_URL" && echo yes || echo no |> @OVR
+>> bash -c 'readlink -f /proc/$PPID/exe' |> @HLBIN
+
+;; katalog z repo aktualizacji = katalog tego skryptu (pelny klon albo samo unpack.hl + main-libs)
+>> dirname "$(readlink -f '@HL_SCRIPT')" |> @UPD_DIR
+::cyan Repo: @UPD_DIR  |  uzytkownik: @USER_HOME
+
+;; odzysk po przerwanej podmianie /usr/share/HackerOS (tylko gdy nie check)
+? switch @CHECK
+| yes
+    ;; nic
+| *
+    ^> bash -c 'if [ ! -d @SHARE ] && [ -d /usr/share/.HackerOS_old ]; then mv /usr/share/.HackerOS_old @SHARE; fi; rm -rf /usr/share/.HackerOS_new /usr/share/.HackerOS_swap' && echo ok || echo fail |> @REC
+done
+
+;; ── KROK 1: biblioteki (hk-parser, hk-attest) + manifest.hk ──────────────────
+::bold [1/9] Biblioteki i manifest.hk
+% L_NAME = hk-parser
+-- lib_step
+% L_NAME = hk-attest
+-- lib_step
+
+? switch @CHECK
+| yes
+    << @UPD_DIR/main-libs/hk-parser.hl
+    << @UPD_DIR/main-libs/hk-attest.hl
+| *
+    # <main/hk-parser>
+    # <main/hk-attest>
+done
+
+% MANIFEST = @WORK/manifest.hk
 ? switch @OVR
 | yes
     % MANIFEST_URL = @HOS_MANIFEST_URL
-    ::yellow Uzyto HOS_MANIFEST_URL: @MANIFEST_URL
-done
-
-;; katalog z repo aktualizacji (tam gdzie lezy ten skrypt, domyslnie /tmp/HackerOS-Updates)
->> dirname "$(readlink -f '@HL_SCRIPT')" |> @UPD_DIR
->> test -d "@UPD_DIR/HackerOS" && echo yes || echo no |> @UPD_OK_DIR
-? switch @UPD_OK_DIR
-| yes
-    ;; ok
+    ::yellow Uzyto HOS_MANIFEST_URL (bez weryfikacji attestation): @MANIFEST_URL
 | *
-    % UPD_DIR = /tmp/HackerOS-Updates
+    -- manifest_attest
 done
-::cyan Repo aktualizacji: @UPD_DIR  |  uzytkownik: @USER_HOME
-
-;; odzysk po przerwanej podmianie /usr/share/HackerOS
-^> bash -c 'if [ ! -d @SHARE ] && [ -d @OLD_DIR ]; then mv @OLD_DIR @SHARE; fi; rm -rf @NEW_DIR' && echo ok || echo fail |> @REC
-
-;; ── KROK 1: biblioteka main/hk-parser + manifest.hk ──────────────────────────
-::bold [1/9] Biblioteka hk-parser i manifest.hk
->> test -f "@UPD_DIR/main-libs/hk-parser.hl" && echo yes || echo no |> @HAVE_LIB
-? switch @HAVE_LIB
-| yes
-    >> cmp -s "@UPD_DIR/main-libs/hk-parser.hl" "@LIBS_DIR/hk-parser.hl" && echo same || echo diff |> @LIB_SAME
-    ? switch @LIB_SAME
-    | same
-        ::cyan hk-parser.hl aktualny
-    | *
-        ^> install -D -m 644 -o root -g root "@UPD_DIR/main-libs/hk-parser.hl" "@LIBS_DIR/hk-parser.hl" && echo ok || echo fail |> @LIB_IN
-        ? switch @LIB_IN
-        | ok
-            ::green hk-parser.hl zaktualizowany
-        | *
-            ::red Nie mozna zainstalowac hk-parser.hl w @LIBS_DIR
-            -- cleanup
-            > exit 1
-        done
-    done
-| *
-    ::red Brak @UPD_DIR/main-libs/hk-parser.hl - niekompletne repo aktualizacji
-    -- cleanup
-    > exit 1
-done
-
-# <main/hk-parser>
-
-% MANIFEST = @WORK/manifest.hk
 ::cyan Pobieranie manifestu: @MANIFEST_URL
 >> curl -fsSL --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 60 -o "@MANIFEST" "@MANIFEST_URL" && echo ok || echo fail |> @MF
 ? switch @MF
@@ -324,8 +676,7 @@ done
     ;; ok
 | *
     ::red Nie mozna pobrac manifest.hk - przerywam, system NIE zostal zmieniony
-    -- cleanup
-    > exit 1
+    -- abort
 done
 
 % _hk_file = @MANIFEST
@@ -335,8 +686,7 @@ done
     ;; ok
 | *
     ::red manifest.hk ma niepoprawny format - przerywam, system NIE zostal zmieniony
-    -- cleanup
-    > exit 1
+    -- abort
 done
 % _hk_section = tools
 -- hk_load_section
@@ -345,31 +695,30 @@ done
     ::green Manifest OK - narzedzi w [tools]: @HK_tools_COUNT
 | *
     ::red manifest.hk nie zawiera sekcji [tools] - przerywam, system NIE zostal zmieniony
-    -- cleanup
-    > exit 1
+    -- abort
 done
+>> sha256sum "@MANIFEST" | cut -d' ' -f1 |> @MANIFEST_SHA
+? switch @CHECK
+| yes
+    ;; check niczego nie zapisuje
+| *
+    -- migrate_state
+done
+-- read_sys
+% SYS_TREE = @OLD_TREE
+% SYS_REL = @OLD_REL
+% SYS_RTREE = @OLD_RTREE
+% SYS_RREL = @OLD_RREL
 
-;; ── KROK 2: struktura /usr/share/HackerOS (podmiana z rollbackiem) ───────────
+;; ── KROK 2: struktura /usr/share/HackerOS (tylko gdy sie zmienila) ───────────
 ::bold [2/9] Struktura /usr/share/HackerOS
->> test -f "@UPD_DIR/HackerOS/Config-Files/release-info.json" && echo ok || echo bad |> @SRC_OK
-? switch @SRC_OK
-| ok
-    ;; ok
+>> test -d "@UPD_DIR/HackerOS" && echo yes || echo no |> @HAVE_TREE
+? switch @HAVE_TREE
+| yes
+    -- tree_step
 | *
-    ::red Brak @UPD_DIR/HackerOS/Config-Files/release-info.json - przerywam
-    -- cleanup
-    > exit 1
+    ::cyan Brak drzewa HackerOS w repo (tryb samych narzedzi) - struktura bez zmian
 done
-^> bash -c 'set -e; rm -rf @NEW_DIR @OLD_DIR; cp -a @UPD_DIR/HackerOS @NEW_DIR; keep() { if [ -d @SHARE/$1 ]; then mkdir -p @NEW_DIR/$1; cp -au @SHARE/$1/. @NEW_DIR/$1/; fi; }; keep Scripts/HackerOS-Apps; keep Scripts/HackerOS-Games; keep Scripts/Steam/bin; chown -R root:root @NEW_DIR; if [ -d @SHARE ]; then mv @SHARE @OLD_DIR; fi; if mv @NEW_DIR @SHARE; then rm -rf @OLD_DIR; else if [ -d @OLD_DIR ]; then mv @OLD_DIR @SHARE; fi; exit 1; fi; echo ok' || (rm -rf @NEW_DIR; echo fail) |> @SWAP
-? switch @SWAP
-| ok
-    ::green Struktura zaktualizowana (pobrane aplikacje i gry zachowane)
-| *
-    ::red Podmiana struktury nie powiodla sie - system zostal przywrocony
-    -- cleanup
-    > exit 1
-done
-^> find @SHARE -type f -name "*.hl" -exec chmod 755 {} + && find @SHARE -type f -name "*.sh" -exec chmod 755 {} + && echo ok || echo fail |> @CHM
 
 ;; ── KROK 3: aplikacje (HackerOS-Apps) ────────────────────────────────────────
 ::bold [3/9] Aplikacje
@@ -397,8 +746,9 @@ done
 % T_ASSET = HackerOS-Welcome
 -- tool_asset
 
-;; ── KROK 4: gry ──────────────────────────────────────────────────────────────
+;; ── KROK 4: gry (duze pliki - trzymamy tylko 1 poprzednia wersje) ────────────
 ::bold [4/9] Gry
+% T_KEEP = 1
 % T_DIR = @GAMES_DIR
 % T_KEY = HackerOS Games
 % T_REPO = HackerOS-Games
@@ -416,6 +766,7 @@ done
     % T_ASSET = @a
     -- tool_asset
 done
+% T_KEEP = 2
 
 ;; ── KROK 6: narzedzia CLI w /usr/bin ─────────────────────────────────────────
 ::bold [6/9] Narzedzia /usr/bin
@@ -500,16 +851,26 @@ done
 
 ;; ── KROK 8: konfiguracja uzytkownika (~/.hackeros/hacker) ────────────────────
 ::bold [8/9] Konfiguracja uzytkownika
-% T_SUDO = no
-% T_DIR = @USER_HOME/.hackeros/hacker
-% T_KEY = hacker
-% T_REPO = Hacker-CLI-Tool
-@ a in hacker-shell hacker-repair hacker-help hacker-select hacker-docs HackerOS-Updater update-system apt-frontend
-    % T_ASSET = @a
-    -- tool_asset
+? switch @NOUSER
+| yes
+    ::cyan Pominieto (tryb systemowy/automatyczny) - zostanie zaktualizowana przy nastepnym recznym update
+| *
+    % T_SUDO = no
+    % T_DIR = @USER_HOME/.hackeros/hacker
+    % T_KEY = hacker
+    % T_REPO = Hacker-CLI-Tool
+    @ a in hacker-shell hacker-repair hacker-help hacker-select hacker-docs HackerOS-Updater update-system apt-frontend
+        % T_ASSET = @a
+        -- tool_asset
+    done
+    ? switch @CHECK
+    | yes
+        ;; bez zmian
+    | *
+        >> bash -c 'if [ "$(id -u)" = 0 ] && [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != root ]; then chown -R "$SUDO_USER": "@USER_HOME/.hackeros"; fi' && echo ok || echo fail |> @CHO
+    done
+    % T_SUDO = yes
 done
->> bash -c 'if [ "$(id -u)" = 0 ] && [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != root ]; then chown -R "$SUDO_USER": "@USER_HOME/.hackeros"; fi' && echo ok || echo fail |> @CHO
-% T_SUDO = yes
 
 ;; ── KROK 9: Hacker Lang (na koncu - podmienia interpreter) ───────────────────
 ::bold [9/9] Hacker Lang
@@ -521,16 +882,44 @@ done
 -- tool_asset
 % T_VERIFY =
 
-;; ── Stan zainstalowanych wersji + podsumowanie ───────────────────────────────
-^> install -D -m 644 -o root -g root "@STATE_NEW" "@STATE_FILE" && echo ok || echo fail |> @ST
--- cleanup
-::bold === Podsumowanie ===
-~> Zaktualizowano: @UPD_OK | Aktualne: @UPD_SAME | Pominiete: @UPD_SKIP | Bledy: @UPD_FAIL
-? switch @UPD_FAIL
-| 0
-    ::green HackerOS zaktualizowany pomyslnie.
+;; ── Podsumowanie, stan, kod wyjscia ──────────────────────────────────────────
+? switch @CHECK
+| yes
+    ;; nic
 | *
-    ::red Nie udalo sie zaktualizowac: @FAILED_LIST
-    ::yellow Uruchom aktualizacje ponownie, nieudane pliki zostana pobrane jeszcze raz.
-    > exit 1
+    -- units_step
 done
+::bold === Podsumowanie ===
+? switch @CHECK
+| yes
+    ~> Do aktualizacji: @UPD_PEND | Aktualne: @UPD_SAME | Wstrzymane: @UPD_HELD | Pominiete: @UPD_SKIP | Bledy: @UPD_FAIL
+    ? switch @UPD_PEND
+    | 0
+        ::green Wszystko aktualne - nic do zrobienia.
+        % RC = 0
+    | *
+        ::yellow Dostepne aktualizacje: @UPD_PEND
+        % RC = 10
+    done
+| *
+    ~> Zaktualizowano: @UPD_OK | Aktualne: @UPD_SAME | Wstrzymane: @UPD_HELD | Pominiete: @UPD_SKIP | Bledy: @UPD_FAIL
+    -- write_state
+    ? switch @UPD_FAIL
+    | 0
+        >> test "@UPD_OK" = "0" -a "@TREE_ACT" != "swap" && echo nic || echo zmiany |> @ZM
+        ? switch @ZM
+        | nic
+            ::green Wszystko aktualne - nic nie zmieniono.
+        | *
+            ::green HackerOS zaktualizowany pomyslnie.
+        done
+        % RC = 0
+    | *
+        ::red Nie udalo sie zaktualizowac: @FAILED_LIST
+        ::yellow Uruchom aktualizacje ponownie, nieudane pliki zostana pobrane jeszcze raz.
+        % RC = 1
+    done
+    -- write_lastrun
+done
+-- cleanup
+-- do_exit
