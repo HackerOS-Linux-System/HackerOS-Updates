@@ -1,0 +1,184 @@
+using <gen 2>
+
+% KEEP = Scripts/HackerOS-Apps Scripts/HackerOS-Games Scripts/Steam/bin
+% RC = 0
+% ARGS_OK = no
+
+;; HL nie interpoluje zmiennej w "exit", wiec kod wyjscia przez switch
+: finish def
+    ? switch @RC
+    | 0
+        > exit 0
+    | 2
+        > exit 2
+    | 3
+        > exit 3
+    | *
+        > exit 1
+    done
+done
+
+: usage def
+    ~> uzycie: hos-tree.hl -- hash DIR, install REPO_TREE [SHARE], restore [SHARE]
+    % RC = 2
+    -- finish
+done
+
+;; nowe drzewo wygrywa; z biezacego dowiazujemy tylko pliki, ktorych w nowym nie ma
+: merge_skip def
+    >> test -d "@M_SRC" && echo yes || echo no |> @M_HAS
+    ? switch @M_HAS
+    | yes
+        >> dirname "@M_DST" |> @M_PARENT
+        >> rm -rf "@M_STAGE" && mkdir -p "@M_STAGE" && cp -a --link "@M_SRC/." "@M_STAGE/" && { [ ! -d "@M_DST" ] || cp -a --remove-destination "@M_DST/." "@M_STAGE/"; } && rm -rf "@M_DST" && mkdir -p "@M_PARENT" && mv "@M_STAGE" "@M_DST" && echo ok || echo fail |> @M_RES
+        ? switch @M_RES
+        | ok
+            ;; ok
+        | *
+            % MERGE_FAIL = yes
+        done
+    done
+done
+
+;; biezace pliki wygrywaja (przy przywracaniu starego drzewa)
+: merge_over def
+    >> test -d "@M_SRC" && echo yes || echo no |> @M_HAS
+    ? switch @M_HAS
+    | yes
+        >> mkdir -p "@M_DST" && cp -a --link --remove-destination "@M_SRC/." "@M_DST/" && echo ok || echo fail |> @M_RES
+        ? switch @M_RES
+        | ok
+            ;; ok
+        | *
+            % MERGE_FAIL = yes
+        done
+    done
+done
+
+: do_hash def
+    >> test -d "@arg1" && echo yes || echo no |> @H_OK
+    ? switch @H_OK
+    | yes
+        >> bash -c 'cd "@arg1" && find . -type f -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum | sha256sum | cut -d" " -f1' |> @H
+        ~> @H
+        % RC = 0
+    | *
+        ~> no-dir
+        % RC = 2
+    done
+    -- finish
+done
+
+: set_paths def
+    >> dirname "@SHARE" |> @BASE
+    >> basename "@SHARE" |> @NAME
+    >> printf '%s/.%s_new' "@BASE" "@NAME" |> @NEW
+    >> printf '%s/.%s_old' "@BASE" "@NAME" |> @OLD
+    >> printf '%s/.%s_swap' "@BASE" "@NAME" |> @TMP
+done
+
+: do_install def
+    % SHARE = /usr/share/HackerOS
+    >> test -n "@arg2" && echo yes || echo no |> @HAS2
+    ? switch @HAS2
+    | yes
+        % SHARE = @arg2
+    done
+    >> test -d "@arg1" && echo yes || echo no |> @SRC_OK
+    ? switch @SRC_OK
+    | yes
+        ;; ok
+    | *
+        ~> no-src
+        % RC = 2
+        -- finish
+    done
+    -- set_paths
+    >> rm -rf "@NEW" && cp -a "@arg1" "@NEW" && echo ok || echo fail |> @CP
+    ? switch @CP
+    | ok
+        ;; ok
+    | *
+        > rm -rf @NEW
+        ~> copy-failed
+        % RC = 1
+        -- finish
+    done
+    % MERGE_FAIL = no
+    @ rel in @KEEP
+        % M_SRC = @SHARE/@rel
+        % M_DST = @NEW/@rel
+        % M_STAGE = @NEW/.hos_keep_stage
+        -- merge_skip
+    done
+    ? switch @MERGE_FAIL
+    | yes
+        > rm -rf @NEW
+        ~> merge-failed
+        % RC = 1
+        -- finish
+    done
+    >> chown -R root:root "@NEW" && rm -rf "@OLD" && { [ ! -d "@SHARE" ] || mv "@SHARE" "@OLD"; } && mv "@NEW" "@SHARE" && echo ok || { if [ -d "@OLD" ] && [ ! -d "@SHARE" ]; then mv "@OLD" "@SHARE"; fi; rm -rf "@NEW"; echo fail; } |> @SWAP
+    ? switch @SWAP
+    | ok
+        ~> ok
+        % RC = 0
+    | *
+        ~> swap-failed
+        % RC = 1
+    done
+    -- finish
+done
+
+: do_restore def
+    % SHARE = /usr/share/HackerOS
+    >> test -n "@arg1" && echo yes || echo no |> @HAS1
+    ? switch @HAS1
+    | yes
+        % SHARE = @arg1
+    done
+    -- set_paths
+    >> test -d "@OLD" && echo yes || echo no |> @HB
+    ? switch @HB
+    | yes
+        ;; ok
+    | *
+        ~> no-backup
+        % RC = 3
+        -- finish
+    done
+    % MERGE_FAIL = no
+    @ rel in @KEEP
+        % M_SRC = @SHARE/@rel
+        % M_DST = @OLD/@rel
+        -- merge_over
+    done
+    ? switch @MERGE_FAIL
+    | yes
+        ~> merge-failed
+        % RC = 1
+        -- finish
+    done
+    >> rm -rf "@TMP" && mv "@SHARE" "@TMP" && { if mv "@OLD" "@SHARE"; then mv "@TMP" "@OLD" && echo ok || echo fail; else mv "@TMP" "@SHARE"; echo fail; fi; } |> @SWAP
+    ? switch @SWAP
+    | ok
+        ~> ok
+        % RC = 0
+    | *
+        ~> swap-failed
+        % RC = 1
+    done
+    -- finish
+done
+
+;; ═════════════════════════ START ═════════════════════════════════════════════
+? switch @arg0
+| hash
+    -- do_hash
+| install
+    -- do_install
+| restore
+    -- do_restore
+| *
+    -- usage
+done
